@@ -1,0 +1,18 @@
+{
+  "region_bbox": { "west": -74.30, "south": 40.49, "east": -73.69, "north": 40.92 },
+  "gtfs": [
+    { "file": "mta-subway-gtfs.zip", "feed_id": "MTASBWY", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_supplemented.zip", "description": "MTA NYC Transit subway, including planned service changes for the next 7 days" },
+    { "file": "mta-bus-bronx-gtfs.zip", "feed_id": "MTABX", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_bx.zip", "description": "MTA NYC Transit bus, Bronx" },
+    { "file": "mta-bus-brooklyn-gtfs.zip", "feed_id": "MTABK", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_b.zip", "description": "MTA NYC Transit bus, Brooklyn" },
+    { "file": "mta-bus-manhattan-gtfs.zip", "feed_id": "MTAMN", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_m.zip", "description": "MTA NYC Transit bus, Manhattan" },
+    { "file": "mta-bus-queens-gtfs.zip", "feed_id": "MTAQN", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_q.zip", "description": "MTA NYC Transit bus, Queens" },
+    { "file": "mta-bus-statenisland-gtfs.zip", "feed_id": "MTASI", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_si.zip", "description": "MTA NYC Transit bus, Staten Island" },
+    { "file": "mta-buscompany-gtfs.zip", "feed_id": "MTABC", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_busco.zip", "description": "MTA Bus Company" },
+    { "file": "path-gtfs.zip", "feed_id": "PATH", "url": "https://rapid.nationalrtap.org/GTFSFileManagement/UserUploadFiles/14843/PATHGTFS.zip", "description": "Port Authority Trans-Hudson (PATH)" }
+  ],
+  "osm": [
+    { "file": "new-york-latest.osm.pbf", "url": "https://download.geofabrik.de/north-america/us/new-york-latest.osm.pbf" },
+    { "file": "new-jersey-latest.osm.pbf", "url": "https://download.geofabrik.de/north-america/us/new-jersey-latest.osm.pbf" }
+  ],
+  "osm_output": "nyc-region.osm.pbf"
+}

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Build the OpenTripPlanner graph from the inputs fetched by fetch_inputs.py.
+#
+# Usage: otp/scripts/build_graph.sh [graph-dir]
+# Env:   OTP_BUILD_HEAP  JVM heap for the build (default 12g)
+set -euo pipefail
+
+GRAPH_DIR="$(realpath "${1:-data/otp/graph}")"
+HEAP="${OTP_BUILD_HEAP:-12g}"
+# Pinned by digest so every build uses an identical OTP binary.
+OTP_IMAGE="opentripplanner/opentripplanner:2.10.0@sha256:8d54e5c589186707ee365417f2202dc878c451fa3001b8edff07019531100933"
+
+if [[ ! -f "$GRAPH_DIR/build-config.json" ]]; then
+  echo "No build-config.json in $GRAPH_DIR. Run otp/scripts/fetch_inputs.py first." >&2
+  exit 1
+fi
+
+echo "Building graph in $GRAPH_DIR with heap $HEAP"
+docker run --rm \
+  -e JAVA_TOOL_OPTIONS="-Xmx${HEAP}" \
+  -v "$GRAPH_DIR":/var/opentripplanner \
+  "$OTP_IMAGE" --build --save
+
+echo "Graph written to $GRAPH_DIR/graph.obj"

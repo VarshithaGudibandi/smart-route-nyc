@@ -1,0 +1,15 @@
+{
+  "transitServiceStart": "-P7D",
+  "transitServiceEnd": "P60D",
+  "osm": [{ "source": "nyc-region.osm.pbf" }],
+  "transitFeeds": [
+    { "type": "gtfs", "feedId": "MTASBWY", "source": "mta-subway-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTABX", "source": "mta-bus-bronx-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTABK", "source": "mta-bus-brooklyn-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTAMN", "source": "mta-bus-manhattan-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTAQN", "source": "mta-bus-queens-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTASI", "source": "mta-bus-statenisland-gtfs.zip" },
+    { "type": "gtfs", "feedId": "MTABC", "source": "mta-buscompany-gtfs.zip" },
+    { "type": "gtfs", "feedId": "PATH", "source": "path-gtfs.zip" }
+  ]
+}

@@ -74,7 +74,9 @@ cp .env.example .env
 pip install pre-commit && pre-commit install
 ```
 
-Setup steps for each service will be documented here as they are added.
+**Routing engine.** Building and serving the OpenTripPlanner graph is described in [`otp/README.md`](otp/README.md).
+
+Setup for the remaining services will be documented here as they are added.
 
 ## Roadmap
 

@@ -1,0 +1,11 @@
+services:
+  otp:
+    image: opentripplanner/opentripplanner:2.10.0@sha256:8d54e5c589186707ee365417f2202dc878c451fa3001b8edff07019531100933
+    command: ["--load", "--serve"]
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx${OTP_SERVE_HEAP:-6g}"
+    volumes:
+      - ./data/otp/graph:/var/opentripplanner
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
