@@ -114,7 +114,21 @@ curl -s localhost:8000/api/v1/routes/search \
       }'
 ```
 
-The response holds up to five itineraries with every leg, its timing and its geometry (encoded polyline). Accessibility is reported as `unknown` until the accessibility assessment is in place; the API never labels a route accessible without evidence.
+The response holds up to five itineraries with every leg, its timing and its geometry (encoded polyline). Each route carries an accessibility verdict and the evidence behind it.
+
+### Accessibility assessment
+
+Every route is assessed on every response, including responses served from cache, so a cached itinerary never carries a stale verdict. Each station the route uses and each walking leg gets a finding:
+
+| Place | `meets` | `violates` | `unknown` |
+|---|---|---|---|
+| Subway station | A usable elevator, none out of service, status data fresh | No usable elevator listed, or all of them out of service | Some elevators out (which platform is affected is not published), or elevator data stale |
+| Walking leg | No stairs found in OpenStreetMap | Stairs mapped in OpenStreetMap, or an entrance tagged as not wheelchair accessible | (none) |
+| PATH station, bus stop | (none) | (none) | Always: no equipment data is published |
+
+A route `violates` if any finding does, `meets` only if all do, and is `unknown` otherwise. Wheelchair users need an ADA-accessible elevator; step-free travel (strollers, luggage) can use any working elevator.
+
+When `step_free_required` or `wheelchair_required` is set, only routes that meet the requirement are returned in `routes`. Everything else is returned separately in `review_only_routes`, with each barrier and unconfirmed step listed, and is never presented as compliant. Findings about walking legs reflect OpenStreetMap, which can be incomplete; they say "no stairs found", never "step-free guaranteed".
 
 | Behavior | Detail |
 |---|---|
@@ -168,7 +182,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Backend foundation: API skeleton, PostgreSQL, Redis, structured logging, CI
 - [x] Route search with caching, deduplication and rate limiting
 - [x] Feed ingestion: schedules, realtime updates, elevator outages
-- [ ] Accessibility assessment engine
+- [x] Accessibility assessment engine
 - [ ] Natural-language preference interpretation
 - [ ] Asynchronous AI route investigation with routing-engine verification
 - [ ] Grounded route explanations and anonymous feedback

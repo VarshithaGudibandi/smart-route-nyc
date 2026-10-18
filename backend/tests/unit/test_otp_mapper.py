@@ -27,3 +27,11 @@ def test_route_ids_are_stable_and_distinct() -> None:
     first, second = itineraries()
     assert to_route(first).route_id == to_route(first).route_id
     assert to_route(first).route_id != to_route(second).route_id
+
+
+def test_maps_stairs_and_parent_stations() -> None:
+    route = to_route(itineraries()[0])
+    features = [f.type for leg in route.legs for f in leg.street_features]
+    assert "stairs" in features
+    subway = [leg for leg in route.legs if leg.route_id and leg.route_id.startswith("MTASBWY")]
+    assert subway[0].destination.station_id == "MTASBWY:117"

@@ -74,6 +74,22 @@ class Place(BaseModel):
     lat: float
     lon: float
     stop_id: str | None = None
+    # Parent station when the stop is a platform (MTA "120S" -> station "120").
+    station_id: str | None = None
+
+
+StreetFeatureType = Literal["stairs", "escalator", "elevator", "entrance"]
+
+
+class StreetFeature(BaseModel):
+    """Notable point on a walking leg, as mapped in OpenStreetMap."""
+
+    type: StreetFeatureType
+    lat: float
+    lon: float
+    name: str | None = None
+    # For entrances: OpenStreetMap's wheelchair tag, when present.
+    wheelchair_accessible: bool | None = None
 
 
 class Leg(BaseModel):
@@ -91,6 +107,32 @@ class Leg(BaseModel):
     distance_meters: float
     # Encoded polyline (Google format, precision 5).
     geometry: str | None = None
+    street_features: list[StreetFeature] = Field(default_factory=list)
+
+
+AccessibilityStatus = Literal["meets", "violates", "unknown"]
+
+
+class EquipmentNote(BaseModel):
+    equipment_id: str
+    type: Literal["elevator", "escalator"]
+    status: Literal["in_service", "out_of_service"]
+    serving: str | None = None
+    reason: str | None = None
+    estimated_return_at: datetime | None = None
+
+
+class AccessibilityFinding(BaseModel):
+    """Evidence for one place on a route: a station or a walking leg."""
+
+    kind: Literal["station", "street"]
+    location: str
+    leg_index: int
+    status: AccessibilityStatus
+    description: str
+    source: Literal["mta_elevators", "openstreetmap", "none"]
+    data_as_of: datetime | None = None
+    equipment: list[EquipmentNote] = Field(default_factory=list)
 
 
 class Route(BaseModel):
@@ -102,9 +144,9 @@ class Route(BaseModel):
     transfers: int
     walk_meters: float
     walk_seconds: int
-    # Accessibility is not assessed yet; never report a route as accessible
-    # without evidence.
-    accessibility_status: Literal["meets", "violates", "unknown"] = "unknown"
+    # Assessed on every response from current evidence; "unknown" until then.
+    accessibility_status: AccessibilityStatus = "unknown"
+    accessibility_findings: list[AccessibilityFinding] = Field(default_factory=list)
     legs: list[Leg]
 
 
@@ -113,8 +155,18 @@ class Notice(BaseModel):
     message: str
 
 
+class DataFreshness(BaseModel):
+    source: str
+    freshness: Literal["fresh", "stale", "expired", "unknown"]
+    as_of: datetime | None
+
+
 class RouteSearchResponse(BaseModel):
     search_id: str
     graph_version: str
     routes: list[Route]
+    # When step-free or wheelchair access is required: routes that do not meet
+    # it, or cannot be confirmed to, kept separate and never presented as compliant.
+    review_only_routes: list[Route] = Field(default_factory=list)
     notices: list[Notice]
+    data_freshness: list[DataFreshness] = Field(default_factory=list)

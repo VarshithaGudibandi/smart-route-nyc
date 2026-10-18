@@ -13,7 +13,7 @@ from app.core.config import Settings
 from app.core.graph_version import GraphVersion
 from app.main import create_app
 from app.services.route_search import CacheStatus, RouteSearchService
-from tests.fakes import FakeOtpServer, fake_otp, make_request
+from tests.fakes import FakeOtpServer, StaticSnapshots, fake_otp, make_request
 
 DEPART = datetime.fromisoformat("2026-10-19T08:30:00-04:00")
 
@@ -46,11 +46,11 @@ async def test_instances_share_one_computation_through_redis(redis_url: str) -> 
     graph = GraphVersion(None)
     # A distinct departure keeps this test independent of other tests' cache entries.
     depart = DEPART + timedelta(days=1, minutes=17)
-    instance_a = RouteSearchService(
-        fake_otp(server.handler), redis_client(redis_url), graph, config
-    )
-    instance_b = RouteSearchService(
-        fake_otp(server.handler), redis_client(redis_url), graph, config
+    instance_a, instance_b = (
+        RouteSearchService(
+            fake_otp(server.handler), redis_client(redis_url), graph, StaticSnapshots(), config
+        )
+        for _ in range(2)
     )
 
     outcomes = await asyncio.gather(
@@ -72,7 +72,9 @@ def client(redis_url: str, server: FakeOtpServer) -> Iterator[TestClient]:
     with TestClient(app) as client:
         res = app.state.resources
         otp = fake_otp(server.handler)
-        route_search = RouteSearchService(otp, res.redis, GraphVersion(None), res.settings)
+        route_search = RouteSearchService(
+            otp, res.redis, GraphVersion(None), StaticSnapshots(), res.settings
+        )
         app.state.resources = dataclasses.replace(res, otp=otp, route_search=route_search)
         yield client
 

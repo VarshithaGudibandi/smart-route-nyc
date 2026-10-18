@@ -24,6 +24,7 @@ from app.schemas.routes import (
     OptimizationPreferences,
     RouteSearchRequest,
 )
+from app.services.accessibility.snapshot import AccessibilitySnapshot, SnapshotProvider
 
 FIXTURES = Path(__file__).parent / "fixtures"
 JOURNAL_SQUARE = Location(lat=40.73301, lon=-74.06289)
@@ -121,3 +122,13 @@ class InMemoryRedis:
 
 def in_memory_redis() -> ResilientRedis:
     return ResilientRedis(InMemoryRedis(), CircuitBreaker("redis", 3, 10))  # type: ignore[arg-type]
+
+
+class StaticSnapshots(SnapshotProvider):
+    """Accessibility snapshot provider returning whatever the test sets."""
+
+    def __init__(self, snapshot: AccessibilitySnapshot | None = None) -> None:
+        self.snapshot = snapshot or AccessibilitySnapshot()
+
+    async def current(self) -> AccessibilitySnapshot:
+        return self.snapshot

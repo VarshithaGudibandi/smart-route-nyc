@@ -25,11 +25,20 @@ from pydantic import BaseModel
 
 from app.cache.redis import ResilientRedis
 from app.core.config import Settings
+from app.core.freshness import SourceKind, classify
 from app.core.graph_version import GraphVersion
 from app.core.single_flight import SingleFlight
 from app.integrations.otp.client import OtpClient, PlanQuery
 from app.integrations.otp.mapper import to_route
-from app.schemas.routes import Notice, Route, RouteSearchRequest, RouteSearchResponse
+from app.schemas.routes import (
+    DataFreshness,
+    Notice,
+    Route,
+    RouteSearchRequest,
+    RouteSearchResponse,
+)
+from app.services.accessibility.assessor import assess_route
+from app.services.accessibility.snapshot import ELEVATOR_SOURCE, SnapshotProvider
 from app.services.cache_keys import departure_bucket, route_search_key
 
 logger = structlog.get_logger(__name__)
@@ -76,11 +85,13 @@ class RouteSearchService:
         otp: OtpClient,
         redis: ResilientRedis,
         graph_version: GraphVersion,
+        accessibility: SnapshotProvider,
         settings: Settings,
     ) -> None:
         self._otp = otp
         self._redis = redis
         self._graph_version = graph_version
+        self._accessibility = accessibility
         self._settings = settings
         self._secret = settings.key_hashing_secret.get_secret_value().encode()
         self._single_flight: SingleFlight[tuple[CachedSearch, CacheStatus]] = SingleFlight()
@@ -96,10 +107,35 @@ class RouteSearchService:
         result, status = await self._cached_or_computed(key, request, bucket, now)
         routes, notices = self._finalize(result, request, requested)
 
+        # Assessed on every response, cached or not: a cached itinerary never
+        # carries forward an accessibility verdict from when it was computed.
+        snapshot = await self._accessibility.current()
+        wheelchair = request.accessibility.wheelchair_required
+        routes = [assess_route(route, snapshot, wheelchair, now) for route in routes]
+        review_only: list[Route] = []
+        if request.accessibility.needs_accessible_routing:
+            routes, review_only = (
+                [r for r in routes if r.accessibility_status == "meets"],
+                [r for r in routes if r.accessibility_status != "meets"],
+            )
+            if not routes and review_only:
+                notices.append(
+                    Notice(
+                        code="NO_CONFIRMED_ACCESSIBLE_ROUTE",
+                        message=(
+                            "No route could be confirmed to meet your access needs. "
+                            "Alternatives are listed for review with each known barrier "
+                            "and unconfirmed step."
+                        ),
+                    )
+                )
+
         logger.info(
             "route_search",
             cache=status,
             routes=len(routes),
+            review_only=len(review_only),
+            accessibility=[r.accessibility_status for r in routes + review_only],
             notices=[notice.code for notice in notices],
             duration_ms=round((time.perf_counter() - started) * 1000, 1),
         )
@@ -107,7 +143,17 @@ class RouteSearchService:
             search_id=uuid.uuid4().hex,
             graph_version=graph_version,
             routes=routes,
+            review_only_routes=review_only,
             notices=notices,
+            data_freshness=[
+                DataFreshness(
+                    source=ELEVATOR_SOURCE,
+                    freshness=classify(
+                        SourceKind.ACCESSIBILITY_STATUS, snapshot.observed_at, None, now
+                    ).value,
+                    as_of=snapshot.observed_at,
+                )
+            ],
         )
         return SearchOutcome(response=response, cache=status)
 

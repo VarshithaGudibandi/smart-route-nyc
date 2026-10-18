@@ -18,6 +18,7 @@ from app.core.middleware import RequestContextMiddleware, RequestSizeLimitMiddle
 from app.core.rate_limit import RateLimiter
 from app.db.session import create_engine
 from app.integrations.otp.client import OtpClient
+from app.services.accessibility.snapshot import SnapshotProvider
 from app.services.route_search import RouteSearchService
 
 logger = structlog.get_logger(__name__)
@@ -43,14 +44,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             reset_timeout_s=settings.otp_breaker_reset_s,
         )
         secret = settings.key_hashing_secret.get_secret_value().encode()
+        db_engine = create_engine(settings)
         resources = Resources(
             settings=settings,
-            db_engine=create_engine(settings),
+            db_engine=db_engine,
             redis=redis,
             otp=otp,
             rate_limiter=RateLimiter(redis, secret),
             route_search=RouteSearchService(
-                otp, redis, GraphVersion(settings.otp_graph_version_file), settings
+                otp,
+                redis,
+                GraphVersion(settings.otp_graph_version_file),
+                SnapshotProvider(db_engine, redis),
+                settings,
             ),
         )
         app.state.resources = resources

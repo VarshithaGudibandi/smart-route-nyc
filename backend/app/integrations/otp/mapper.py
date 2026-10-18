@@ -4,7 +4,16 @@ import hashlib
 from datetime import datetime
 from typing import Any
 
-from app.schemas.routes import Leg, Place, Route
+from app.schemas.routes import Leg, Place, Route, StreetFeature, StreetFeatureType
+
+FEATURE_TYPES: dict[str, StreetFeatureType] = {
+    "StairsUse": "stairs",
+    "EscalatorUse": "escalator",
+    "ElevatorUse": "elevator",
+    "Entrance": "entrance",
+}
+# OTP's GTFS-based values; OpenStreetMap "wheelchair=yes/no" maps onto these.
+ENTRANCE_ACCESS = {"POSSIBLE": True, "NOT_POSSIBLE": False}
 
 
 def to_route(itinerary: dict[str, Any]) -> Route:
@@ -38,13 +47,38 @@ def _leg(leg: dict[str, Any]) -> Leg:
         realtime=bool(start.get("estimated") or end.get("estimated")),
         distance_meters=round(float(leg["distance"]), 1),
         geometry=(leg.get("legGeometry") or {}).get("points"),
+        street_features=_street_features(leg.get("steps") or []),
     )
+
+
+def _street_features(steps: list[dict[str, Any]]) -> list[StreetFeature]:
+    features = []
+    for step in steps:
+        feature = step.get("feature") or {}
+        kind = FEATURE_TYPES.get(feature.get("__typename", ""))
+        if kind is None:
+            continue
+        features.append(
+            StreetFeature(
+                type=kind,
+                lat=step["lat"],
+                lon=step["lon"],
+                name=feature.get("name"),
+                wheelchair_accessible=ENTRANCE_ACCESS.get(feature.get("wheelchairAccessible", "")),
+            )
+        )
+    return features
 
 
 def _place(place: dict[str, Any]) -> Place:
     stop = place.get("stop") or {}
+    parent = stop.get("parentStation") or {}
     return Place(
-        name=place.get("name"), lat=place["lat"], lon=place["lon"], stop_id=stop.get("gtfsId")
+        name=place.get("name"),
+        lat=place["lat"],
+        lon=place["lon"],
+        stop_id=stop.get("gtfsId"),
+        station_id=parent.get("gtfsId") or stop.get("gtfsId"),
     )
 
 

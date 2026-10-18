@@ -23,8 +23,9 @@ from app.db.models import (
 from app.db.session import create_session_factory
 from app.ingestion.retention import RetentionJob, RetentionPolicy
 from app.ingestion.runner import run_job
-from app.ingestion.sources.mta_elevators import ACCESSIBILITY_VERSION_KEY, MtaElevatorSource
+from app.ingestion.sources.mta_elevators import MtaElevatorSource
 from app.main import create_app
+from app.services.accessibility.snapshot import ACCESSIBILITY_VERSION_KEY, SnapshotProvider
 from tests.fakes import FIXTURES
 
 BASE = "https://feeds.example/mta"
@@ -293,3 +294,46 @@ async def test_freshness_endpoint_reports_ingested_sources(
     assert by_source["mta_elevators"]["freshness"] == "fresh"
     assert by_source["mta_elevators"]["kind"] == "accessibility_status"
     assert by_source["mta_elevators"]["last_fetch"] == "ok"
+
+
+async def test_snapshot_loads_inventory_and_reloads_when_status_changes(
+    feeds: MtaFeeds,
+    engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    redis: ResilientRedis,
+) -> None:
+    source = elevator_source(feeds, sessions, redis)
+    await run_job(source, sessions, redis)
+    provider = SnapshotProvider(engine, redis)
+
+    snapshot = await provider.current()
+    # EL223 is an elevator serving the 14 St complex (stops A31 and L01).
+    assert [e.equipment_id for e in snapshot.elevators_by_stop["A31"]] == ["EL223"]
+    assert snapshot.elevators_by_stop["L01"][0].in_service
+    assert snapshot.observed_at is not None
+    # Escalators are not step-free access and are excluded.
+    assert all(
+        e.equipment_id.startswith("EL") for es in snapshot.elevators_by_stop.values() for e in es
+    )
+
+    feeds.outages.append(
+        {**feeds.outages[0], "equipment": "EL223", "isupcomingoutage": "N", "reason": "Repair"}
+    )
+    await run_job(source, sessions, redis)  # bumps the accessibility version
+
+    reloaded = await provider.current()
+    assert reloaded is not snapshot
+    assert reloaded.elevators_by_stop["A31"][0].in_service is False
+    assert reloaded.elevators_by_stop["A31"][0].reason == "Repair"
+
+
+async def test_snapshot_is_reused_until_something_changes(
+    feeds: MtaFeeds,
+    engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    redis: ResilientRedis,
+) -> None:
+    await run_job(elevator_source(feeds, sessions, redis), sessions, redis)
+    provider = SnapshotProvider(engine, redis)
+    first = await provider.current()
+    assert await provider.current() is first

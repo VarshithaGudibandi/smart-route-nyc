@@ -29,7 +29,8 @@
          "lat": 40.73199,
          "lon": -74.062854,
          "stop": {
-          "gtfsId": "PATH:781722"
+          "gtfsId": "PATH:781722",
+          "parentStation": null
          }
         },
         "start": {
@@ -42,7 +43,33 @@
         },
         "legGeometry": {
          "points": "ctrwFbl`cM@QPJ@DJJLB@M@C?C@QP@j@HF?j@HCTF?B@F@Dg@NBGB"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.7329897,
+          "lon": -74.0628955,
+          "feature": null
+         },
+         {
+          "lat": 40.7329753,
+          "lon": -74.0628035,
+          "feature": null
+         },
+         {
+          "lat": 40.732732,
+          "lon": -74.0629043,
+          "feature": {
+           "__typename": "StairsUse"
+          }
+         },
+         {
+          "lat": 40.7320386,
+          "lon": -74.0628194,
+          "feature": {
+           "__typename": "EscalatorUse"
+          }
+         }
+        ]
        },
        {
         "mode": "SUBWAY",
@@ -64,7 +91,8 @@
          "lat": 40.73199,
          "lon": -74.062854,
          "stop": {
-          "gtfsId": "PATH:781722"
+          "gtfsId": "PATH:781722",
+          "parentStation": null
          }
         },
         "to": {
@@ -72,7 +100,8 @@
          "lat": 40.71224,
          "lon": -74.012522,
          "stop": {
-          "gtfsId": "PATH:781750"
+          "gtfsId": "PATH:781750",
+          "parentStation": null
          }
         },
         "start": {
@@ -85,7 +114,8 @@
         },
         "legGeometry": {
          "points": "_mrwFrl`cMvA}Df@{@`C{C`AeAt@}@b@i@nAwAb@u@|@aAxCmDtDoEvAoAzK_HnAw@~@q@jAiARSz@{@R]v@oAl@wB^oBj@kChEwQvByJbB_InAcJn@oCDU|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A"
-        }
+        },
+        "steps": []
        },
        {
         "mode": "WALK",
@@ -99,7 +129,8 @@
          "lat": 40.71224,
          "lon": -74.012522,
          "stop": {
-          "gtfsId": "PATH:781750"
+          "gtfsId": "PATH:781750",
+          "parentStation": null
          }
         },
         "to": {
@@ -107,7 +138,10 @@
          "lat": 40.711835,
          "lon": -74.012188,
          "stop": {
-          "gtfsId": "MTASBWY:138N"
+          "gtfsId": "MTASBWY:138N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:138"
+          }
          }
         },
         "start": {
@@ -120,7 +154,19 @@
         },
         "legGeometry": {
          "points": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.7122393,
+          "lon": -74.0125225,
+          "feature": null
+         },
+         {
+          "lat": 40.7120592,
+          "lon": -74.0120966,
+          "feature": null
+         }
+        ]
        },
        {
         "mode": "SUBWAY",
@@ -135,14 +181,17 @@
          "name": "MTA New York City Transit"
         },
         "trip": {
-         "gtfsId": "MTASBWY:L0S4-1-1094-S01_053750_1..N17R"
+         "gtfsId": "MTASBWY:L0S3-1-1094-S01_053750_1..N17R"
         },
         "from": {
          "name": "WTC Cortlandt",
          "lat": 40.711835,
          "lon": -74.012188,
          "stop": {
-          "gtfsId": "MTASBWY:138N"
+          "gtfsId": "MTASBWY:138N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:138"
+          }
          }
         },
         "to": {
@@ -150,7 +199,10 @@
          "lat": 40.807722,
          "lon": -73.96411,
          "stop": {
-          "gtfsId": "MTASBWY:117N"
+          "gtfsId": "MTASBWY:117N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:117"
+          }
          }
         },
         "start": {
@@ -163,7 +215,8 @@
         },
         "legGeometry": {
          "points": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP"
-        }
+        },
+        "steps": []
        },
        {
         "mode": "WALK",
@@ -177,7 +230,10 @@
          "lat": 40.807722,
          "lon": -73.96411,
          "stop": {
-          "gtfsId": "MTASBWY:117N"
+          "gtfsId": "MTASBWY:117N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:117"
+          }
          }
         },
         "to": {
@@ -196,7 +252,24 @@
         },
         "legGeometry": {
          "points": "ggaxFvbmbMFS`An@ELEJCLGPOI"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.8076842,
+          "lon": -73.9640192,
+          "feature": null
+         },
+         {
+          "lat": 40.8073581,
+          "lon": -73.9642561,
+          "feature": null
+         },
+         {
+          "lat": 40.8074771,
+          "lon": -73.9645462,
+          "feature": null
+         }
+        ]
        }
       ]
      }
@@ -228,7 +301,8 @@
          "lat": 40.73199,
          "lon": -74.062854,
          "stop": {
-          "gtfsId": "PATH:781722"
+          "gtfsId": "PATH:781722",
+          "parentStation": null
          }
         },
         "start": {
@@ -241,7 +315,33 @@
         },
         "legGeometry": {
          "points": "ctrwFbl`cM@QPJ@DJJLB@M@C?C@QP@j@HF?j@HCTF?B@F@Dg@NBGB"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.7329897,
+          "lon": -74.0628955,
+          "feature": null
+         },
+         {
+          "lat": 40.7329753,
+          "lon": -74.0628035,
+          "feature": null
+         },
+         {
+          "lat": 40.732732,
+          "lon": -74.0629043,
+          "feature": {
+           "__typename": "StairsUse"
+          }
+         },
+         {
+          "lat": 40.7320386,
+          "lon": -74.0628194,
+          "feature": {
+           "__typename": "EscalatorUse"
+          }
+         }
+        ]
        },
        {
         "mode": "SUBWAY",
@@ -263,7 +363,8 @@
          "lat": 40.73199,
          "lon": -74.062854,
          "stop": {
-          "gtfsId": "PATH:781722"
+          "gtfsId": "PATH:781722",
+          "parentStation": null
          }
         },
         "to": {
@@ -271,7 +372,8 @@
          "lat": 40.71224,
          "lon": -74.012522,
          "stop": {
-          "gtfsId": "PATH:781750"
+          "gtfsId": "PATH:781750",
+          "parentStation": null
          }
         },
         "start": {
@@ -284,7 +386,8 @@
         },
         "legGeometry": {
          "points": "_mrwFrl`cMvA}Df@{@`C{C`AeAt@}@b@i@nAwAb@u@|@aAxCmDtDoEvAoAzK_HnAw@~@q@jAiARSz@{@R]v@oAl@wB^oBj@kChEwQvByJbB_InAcJn@oCDU|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A"
-        }
+        },
+        "steps": []
        },
        {
         "mode": "WALK",
@@ -298,7 +401,8 @@
          "lat": 40.71224,
          "lon": -74.012522,
          "stop": {
-          "gtfsId": "PATH:781750"
+          "gtfsId": "PATH:781750",
+          "parentStation": null
          }
         },
         "to": {
@@ -306,7 +410,10 @@
          "lat": 40.711835,
          "lon": -74.012188,
          "stop": {
-          "gtfsId": "MTASBWY:138N"
+          "gtfsId": "MTASBWY:138N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:138"
+          }
          }
         },
         "start": {
@@ -319,7 +426,19 @@
         },
         "legGeometry": {
          "points": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.7122393,
+          "lon": -74.0125225,
+          "feature": null
+         },
+         {
+          "lat": 40.7120592,
+          "lon": -74.0120966,
+          "feature": null
+         }
+        ]
        },
        {
         "mode": "SUBWAY",
@@ -334,14 +453,17 @@
          "name": "MTA New York City Transit"
         },
         "trip": {
-         "gtfsId": "MTASBWY:L0S4-1-1094-S01_054050_1..N15R"
+         "gtfsId": "MTASBWY:L0S3-1-1094-S01_054050_1..N15R"
         },
         "from": {
          "name": "WTC Cortlandt",
          "lat": 40.711835,
          "lon": -74.012188,
          "stop": {
-          "gtfsId": "MTASBWY:138N"
+          "gtfsId": "MTASBWY:138N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:138"
+          }
          }
         },
         "to": {
@@ -349,7 +471,10 @@
          "lat": 40.807722,
          "lon": -73.96411,
          "stop": {
-          "gtfsId": "MTASBWY:117N"
+          "gtfsId": "MTASBWY:117N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:117"
+          }
          }
         },
         "start": {
@@ -362,7 +487,8 @@
         },
         "legGeometry": {
          "points": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP"
-        }
+        },
+        "steps": []
        },
        {
         "mode": "WALK",
@@ -376,7 +502,10 @@
          "lat": 40.807722,
          "lon": -73.96411,
          "stop": {
-          "gtfsId": "MTASBWY:117N"
+          "gtfsId": "MTASBWY:117N",
+          "parentStation": {
+           "gtfsId": "MTASBWY:117"
+          }
          }
         },
         "to": {
@@ -395,7 +524,24 @@
         },
         "legGeometry": {
          "points": "ggaxFvbmbMFS`An@ELEJCLGPOI"
-        }
+        },
+        "steps": [
+         {
+          "lat": 40.8076842,
+          "lon": -73.9640192,
+          "feature": null
+         },
+         {
+          "lat": 40.8073581,
+          "lon": -73.9642561,
+          "feature": null
+         },
+         {
+          "lat": 40.8074771,
+          "lon": -73.9645462,
+          "feature": null
+         }
+        ]
        }
       ]
      }

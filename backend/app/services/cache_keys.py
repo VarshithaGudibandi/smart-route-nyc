@@ -15,7 +15,8 @@ from zoneinfo import ZoneInfo
 from app.schemas.routes import RouteSearchRequest
 
 NEW_YORK = ZoneInfo("America/New_York")
-KEY_SCHEMA_VERSION = 1
+# Bump when the cached payload changes shape, so old entries are never read.
+KEY_SCHEMA_VERSION = 2
 # 4 decimal places is about 11 m: close enough that walking legs barely change.
 COORDINATE_DECIMALS = 4
 DEPARTURE_BUCKET = timedelta(minutes=5)

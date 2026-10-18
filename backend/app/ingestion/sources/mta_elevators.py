@@ -38,15 +38,15 @@ from app.db.models import (
 from app.ingestion.http import FetchError, fetch_bytes
 from app.ingestion.runs import RunContext, RunOutcome
 
+# Bumped whenever any equipment status changes; the API reloads its snapshot on change.
+from app.services.accessibility.snapshot import ACCESSIBILITY_VERSION_KEY
+
 logger = structlog.get_logger(__name__)
 
 OPERATOR = "MTA"
 NEW_YORK = ZoneInfo("America/New_York")
 IN_SERVICE = "in_service"
 OUT_OF_SERVICE = "out_of_service"
-# Bumped whenever any equipment status changes, so results that depend on
-# accessibility can be invalidated without scanning caches.
-ACCESSIBILITY_VERSION_KEY = "srn:v1:ver:accessibility"
 
 
 @dataclass(frozen=True)

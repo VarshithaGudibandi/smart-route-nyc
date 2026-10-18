@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -9,9 +9,21 @@ from app.core.config import Settings
 from app.core.errors import RoutingUnavailableError
 from app.core.graph_version import GraphVersion
 from app.core.resilience import CircuitBreaker
-from app.schemas.routes import AccessibilityRequirements
+from app.schemas.routes import AccessibilityRequirements, Route
+from app.services.accessibility.snapshot import (
+    AccessibilitySnapshot,
+    Elevator,
+    SnapshotProvider,
+)
 from app.services.route_search import CacheStatus, RouteSearchService
-from tests.fakes import FakeOtpServer, fake_otp, in_memory_redis, make_request, plan_fixture
+from tests.fakes import (
+    FakeOtpServer,
+    StaticSnapshots,
+    fake_otp,
+    in_memory_redis,
+    make_request,
+    plan_fixture,
+)
 from tests.unit.test_redis_resilience import FailingRedis
 
 DEPART = datetime.fromisoformat("2026-10-19T08:30:00-04:00")
@@ -21,10 +33,15 @@ def service(
     server: FakeOtpServer,
     redis: ResilientRedis | None = None,
     graph_file: Path | None = None,
+    snapshots: SnapshotProvider | None = None,
 ) -> RouteSearchService:
     settings = Settings(_env_file=None, app_env="test")
     return RouteSearchService(
-        fake_otp(server.handler), redis or in_memory_redis(), GraphVersion(graph_file), settings
+        fake_otp(server.handler),
+        redis or in_memory_redis(),
+        GraphVersion(graph_file),
+        snapshots or StaticSnapshots(),
+        settings,
     )
 
 
@@ -154,3 +171,71 @@ async def test_new_graph_version_invalidates_cache(tmp_path: Path) -> None:
 
 def test_fixture_has_routes() -> None:
     assert plan_fixture()["data"]["planConnection"]["edges"]
+
+
+def all_elevators(working: bool) -> AccessibilitySnapshot:
+    """Every station in the fixture has one ADA elevator, working or not."""
+    stations = {
+        place["stop"]["parentStation"]["gtfsId"].split(":")[1]
+        for edge in plan_fixture()["data"]["planConnection"]["edges"]
+        for leg in edge["node"]["legs"]
+        for place in (leg["from"], leg["to"])
+        if place.get("stop") and place["stop"].get("parentStation")
+    }
+    elevator = Elevator("EL1", True, working, None, None if working else "Repair", None)
+    return AccessibilitySnapshot(
+        elevators_by_stop={s: [elevator] for s in stations},
+        observed_at=datetime.now(UTC),
+    )
+
+
+def station_statuses(routes: list[Route]) -> set[str]:
+    return {
+        f.status for r in routes for f in r.accessibility_findings if f.source == "mta_elevators"
+    }
+
+
+async def test_cached_routes_are_reassessed_on_every_request() -> None:
+    """An elevator breaking after a route was cached must change its verdict."""
+    snapshots = StaticSnapshots(all_elevators(working=True))
+    svc = service(FakeOtpServer(), snapshots=snapshots)
+    first = await svc.search(make_request(DEPART))
+    snapshots.snapshot = all_elevators(working=False)
+    second = await svc.search(make_request(DEPART))
+
+    assert second.cache == CacheStatus.HIT
+    before = [
+        f.status
+        for r in first.response.routes
+        for f in r.accessibility_findings
+        if f.source == "mta_elevators"
+    ]
+    after = [
+        f.status
+        for r in second.response.routes
+        for f in r.accessibility_findings
+        if f.source == "mta_elevators"
+    ]
+    assert set(before) == {"meets"}
+    assert set(after) == {"violates"}
+
+
+async def test_required_access_separates_unconfirmed_routes() -> None:
+    svc = service(FakeOtpServer(), snapshots=StaticSnapshots(all_elevators(working=True)))
+    wheelchair = AccessibilityRequirements(wheelchair_required=True)
+    outcome = await svc.search(make_request(DEPART, accessibility=wheelchair))
+
+    response = outcome.response
+    assert response.routes == []
+    assert response.review_only_routes
+    # The recorded walk includes mapped stairs, so none can be confirmed.
+    assert {r.accessibility_status for r in response.review_only_routes} <= {"violates", "unknown"}
+    assert "NO_CONFIRMED_ACCESSIBLE_ROUTE" in [n.code for n in response.notices]
+
+
+async def test_without_requirements_all_routes_are_shown_with_verdicts() -> None:
+    outcome = await service(FakeOtpServer()).search(make_request(DEPART))
+    assert outcome.response.routes
+    assert outcome.response.review_only_routes == []
+    assert all(r.accessibility_findings for r in outcome.response.routes)
+    assert outcome.response.data_freshness[0].source == "mta_elevators"

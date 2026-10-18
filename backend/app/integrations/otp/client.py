@@ -54,11 +54,19 @@ query Plan(
           route { gtfsId shortName longName }
           agency { name }
           trip { gtfsId }
-          from { name lat lon stop { gtfsId } }
-          to { name lat lon stop { gtfsId } }
+          from { name lat lon stop { gtfsId parentStation { gtfsId } } }
+          to { name lat lon stop { gtfsId parentStation { gtfsId } } }
           start { scheduledTime estimated { time } }
           end { scheduledTime estimated { time } }
           legGeometry { points }
+          steps {
+            lat
+            lon
+            feature {
+              __typename
+              ... on Entrance { name wheelchairAccessible }
+            }
+          }
         }
       }
     }

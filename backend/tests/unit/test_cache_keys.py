@@ -9,7 +9,7 @@ from app.schemas.routes import (
     OptimizationPreferences,
     RouteSearchRequest,
 )
-from app.services.cache_keys import departure_bucket, route_search_key
+from app.services.cache_keys import KEY_SCHEMA_VERSION, departure_bucket, route_search_key
 from tests.fakes import make_request
 
 SECRET = b"test-secret"
@@ -30,7 +30,7 @@ def test_key_is_deterministic_and_opaque() -> None:
     request = make_request()
     assert key(request) == key(make_request())
     assert "40.73" not in key(request)
-    assert key(request).startswith("srn:v1:route:")
+    assert key(request).startswith(f"srn:v{KEY_SCHEMA_VERSION}:route:")
 
 
 def test_nearby_coordinates_share_a_key() -> None:
