@@ -38,13 +38,49 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: Type check
-        run: uv run mypy app tests evals alembic
+        run: uv run mypy app tests evals alembic scripts
       - name: Tests (unit and integration, with PostgreSQL and Redis containers)
         run: uv run pytest -v
       - name: Preference interpretation evaluation (baseline)
         run: uv run python -m evals.preferences
       - name: Explanation grounding evaluation
         run: uv run python -m evals.explanations
+      - name: Frontend API schema is up to date
+        run: |
+          uv run python -m scripts.export_openapi ../frontend/src/lib/openapi.json
+          git diff --exit-code ../frontend/src/lib/openapi.json
+
+  frontend:
+    name: Web app (types, lint, tests, browser tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Generated API types match the schema
+        run: |
+          npm run api:types
+          git diff --exit-code src/lib/api-types.ts
+      - run: npm run typecheck
+      - run: npm run lint
+      - name: Unit and component tests
+        run: npm test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests with accessibility checks
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
 
   otp-scripts:
     name: OTP data scripts
@@ -58,14 +94,17 @@ jobs:
         run: python -m unittest discover -s otp/tests -v
 
   docker:
-    name: Backend image
+    name: Container images
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        context: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
       - uses: docker/build-push-action@v7
         with:
-          context: backend
+          context: ${{ matrix.context }}
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.context }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.context }}

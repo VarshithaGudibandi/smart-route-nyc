@@ -1,0 +1,193 @@
+{
+ "search_id": "c1008ed5781748ec8cb237572ddc232a",
+ "route_id": "cb07730af90f2c22",
+ "source": "facts",
+ "provider": null,
+ "prompt_version": null,
+ "cached": false,
+ "sentences": [
+  {
+   "text": "Leaves at 08:34 and arrives at 09:18: 44 min in total, with 1 transfer and 81 m of walking.",
+   "fact_ids": [
+    "summary"
+   ]
+  },
+  {
+   "text": "This route makes a transfer the planner did not pick by default; the routing engine checked it against the timetable and it arrives earlier.",
+   "fact_ids": [
+    "origin"
+   ]
+  },
+  {
+   "text": "Walk 21 m (about 3 min) from your starting point to Bay Ridge-95 St.",
+   "fact_ids": [
+    "leg0"
+   ]
+  },
+  {
+   "text": "Take the R (MTA New York City Transit) toward Forest Hills-71 Av from Bay Ridge-95 St at 08:37 to 59 St, arriving at 08:44.",
+   "fact_ids": [
+    "leg1"
+   ]
+  },
+  {
+   "text": "Take the N (MTA New York City Transit) toward Astoria-Ditmars Blvd from 59 St at 08:47 to 34 St-Herald Sq, arriving at 09:15.",
+   "fact_ids": [
+    "leg2"
+   ]
+  },
+  {
+   "text": "Walk 60 m (about 3 min) from 34 St-Herald Sq to your destination.",
+   "fact_ids": [
+    "leg3"
+   ]
+  },
+  {
+   "text": "Change from the R at 59 St to the N at 59 St, with 2 min between trains.",
+   "fact_ids": [
+    "transfer2"
+   ]
+  },
+  {
+   "text": "Every station and walk on this route was checked and meets the requirement.",
+   "fact_ids": [
+    "accessibility"
+   ]
+  },
+  {
+   "text": "Walk from your starting point to Bay Ridge-95 St: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "fact_ids": [
+    "finding0"
+   ]
+  },
+  {
+   "text": "Bay Ridge-95 St: meets the requirement. 2 elevators in service. (MTA elevator status as of 13:42)",
+   "fact_ids": [
+    "finding1"
+   ]
+  },
+  {
+   "text": "59 St: meets the requirement. 3 elevators in service. (MTA elevator status as of 13:42)",
+   "fact_ids": [
+    "finding2"
+   ]
+  },
+  {
+   "text": "34 St-Herald Sq: meets the requirement. 6 elevators in service. (MTA elevator status as of 13:42)",
+   "fact_ids": [
+    "finding3"
+   ]
+  },
+  {
+   "text": "Walk from 34 St-Herald Sq to your destination: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "fact_ids": [
+    "finding4"
+   ]
+  },
+  {
+   "text": "Elevator status is as it is now; it can change before you travel at 08:34.",
+   "fact_ids": [
+    "status_now"
+   ]
+  },
+  {
+   "text": "Times come from the published timetable, not live train positions.",
+   "fact_ids": [
+    "schedule"
+   ]
+  }
+ ],
+ "facts": [
+  {
+   "id": "summary",
+   "kind": "summary",
+   "text": "Leaves at 08:34 and arrives at 09:18: 44 min in total, with 1 transfer and 81 m of walking.",
+   "required": false
+  },
+  {
+   "id": "origin",
+   "kind": "origin",
+   "text": "This route makes a transfer the planner did not pick by default; the routing engine checked it against the timetable and it arrives earlier.",
+   "required": false
+  },
+  {
+   "id": "leg0",
+   "kind": "leg",
+   "text": "Walk 21 m (about 3 min) from your starting point to Bay Ridge-95 St.",
+   "required": false
+  },
+  {
+   "id": "leg1",
+   "kind": "leg",
+   "text": "Take the R (MTA New York City Transit) toward Forest Hills-71 Av from Bay Ridge-95 St at 08:37 to 59 St, arriving at 08:44.",
+   "required": false
+  },
+  {
+   "id": "leg2",
+   "kind": "leg",
+   "text": "Take the N (MTA New York City Transit) toward Astoria-Ditmars Blvd from 59 St at 08:47 to 34 St-Herald Sq, arriving at 09:15.",
+   "required": false
+  },
+  {
+   "id": "leg3",
+   "kind": "leg",
+   "text": "Walk 60 m (about 3 min) from 34 St-Herald Sq to your destination.",
+   "required": false
+  },
+  {
+   "id": "transfer2",
+   "kind": "transfer",
+   "text": "Change from the R at 59 St to the N at 59 St, with 2 min between trains.",
+   "required": false
+  },
+  {
+   "id": "accessibility",
+   "kind": "accessibility",
+   "text": "Every station and walk on this route was checked and meets the requirement.",
+   "required": true
+  },
+  {
+   "id": "finding0",
+   "kind": "finding",
+   "text": "Walk from your starting point to Bay Ridge-95 St: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "required": false
+  },
+  {
+   "id": "finding1",
+   "kind": "finding",
+   "text": "Bay Ridge-95 St: meets the requirement. 2 elevators in service. (MTA elevator status as of 13:42)",
+   "required": false
+  },
+  {
+   "id": "finding2",
+   "kind": "finding",
+   "text": "59 St: meets the requirement. 3 elevators in service. (MTA elevator status as of 13:42)",
+   "required": false
+  },
+  {
+   "id": "finding3",
+   "kind": "finding",
+   "text": "34 St-Herald Sq: meets the requirement. 6 elevators in service. (MTA elevator status as of 13:42)",
+   "required": false
+  },
+  {
+   "id": "finding4",
+   "kind": "finding",
+   "text": "Walk from 34 St-Herald Sq to your destination: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "required": false
+  },
+  {
+   "id": "status_now",
+   "kind": "data",
+   "text": "Elevator status is as it is now; it can change before you travel at 08:34.",
+   "required": false
+  },
+  {
+   "id": "schedule",
+   "kind": "data",
+   "text": "Times come from the published timetable, not live train positions.",
+   "required": false
+  }
+ ],
+ "notice": null
+}

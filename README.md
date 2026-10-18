@@ -23,7 +23,8 @@ SmartRouteNYC compares multimodal journeys against each rider's individual needs
 ```mermaid
 flowchart LR
   B[Browser<br/>Next.js] -->|HTTPS JSON| API[FastAPI]
-  B --> MB[Mapbox Search]
+  B --> T[OpenFreeMap tiles]
+  API --> G[Photon geocoder]
   API <--> R[(Redis<br/>cache · locks · jobs · rate limits)]
   API --> OTP[OpenTripPlanner 2]
   API --> LLM[LLM provider]
@@ -36,7 +37,7 @@ flowchart LR
 
 | Component | Responsibility |
 |---|---|
-| **Frontend** (Next.js, TypeScript) | Place search, current location, preferences, route comparison, map, transfer details |
+| **Web app** (Next.js, TypeScript) | Place search, current location, needs, route comparison, map, step-by-step detail, explanations, feedback |
 | **API** (FastAPI, Pydantic v2) | Validation, search coordination, accessibility assessment, AI job orchestration |
 | **OpenTripPlanner** | Multimodal itinerary computation over the GTFS + OSM graph |
 | **Redis** | Cache-aside for routing, timetable and LLM results, distributed locks, background job state, rate limiting |
@@ -46,26 +47,22 @@ flowchart LR
 ## Tech stack
 
 - **Backend:** Python, FastAPI, Pydantic v2, SQLAlchemy 2 (async), Alembic, Redis
-- **Frontend:** Next.js, React, TypeScript, Tailwind CSS
+- **Frontend:** Next.js, React, TypeScript, CSS modules, MapLibre GL with OpenFreeMap tiles
 - **Routing:** OpenTripPlanner 2, GTFS, GTFS-Realtime, OpenStreetMap
 - **Infrastructure:** Docker Compose, GitHub Actions, Prometheus, Grafana, OpenTelemetry
-- **Testing:** pytest, Testcontainers, Playwright, k6
+- **Testing:** pytest, Testcontainers, Vitest, Testing Library, Playwright, axe-core
 
 ## Repository layout
 
 ```text
-backend/      FastAPI application, API schemas, services, integrations
-frontend/     Next.js web application
-ingestion/    Scheduled transit and accessibility feed ingestion
+backend/      FastAPI application: API, services, ingestion worker, evaluations
+frontend/     Next.js web app
 otp/          OpenTripPlanner configuration and graph-build scripts
-infra/        Docker Compose, observability configuration, load tests
 ```
-
-Directories are added as each component is implemented.
 
 ## Getting started
 
-Prerequisites: Docker with Compose, Python 3.12 and Node.js 20. OpenTripPlanner runs in Docker, so no local Java install is needed.
+Prerequisites: Docker with Compose, Python 3.12 and Node.js 22. OpenTripPlanner runs in Docker, so no local Java install is needed.
 
 ```bash
 git clone https://github.com/VarshithaGudibandi/smart-route-nyc.git
@@ -84,6 +81,7 @@ docker compose up -d --build
 
 | Service | Address | Notes |
 |---|---|---|
+| Web app | http://localhost:3000 | |
 | API | http://localhost:8000 | Interactive docs at `/api/docs` |
 | OpenTripPlanner | http://localhost:8080 | Takes about a minute to load the graph |
 | PostgreSQL | localhost:5432 | Schema applied by the one-shot `migrate` service |
@@ -99,6 +97,28 @@ curl localhost:8000/api/v1/health/ready   # PostgreSQL, Redis and OpenTripPlanne
 ```
 
 `/ready` returns `503` and names the failing dependency when any of them is down.
+
+### Web app
+
+The web app ([`frontend/`](frontend/README.md)) is built for clarity first:
+
+- **Status you can read, not just see.** Confirmed, barrier and not confirmed each have their own shape, symbol and words, so nothing depends on color. Routes that cannot be confirmed are shown under "Needs review" with every barrier counted, never mixed with routes that meet the rider's needs.
+- **Every step.** The route detail lists each walk, ride and change, the elevator status at each change, and the full step-free check with the data's age.
+- **Verified faster transfers** appear when the background investigation finishes, with the minutes saved.
+- **No account and no stored location.** The trip lives in the page URL, so searches survive a reload and can be shared. Current location is used once, only when asked; if permission is refused, search keeps working.
+- **New York time everywhere**, including the time picker, whatever the device's time zone.
+- **Accessible as built:** keyboard support throughout (including the place search combobox), screen-reader labels for lines and states, focus moved to a chosen route, visible focus, reduced-motion support and WCAG AA contrast. Automated axe checks run in CI on each screen, on desktop and phone sizes.
+
+Maps use MapLibre with [OpenFreeMap](https://openfreemap.org) tiles of OpenStreetMap data, which need no API key.
+
+### Place search
+
+`GET /api/v1/places?q=` returns stations first, then addresses and places:
+
+| Source | Detail |
+|---|---|
+| Stations | Built from the routing graph, so every result can be routed to. Station complexes merge into one result with all their lines (Times Sq-42 St: 1 2 3 7 N Q R S W). PATH platforms group into stations. "Herald Square", "herald sq" and "34th St" all match |
+| Addresses and places | [Photon](https://github.com/komoot/photon), an open-source OpenStreetMap geocoder, called from the backend only, limited to the service area, cached in Redis by an HMAC of the query, and behind a circuit breaker. If it is unavailable, stations are still returned with a notice. Set `PHOTON_BASE_URL` to use a self-hosted instance |
 
 ### Searching for routes
 
@@ -316,8 +336,8 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Natural-language preference interpretation (model provider pluggable; keyword baseline included)
 - [x] Asynchronous transfer investigation with routing-engine verification (rules generator; model generator ready for a provider)
 - [x] Grounded route explanations and anonymous feedback
-- [ ] Web application
-- [ ] Load testing, dashboards, end-to-end tests and deployment
+- [x] Web application
+- [ ] Load testing, metrics dashboards, tracing and deployment
 
 ## Data sources and attribution
 

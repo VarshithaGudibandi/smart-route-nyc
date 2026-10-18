@@ -1,7 +1,7 @@
 /**
  * Line colors for route bullets. Subway colors follow the MTA's published
- * line colors; PATH colors follow its route colors, darkened where white
- * text would otherwise fall below 4.5:1 contrast.
+ * line colors; PATH colors follow its route colors. Text is black or white,
+ * whichever keeps at least 4.5:1 contrast on that color.
  */
 export type LineStyle = { background: string; color: string; label: string; shape: "circle" | "pill" };
 
@@ -21,11 +21,11 @@ const SUBWAY: Record<string, string> = {
 
 const DARK_TEXT = new Set(["N", "Q", "R", "W", "L", "G"]);
 
-const PATH: Record<string, { background: string; label: string }> = {
-  RED: { background: "#D93A30", label: "PATH" },
-  GRN: { background: "#3E7D1E", label: "PATH" },
-  YEL: { background: "#B26A00", label: "PATH" },
-  BLU: { background: "#2F6FD6", label: "PATH" },
+const PATH: Record<string, { background: string; color: string }> = {
+  RED: { background: "#D93A30", color: "#FFFFFF" },
+  GRN: { background: "#65C100", color: "#111111" },
+  YEL: { background: "#FF9900", color: "#111111" },
+  BLU: { background: "#2F6FD6", color: "#FFFFFF" },
 };
 
 export function lineStyle(routeId: string | null | undefined, name: string | null | undefined): LineStyle {
@@ -41,8 +41,8 @@ export function lineStyle(routeId: string | null | undefined, name: string | nul
     };
   }
   if (feed === "PATH") {
-    const path = PATH[short] ?? { background: "#4A4A4A", label: "PATH" };
-    return { background: path.background, color: "#FFFFFF", label: path.label, shape: "pill" };
+    const path = PATH[short] ?? { background: "#4A4A4A", color: "#FFFFFF" };
+    return { background: path.background, color: path.color, label: "PATH", shape: "pill" };
   }
   return { background: "#0062CF", color: "#FFFFFF", label: short || "Bus", shape: "pill" };
 }

@@ -23,6 +23,7 @@
     }
   },
   "include": [
+    "e2e/**/*.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

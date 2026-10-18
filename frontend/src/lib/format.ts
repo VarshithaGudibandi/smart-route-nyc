@@ -42,7 +42,7 @@ export function duration(seconds: number): string {
 
 export function distance(meters: number): string {
   if (meters < 950) return `${Math.round(meters / 10) * 10 || Math.round(meters)} m`;
-  return `${(meters / 1000).toFixed(1)} km`;
+  return `${(Math.round(meters / 100) / 10).toFixed(1)} km`;
 }
 
 /** OTP names coordinate endpoints "Origin" and "Destination". */

@@ -1,0 +1,35 @@
+{
+ "proposed": {
+  "accessibility": {
+   "step_free_required": true,
+   "wheelchair_required": true,
+   "max_walk_meters": null
+  },
+  "optimization": {
+   "primary": "FASTEST",
+   "prefer_fewer_transfers": false,
+   "prefer_less_walking": false
+  }
+ },
+ "changes": [
+  {
+   "field": "step_free_required",
+   "previous": false,
+   "proposed": true
+  },
+  {
+   "field": "wheelchair_required",
+   "previous": false,
+   "proposed": true
+  }
+ ],
+ "conflicts": [],
+ "uncertain_fields": [],
+ "unsupported_requests": [],
+ "source": {
+  "provider": "baseline",
+  "model": "keyword-rules-v1",
+  "prompt_version": "preferences-v1",
+  "cached": false
+ }
+}

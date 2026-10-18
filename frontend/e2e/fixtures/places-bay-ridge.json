@@ -1,0 +1,20 @@
+{
+ "results": [
+  {
+   "id": "MTASBWY:R45",
+   "name": "Bay Ridge-95 St",
+   "detail": "Subway \u00b7 R",
+   "kind": "station",
+   "lat": 40.616622,
+   "lon": -74.030876,
+   "source": "transit"
+  }
+ ],
+ "notices": [
+  {
+   "code": "ADDRESS_SEARCH_UNAVAILABLE",
+   "message": "Address search is unavailable right now; stations still work."
+  }
+ ],
+ "attribution": null
+}

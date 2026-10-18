@@ -1,0 +1,1321 @@
+{
+ "search_id": "20d31ab26eff479dbb35154bd15bef05",
+ "graph_version": "438a778a4522151b",
+ "routes": [],
+ "review_only_routes": [
+  {
+   "route_id": "87fe189a2bef69a7",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:30:19-04:00",
+   "arrival": "2026-10-19T09:51:39-04:00",
+   "duration_seconds": 4880,
+   "transfers": 1,
+   "walk_meters": 2555.8,
+   "walk_seconds": 2503,
+   "accessibility_status": "violates",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Grove Street",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Grove Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "World Trade Center",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from World Trade Center to WTC Cortlandt",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "WTC Cortlandt",
+     "leg_index": 3,
+     "status": "meets",
+     "description": "7 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL736",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich Street (near southwest corner of Greenwich Street and Vesey Street) to downtown 1 platform and access to uptown 1 service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL713",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to downtown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL712",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to uptown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL14X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich St to Oculus Balcony with access to uptown 1 and downtown R/W service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL13X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Oculus main level  to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL12X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL11X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to West Concourse with access to 1 service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "116 St-Columbia University",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 116 St-Columbia University to Destination",
+     "leg_index": 4,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.733,
+      "lon": -74.0629,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "start_time": "2026-10-19T08:30:19-04:00",
+     "end_time": "2026-10-19T09:03:30-04:00",
+     "realtime": false,
+     "distance_meters": 2405.6,
+     "geometry": "etrwFdl`cMBS@QHmA@_@BY@_@BW?[?EDs@@M@[BY@OBa@F{@NiCNi@Vg@\\g@b@k@HK|@oArC{DHMJMnA_BlBiCFCJGFGHGh@s@dCeD@CAOj@OHAVIjA[dBcBTU\\]fAiANOPS~BgCDEZ]Z_@RSJOTUh@m@DGPQhAmAb@g@^a@BAX[DGFGTWzAgBFGHINQX]FGHODGBGRg@FQFMh@qAXq@FO`AaCFOFOz@yBf@kAb@cAHWLYjAsCh@sAHSJWHQFOjCsG@EL@@CDEn@J@@DOBMBAXBJBVgABBBA",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "RED",
+     "route_id": "PATH:RED",
+     "agency": "PATH",
+     "headsign": "Newark - World Trade Center",
+     "trip_id": "PATH:1546248-26B-AllLines-Weekday-02",
+     "origin": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "destination": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "start_time": "2026-10-19T09:03:30-04:00",
+     "end_time": "2026-10-19T09:11:00-04:00",
+     "realtime": false,
+     "distance_meters": 2659.0,
+     "geometry": "m_pwFnl|bM|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "destination": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "start_time": "2026-10-19T09:11:00-04:00",
+     "end_time": "2026-10-19T09:15:53-04:00",
+     "realtime": false,
+     "distance_meters": 67.2,
+     "geometry": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "1",
+     "route_id": "MTASBWY:1",
+     "agency": "MTA New York City Transit",
+     "headsign": "215 St",
+     "trip_id": "MTASBWY:L0S3-1-1094-S01_055550_1..N17R",
+     "origin": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "destination": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "start_time": "2026-10-19T09:18:30-04:00",
+     "end_time": "2026-10-19T09:48:00-04:00",
+     "realtime": false,
+     "distance_meters": 11632.0,
+     "geometry": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.8076,
+      "lon": -73.9645,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:48:00-04:00",
+     "end_time": "2026-10-19T09:51:39-04:00",
+     "realtime": false,
+     "distance_meters": 83.0,
+     "geometry": "ggaxFvbmbMFS`An@ELEJCLGPUO",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "d8f6424840a67a06",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:32:19-04:00",
+   "arrival": "2026-10-19T09:55:09-04:00",
+   "duration_seconds": 4970,
+   "transfers": 1,
+   "walk_meters": 2782.8,
+   "walk_seconds": 2697,
+   "accessibility_status": "violates",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Grove Street",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Grove Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "23rd Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 23rd Street to 23 St",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "23 St",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "116 St-Columbia University",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 116 St-Columbia University to Destination",
+     "leg_index": 4,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.733,
+      "lon": -74.0629,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "start_time": "2026-10-19T08:32:19-04:00",
+     "end_time": "2026-10-19T09:05:30-04:00",
+     "realtime": false,
+     "distance_meters": 2405.6,
+     "geometry": "etrwFdl`cMBS@QHmA@_@BY@_@BW?[?EDs@@M@[BY@OBa@F{@NiCNi@Vg@\\g@b@k@HK|@oArC{DHMJMnA_BlBiCFCJGFGHGh@s@dCeD@CAOj@OHAVIjA[dBcBTU\\]fAiANOPS~BgCDEZ]Z_@RSJOTUh@m@DGPQhAmAb@g@^a@BAX[DGFGTWzAgBFGHINQX]FGHODGBGRg@FQFMh@qAXq@FO`AaCFOFOz@yBf@kAb@cAHWLYjAsCh@sAHSJWHQFOjCsG@EL@@CDEn@J@@DOBMBAXBJBVgABBBA",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "YEL",
+     "route_id": "PATH:YEL",
+     "agency": "PATH",
+     "headsign": "Journal Square - 33rd Street",
+     "trip_id": "PATH:1546103-26B-AllLines-Weekday-02",
+     "origin": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "destination": {
+      "name": "23rd Street",
+      "lat": 40.74286,
+      "lon": -73.992792,
+      "stop_id": "PATH:781738",
+      "station_id": "PATH:781738"
+     },
+     "start_time": "2026-10-19T09:05:30-04:00",
+     "end_time": "2026-10-19T09:21:12-04:00",
+     "realtime": false,
+     "distance_meters": 6233.0,
+     "geometry": "m_pwFnl|bM|@{Df@eBrAoEfAwEFWBI@a@@aCM{AMiAwBSkCSkCScDc@sCm@eF_@}Fw@gBi@cBUoD{@oBuAyAo@gAWmA@gCT{@Ni@Dy@@q@EmAUkC]kAmAgA_A{@qAs@{AWcBAaA`A}_@xA{bBd@oKHiB@WASCKEEICk@O{Ci@mBYKGMMEKEOEg@WqDY{Co@gHk@sF[sEg@oHSwCGSESIUIKIGsEkCiBkA_C_BuCmBaDwBqAy@cBmAcC{AeBgAmA{@uBoAwBwAkCeBoA}@",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "23rd Street",
+      "lat": 40.74286,
+      "lon": -73.992792,
+      "stop_id": "PATH:781738",
+      "station_id": "PATH:781738"
+     },
+     "destination": {
+      "name": "23 St",
+      "lat": 40.744081,
+      "lon": -73.995657,
+      "stop_id": "MTASBWY:130N",
+      "station_id": "MTASBWY:130"
+     },
+     "start_time": "2026-10-19T09:21:12-04:00",
+     "end_time": "2026-10-19T09:29:19-04:00",
+     "realtime": false,
+     "distance_meters": 294.2,
+     "geometry": "{qtwF~urbMADLHIXCAqEvNELIVOI??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "1",
+     "route_id": "MTASBWY:1",
+     "agency": "MTA New York City Transit",
+     "headsign": "Van Cortlandt Park-242 St",
+     "trip_id": "MTASBWY:L0S3-1-1094-S01_055900_1..N15R",
+     "origin": {
+      "name": "23 St",
+      "lat": 40.744081,
+      "lon": -73.995657,
+      "stop_id": "MTASBWY:130N",
+      "station_id": "MTASBWY:130"
+     },
+     "destination": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "start_time": "2026-10-19T09:32:00-04:00",
+     "end_time": "2026-10-19T09:51:30-04:00",
+     "realtime": false,
+     "distance_meters": 7725.0,
+     "geometry": "oytwFzgsbMqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.8076,
+      "lon": -73.9645,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:51:30-04:00",
+     "end_time": "2026-10-19T09:55:09-04:00",
+     "realtime": false,
+     "distance_meters": 83.0,
+     "geometry": "ggaxFvbmbMFS`An@ELEJCLGPUO",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "62fe95aa0ccd2523",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:35:19-04:00",
+   "arrival": "2026-10-19T09:58:39-04:00",
+   "duration_seconds": 5000,
+   "transfers": 1,
+   "walk_meters": 2555.8,
+   "walk_seconds": 2503,
+   "accessibility_status": "violates",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Grove Street",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Grove Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "World Trade Center",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from World Trade Center to WTC Cortlandt",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "WTC Cortlandt",
+     "leg_index": 3,
+     "status": "meets",
+     "description": "7 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL736",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich Street (near southwest corner of Greenwich Street and Vesey Street) to downtown 1 platform and access to uptown 1 service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL713",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to downtown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL712",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to uptown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL14X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich St to Oculus Balcony with access to uptown 1 and downtown R/W service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL13X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Oculus main level  to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL12X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL11X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to West Concourse with access to 1 service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "116 St-Columbia University",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 116 St-Columbia University to Destination",
+     "leg_index": 4,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.733,
+      "lon": -74.0629,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "start_time": "2026-10-19T08:35:19-04:00",
+     "end_time": "2026-10-19T09:08:30-04:00",
+     "realtime": false,
+     "distance_meters": 2405.6,
+     "geometry": "etrwFdl`cMBS@QHmA@_@BY@_@BW?[?EDs@@M@[BY@OBa@F{@NiCNi@Vg@\\g@b@k@HK|@oArC{DHMJMnA_BlBiCFCJGFGHGh@s@dCeD@CAOj@OHAVIjA[dBcBTU\\]fAiANOPS~BgCDEZ]Z_@RSJOTUh@m@DGPQhAmAb@g@^a@BAX[DGFGTWzAgBFGHINQX]FGHODGBGRg@FQFMh@qAXq@FO`AaCFOFOz@yBf@kAb@cAHWLYjAsCh@sAHSJWHQFOjCsG@EL@@CDEn@J@@DOBMBAXBJBVgABBBA",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "RED",
+     "route_id": "PATH:RED",
+     "agency": "PATH",
+     "headsign": "Newark - World Trade Center",
+     "trip_id": "PATH:1546249-26B-AllLines-Weekday-02",
+     "origin": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "destination": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "start_time": "2026-10-19T09:08:30-04:00",
+     "end_time": "2026-10-19T09:16:00-04:00",
+     "realtime": false,
+     "distance_meters": 2659.0,
+     "geometry": "m_pwFnl|bM|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "destination": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "start_time": "2026-10-19T09:16:00-04:00",
+     "end_time": "2026-10-19T09:20:53-04:00",
+     "realtime": false,
+     "distance_meters": 67.2,
+     "geometry": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "1",
+     "route_id": "MTASBWY:1",
+     "agency": "MTA New York City Transit",
+     "headsign": "Van Cortlandt Park-242 St",
+     "trip_id": "MTASBWY:L0S3-1-1094-S01_056250_1..N15R",
+     "origin": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "destination": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "start_time": "2026-10-19T09:25:30-04:00",
+     "end_time": "2026-10-19T09:55:00-04:00",
+     "realtime": false,
+     "distance_meters": 11632.0,
+     "geometry": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.8076,
+      "lon": -73.9645,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:55:00-04:00",
+     "end_time": "2026-10-19T09:58:39-04:00",
+     "realtime": false,
+     "distance_meters": 83.0,
+     "geometry": "ggaxFvbmbMFS`An@ELEJCLGPUO",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "04b520315a1df3de",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:40:19-04:00",
+   "arrival": "2026-10-19T10:02:09-04:00",
+   "duration_seconds": 4910,
+   "transfers": 1,
+   "walk_meters": 2555.8,
+   "walk_seconds": 2503,
+   "accessibility_status": "violates",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Grove Street",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Grove Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "World Trade Center",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from World Trade Center to WTC Cortlandt",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "WTC Cortlandt",
+     "leg_index": 3,
+     "status": "meets",
+     "description": "7 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL736",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich Street (near southwest corner of Greenwich Street and Vesey Street) to downtown 1 platform and access to uptown 1 service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL713",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to downtown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL712",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine at Oculus main level to uptown 1 platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL14X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Greenwich St to Oculus Balcony with access to uptown 1 and downtown R/W service",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL13X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Oculus main level  to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL12X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to PATH level with access to 1 train service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL11X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "West Concourse balcony to West Concourse with access to 1 service in both directions",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "116 St-Columbia University",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 116 St-Columbia University to Destination",
+     "leg_index": 4,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.733,
+      "lon": -74.0629,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "start_time": "2026-10-19T08:40:19-04:00",
+     "end_time": "2026-10-19T09:13:30-04:00",
+     "realtime": false,
+     "distance_meters": 2405.6,
+     "geometry": "etrwFdl`cMBS@QHmA@_@BY@_@BW?[?EDs@@M@[BY@OBa@F{@NiCNi@Vg@\\g@b@k@HK|@oArC{DHMJMnA_BlBiCFCJGFGHGh@s@dCeD@CAOj@OHAVIjA[dBcBTU\\]fAiANOPS~BgCDEZ]Z_@RSJOTUh@m@DGPQhAmAb@g@^a@BAX[DGFGTWzAgBFGHINQX]FGHODGBGRg@FQFMh@qAXq@FO`AaCFOFOz@yBf@kAb@cAHWLYjAsCh@sAHSJWHQFOjCsG@EL@@CDEn@J@@DOBMBAXBJBVgABBBA",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "RED",
+     "route_id": "PATH:RED",
+     "agency": "PATH",
+     "headsign": "Newark - World Trade Center",
+     "trip_id": "PATH:1546250-26B-AllLines-Weekday-02",
+     "origin": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "destination": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "start_time": "2026-10-19T09:13:30-04:00",
+     "end_time": "2026-10-19T09:21:00-04:00",
+     "realtime": false,
+     "distance_meters": 2659.0,
+     "geometry": "m_pwFnl|bM|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "World Trade Center",
+      "lat": 40.71224,
+      "lon": -74.012522,
+      "stop_id": "PATH:781750",
+      "station_id": "PATH:781750"
+     },
+     "destination": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "start_time": "2026-10-19T09:21:00-04:00",
+     "end_time": "2026-10-19T09:25:53-04:00",
+     "realtime": false,
+     "distance_meters": 67.2,
+     "geometry": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "1",
+     "route_id": "MTASBWY:1",
+     "agency": "MTA New York City Transit",
+     "headsign": "Dyckman St",
+     "trip_id": "MTASBWY:L0S3-1-1094-S01_056600_1..N20R",
+     "origin": {
+      "name": "WTC Cortlandt",
+      "lat": 40.711835,
+      "lon": -74.012188,
+      "stop_id": "MTASBWY:138N",
+      "station_id": "MTASBWY:138"
+     },
+     "destination": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "start_time": "2026-10-19T09:29:00-04:00",
+     "end_time": "2026-10-19T09:58:30-04:00",
+     "realtime": false,
+     "distance_meters": 11632.0,
+     "geometry": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.8076,
+      "lon": -73.9645,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:58:30-04:00",
+     "end_time": "2026-10-19T10:02:09-04:00",
+     "realtime": false,
+     "distance_meters": 83.0,
+     "geometry": "ggaxFvbmbMFS`An@ELEJCLGPUO",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "a754f09b38e0c9e2",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:47:19-04:00",
+   "arrival": "2026-10-19T10:10:09-04:00",
+   "duration_seconds": 4970,
+   "transfers": 1,
+   "walk_meters": 2782.8,
+   "walk_seconds": 2697,
+   "accessibility_status": "violates",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Grove Street",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Grove Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "23rd Street",
+     "leg_index": 1,
+     "status": "unknown",
+     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "source": "none",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 23rd Street to 23 St",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "23 St",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "116 St-Columbia University",
+     "leg_index": 3,
+     "status": "violates",
+     "description": "MTA lists no elevator at this station.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": []
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 116 St-Columbia University to Destination",
+     "leg_index": 4,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.733,
+      "lon": -74.0629,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "start_time": "2026-10-19T08:47:19-04:00",
+     "end_time": "2026-10-19T09:20:30-04:00",
+     "realtime": false,
+     "distance_meters": 2405.6,
+     "geometry": "etrwFdl`cMBS@QHmA@_@BY@_@BW?[?EDs@@M@[BY@OBa@F{@NiCNi@Vg@\\g@b@k@HK|@oArC{DHMJMnA_BlBiCFCJGFGHGh@s@dCeD@CAOj@OHAVIjA[dBcBTU\\]fAiANOPS~BgCDEZ]Z_@RSJOTUh@m@DGPQhAmAb@g@^a@BAX[DGFGTWzAgBFGHINQX]FGHODGBGRg@FQFMh@qAXq@FO`AaCFOFOz@yBf@kAb@cAHWLYjAsCh@sAHSJWHQFOjCsG@EL@@CDEn@J@@DOBMBAXBJBVgABBBA",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "YEL",
+     "route_id": "PATH:YEL",
+     "agency": "PATH",
+     "headsign": "Journal Square - 33rd Street",
+     "trip_id": "PATH:1546106-26B-AllLines-Weekday-02",
+     "origin": {
+      "name": "Grove Street",
+      "lat": 40.719264,
+      "lon": -74.04257,
+      "stop_id": "PATH:781726",
+      "station_id": "PATH:781726"
+     },
+     "destination": {
+      "name": "23rd Street",
+      "lat": 40.74286,
+      "lon": -73.992792,
+      "stop_id": "PATH:781738",
+      "station_id": "PATH:781738"
+     },
+     "start_time": "2026-10-19T09:20:30-04:00",
+     "end_time": "2026-10-19T09:36:12-04:00",
+     "realtime": false,
+     "distance_meters": 6233.0,
+     "geometry": "m_pwFnl|bM|@{Df@eBrAoEfAwEFWBI@a@@aCM{AMiAwBSkCSkCScDc@sCm@eF_@}Fw@gBi@cBUoD{@oBuAyAo@gAWmA@gCT{@Ni@Dy@@q@EmAUkC]kAmAgA_A{@qAs@{AWcBAaA`A}_@xA{bBd@oKHiB@WASCKEEICk@O{Ci@mBYKGMMEKEOEg@WqDY{Co@gHk@sF[sEg@oHSwCGSESIUIKIGsEkCiBkA_C_BuCmBaDwBqAy@cBmAcC{AeBgAmA{@uBoAwBwAkCeBoA}@",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "23rd Street",
+      "lat": 40.74286,
+      "lon": -73.992792,
+      "stop_id": "PATH:781738",
+      "station_id": "PATH:781738"
+     },
+     "destination": {
+      "name": "23 St",
+      "lat": 40.744081,
+      "lon": -73.995657,
+      "stop_id": "MTASBWY:130N",
+      "station_id": "MTASBWY:130"
+     },
+     "start_time": "2026-10-19T09:36:12-04:00",
+     "end_time": "2026-10-19T09:44:19-04:00",
+     "realtime": false,
+     "distance_meters": 294.2,
+     "geometry": "{qtwF~urbMADLHIXCAqEvNELIVOI??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "1",
+     "route_id": "MTASBWY:1",
+     "agency": "MTA New York City Transit",
+     "headsign": "Van Cortlandt Park-242 St",
+     "trip_id": "MTASBWY:L0S3-1-1094-S01_057400_1..N15R",
+     "origin": {
+      "name": "23 St",
+      "lat": 40.744081,
+      "lon": -73.995657,
+      "stop_id": "MTASBWY:130N",
+      "station_id": "MTASBWY:130"
+     },
+     "destination": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "start_time": "2026-10-19T09:47:00-04:00",
+     "end_time": "2026-10-19T10:06:30-04:00",
+     "realtime": false,
+     "distance_meters": 7725.0,
+     "geometry": "oytwFzgsbMqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "116 St-Columbia University",
+      "lat": 40.807722,
+      "lon": -73.96411,
+      "stop_id": "MTASBWY:117N",
+      "station_id": "MTASBWY:117"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.8076,
+      "lon": -73.9645,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T10:06:30-04:00",
+     "end_time": "2026-10-19T10:10:09-04:00",
+     "realtime": false,
+     "distance_meters": 83.0,
+     "geometry": "ggaxFvbmbMFS`An@ELEJCLGPUO",
+     "street_features": []
+    }
+   ]
+  }
+ ],
+ "notices": [
+  {
+   "code": "NO_CONFIRMED_ACCESSIBLE_ROUTE",
+   "message": "No route could be confirmed to meet your access needs. Alternatives are listed for review with each known barrier and unconfirmed step."
+  }
+ ],
+ "data_freshness": [
+  {
+   "source": "mta_elevators",
+   "freshness": "fresh",
+   "as_of": "2026-10-18T17:42:17.325905Z"
+  }
+ ],
+ "investigation": {
+  "id": "10795082d1a65efe0a4f2526",
+  "status": "completed",
+  "poll_after_ms": 0
+ }
+}

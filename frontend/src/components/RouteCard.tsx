@@ -1,4 +1,4 @@
-import { clock, duration } from "@/lib/format";
+import { clock, distance, duration } from "@/lib/format";
 import { findingCounts, transferPlaces, transitLegs } from "@/lib/route";
 import type { Route } from "@/lib/types";
 
@@ -84,7 +84,7 @@ export function RouteCard({ route, selected, onSelect, savesSeconds, compact = f
             : changes.length === 1
               ? `change at ${changes[0]}`
               : `${changes.length} transfers`}
-          {route.walk_meters >= 400 && ` · ${(route.walk_meters / 1000).toFixed(1)} km walk`}
+          {route.walk_meters >= 400 && ` · ${distance(route.walk_meters)} walk`}
         </span>
       </span>
 

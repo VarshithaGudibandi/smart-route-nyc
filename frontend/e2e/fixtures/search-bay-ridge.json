@@ -1,0 +1,1045 @@
+{
+ "search_id": "c1008ed5781748ec8cb237572ddc232a",
+ "graph_version": "438a778a4522151b",
+ "routes": [
+  {
+   "route_id": "83baecd0922a39de",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:34:14-04:00",
+   "arrival": "2026-10-19T09:31:40-04:00",
+   "duration_seconds": 3446,
+   "transfers": 0,
+   "walk_meters": 81.1,
+   "walk_seconds": 356,
+   "accessibility_status": "meets",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Bay Ridge-95 St",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Bay Ridge-95 St",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "2 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL381",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Mezzanine to platform for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL380",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Street (NW corner of 95 St & 4 Av) to mezzanine for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "34 St-Herald Sq",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "6 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL200X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 32 St (NW corner) to mezzanine for PATH service and access to subway service via stairs or non-ADA ramp",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL213",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 34 St entrance (SW corner) to mezzanine for service in both directions on all lines",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL212",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL211",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL210",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL209",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 34 St-Herald Sq to Destination",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.6168,
+      "lon": -74.0308,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "start_time": "2026-10-19T08:34:14-04:00",
+     "end_time": "2026-10-19T08:37:00-04:00",
+     "realtime": false,
+     "distance_meters": 20.8,
+     "geometry": "_~{vFpczbMFBLBHBB@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "R",
+     "route_id": "MTASBWY:R",
+     "agency": "MTA New York City Transit",
+     "headsign": "Forest Hills-71 Av",
+     "trip_id": "MTASBWY:L0S3-R-1097-S01_051700_R..N93R",
+     "origin": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "destination": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "start_time": "2026-10-19T08:37:00-04:00",
+     "end_time": "2026-10-19T09:28:30-04:00",
+     "realtime": false,
+     "distance_meters": 18717.0,
+     "geometry": "{|{vF~czbM{d@oNck@aQs_@iLeHwBKEICIEIEIEIEIEIEGGIEGGGGIGEGIGmHyH}OsPcVaWeWeX}[a]{HiIy_@aa@k^s_@EGGEEEGGEEEEGEEEGEEEGEEEGEEEGEu]sXy]uXKIIGKIIGIGKGIGIGIGIEIGIEIEIEIEwCgBuf@{YyDyBIEGCGEGCICGCGCGAIAGAGAIAG?G?GAyL`AI@I@I@IBGBIDGDGDGFGFGHEFGJEHEJeClIELELEJGJGJGJGHIHGFIHIFKDIDKDKDuFzBwD~AMDKFKFIHIJGHGLELELENCNCPAPARARSjOQtM?ZC\\AXEXEVGVGRKRIPMPMNMJOJQJSFOFMHMHMHKHKJKLILILINGLGPEPEPEPw@dEoHva@ETETETEVGTEVGVEVGXGVGXGXGXIXGXqVlcAkBdGKXMVMVMTOROROPQNQNSLSJSJUHUFUD_GbAeBVK@MBM@MBO@O@OBQ@QBQ@S@SBU@UBU@G@G?I@G@GBG@GBGBGBGBGDGBGDGFGDo@f@MHKHKFKFKBKBK@K@I?KAICICKEIGIGcAaACACCAACCCAACCACCCAACCACCCACCCAEEGEEEGCGEEEGC}RiLmDoBIIIGEIGICKCKCKAK?M@M?MBOBMDODQFQFQBODOBO@M?O@MAM?MCMCKCKEMGKGI_D_CAAAAAAAAAAAAA?AA?AAAAAAA?AAAAAAA?AAAAAAA?AAAAAA?AA?AAAA?AAAAoB}AqCwB?AA?AA??AAA?AA??AAA?A?AA??AAA?A?AA??A?AAA?AA??AAA?A??AA?AA??a`@}ZqAeAmZgVod@w^_F{DGGGEGEGEICGEGCGEICGAICGAGCIAIAwU}CsIgAGAGAIAGAIAGAIAIAGAICIAIAIAIAICkIuAIAICIAIAIAIAIAIAIAIAIAIAIAG?IAyCUkG]KAIAK?IAKAI?IAIAI?IAIAGAIAG?IAaLmAmXuC",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.7496,
+      "lon": -73.9877,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:28:30-04:00",
+     "end_time": "2026-10-19T09:31:40-04:00",
+     "realtime": false,
+     "distance_meters": 60.3,
+     "geometry": "w{uwFtwqbM@EA?]UDM@E@EDMDK@@@@@@?@?BA?CP",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "115c6af4aa10b368",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:41:44-04:00",
+   "arrival": "2026-10-19T09:38:40-04:00",
+   "duration_seconds": 3416,
+   "transfers": 0,
+   "walk_meters": 81.1,
+   "walk_seconds": 356,
+   "accessibility_status": "meets",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Bay Ridge-95 St",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Bay Ridge-95 St",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "2 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL381",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Mezzanine to platform for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL380",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Street (NW corner of 95 St & 4 Av) to mezzanine for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "34 St-Herald Sq",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "6 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL200X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 32 St (NW corner) to mezzanine for PATH service and access to subway service via stairs or non-ADA ramp",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL213",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 34 St entrance (SW corner) to mezzanine for service in both directions on all lines",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL212",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL211",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL210",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL209",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 34 St-Herald Sq to Destination",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.6168,
+      "lon": -74.0308,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "start_time": "2026-10-19T08:41:44-04:00",
+     "end_time": "2026-10-19T08:44:30-04:00",
+     "realtime": false,
+     "distance_meters": 20.8,
+     "geometry": "_~{vFpczbMFBLBHBB@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "R",
+     "route_id": "MTASBWY:R",
+     "agency": "MTA New York City Transit",
+     "headsign": "Forest Hills-71 Av",
+     "trip_id": "MTASBWY:L0S3-R-1097-S01_052450_R..N93R",
+     "origin": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "destination": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "start_time": "2026-10-19T08:44:30-04:00",
+     "end_time": "2026-10-19T09:35:30-04:00",
+     "realtime": false,
+     "distance_meters": 18717.0,
+     "geometry": "{|{vF~czbM{d@oNck@aQs_@iLeHwBKEICIEIEIEIEIEIEGGIEGGGGIGEGIGmHyH}OsPcVaWeWeX}[a]{HiIy_@aa@k^s_@EGGEEEGGEEEEGEEEGEEEGEEEGEEEGEu]sXy]uXKIIGKIIGIGKGIGIGIGIEIGIEIEIEIEwCgBuf@{YyDyBIEGCGEGCICGCGCGAIAGAGAIAG?G?GAyL`AI@I@I@IBGBIDGDGDGFGFGHEFGJEHEJeClIELELEJGJGJGJGHIHGFIHIFKDIDKDKDuFzBwD~AMDKFKFIHIJGHGLELELENCNCPAPARARSjOQtM?ZC\\AXEXEVGVGRKRIPMPMNMJOJQJSFOFMHMHMHKHKJKLILILINGLGPEPEPEPw@dEoHva@ETETETEVGTEVGVEVGXGVGXGXGXIXGXqVlcAkBdGKXMVMVMTOROROPQNQNSLSJSJUHUFUD_GbAeBVK@MBM@MBO@O@OBQ@QBQ@S@SBU@UBU@G@G?I@G@GBG@GBGBGBGBGDGBGDGFGDo@f@MHKHKFKFKBKBK@K@I?KAICICKEIGIGcAaACACCAACCCAACCACCCAACCACCCACCCAEEGEEEGCGEEEGC}RiLmDoBIIIGEIGICKCKCKAK?M@M?MBOBMDODQFQFQBODOBO@M?O@MAM?MCMCKCKEMGKGI_D_CAAAAAAAAAAAAA?AA?AAAAAAA?AAAAAAA?AAAAAAA?AAAAAA?AA?AAAA?AAAAoB}AqCwB?AA?AA??AAA?AA??AAA?A?AA??AAA?A?AA??A?AAA?AA??AAA?A??AA?AA??a`@}ZqAeAmZgVod@w^_F{DGGGEGEGEICGEGCGEICGAICGAGCIAIAwU}CsIgAGAGAIAGAIAGAIAIAGAICIAIAIAIAICkIuAIAICIAIAIAIAIAIAIAIAIAIAIAG?IAyCUkG]KAIAK?IAKAI?IAIAI?IAIAGAIAG?IAaLmAmXuC",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.7496,
+      "lon": -73.9877,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:35:30-04:00",
+     "end_time": "2026-10-19T09:38:40-04:00",
+     "realtime": false,
+     "distance_meters": 60.3,
+     "geometry": "w{uwFtwqbM@EA?]UDM@E@EDMDK@@@@@@?@?BA?CP",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "15089b7797977edc",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:49:14-04:00",
+   "arrival": "2026-10-19T09:45:40-04:00",
+   "duration_seconds": 3386,
+   "transfers": 0,
+   "walk_meters": 81.1,
+   "walk_seconds": 356,
+   "accessibility_status": "meets",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Bay Ridge-95 St",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Bay Ridge-95 St",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "2 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL381",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Mezzanine to platform for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL380",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Street (NW corner of 95 St & 4 Av) to mezzanine for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "34 St-Herald Sq",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "6 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL200X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 32 St (NW corner) to mezzanine for PATH service and access to subway service via stairs or non-ADA ramp",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL213",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 34 St entrance (SW corner) to mezzanine for service in both directions on all lines",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL212",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL211",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL210",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL209",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 34 St-Herald Sq to Destination",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.6168,
+      "lon": -74.0308,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "start_time": "2026-10-19T08:49:14-04:00",
+     "end_time": "2026-10-19T08:52:00-04:00",
+     "realtime": false,
+     "distance_meters": 20.8,
+     "geometry": "_~{vFpczbMFBLBHBB@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "R",
+     "route_id": "MTASBWY:R",
+     "agency": "MTA New York City Transit",
+     "headsign": "Forest Hills-71 Av",
+     "trip_id": "MTASBWY:L0S3-R-1097-S01_053200_R..N93R",
+     "origin": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "destination": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "start_time": "2026-10-19T08:52:00-04:00",
+     "end_time": "2026-10-19T09:42:30-04:00",
+     "realtime": false,
+     "distance_meters": 18717.0,
+     "geometry": "{|{vF~czbM{d@oNck@aQs_@iLeHwBKEICIEIEIEIEIEIEGGIEGGGGIGEGIGmHyH}OsPcVaWeWeX}[a]{HiIy_@aa@k^s_@EGGEEEGGEEEEGEEEGEEEGEEEGEEEGEu]sXy]uXKIIGKIIGIGKGIGIGIGIEIGIEIEIEIEwCgBuf@{YyDyBIEGCGEGCICGCGCGAIAGAGAIAG?G?GAyL`AI@I@I@IBGBIDGDGDGFGFGHEFGJEHEJeClIELELEJGJGJGJGHIHGFIHIFKDIDKDKDuFzBwD~AMDKFKFIHIJGHGLELELENCNCPAPARARSjOQtM?ZC\\AXEXEVGVGRKRIPMPMNMJOJQJSFOFMHMHMHKHKJKLILILINGLGPEPEPEPw@dEoHva@ETETETEVGTEVGVEVGXGVGXGXGXIXGXqVlcAkBdGKXMVMVMTOROROPQNQNSLSJSJUHUFUD_GbAeBVK@MBM@MBO@O@OBQ@QBQ@S@SBU@UBU@G@G?I@G@GBG@GBGBGBGBGDGBGDGFGDo@f@MHKHKFKFKBKBK@K@I?KAICICKEIGIGcAaACACCAACCCAACCACCCAACCACCCACCCAEEGEEEGCGEEEGC}RiLmDoBIIIGEIGICKCKCKAK?M@M?MBOBMDODQFQFQBODOBO@M?O@MAM?MCMCKCKEMGKGI_D_CAAAAAAAAAAAAA?AA?AAAAAAA?AAAAAAA?AAAAAAA?AAAAAA?AA?AAAA?AAAAoB}AqCwB?AA?AA??AAA?AA??AAA?A?AA??AAA?A?AA??A?AAA?AA??AAA?A??AA?AA??a`@}ZqAeAmZgVod@w^_F{DGGGEGEGEICGEGCGEICGAICGAGCIAIAwU}CsIgAGAGAIAGAIAGAIAIAGAICIAIAIAIAICkIuAIAICIAIAIAIAIAIAIAIAIAIAIAG?IAyCUkG]KAIAK?IAKAI?IAIAI?IAIAGAIAG?IAaLmAmXuC",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.7496,
+      "lon": -73.9877,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:42:30-04:00",
+     "end_time": "2026-10-19T09:45:40-04:00",
+     "realtime": false,
+     "distance_meters": 60.3,
+     "geometry": "w{uwFtwqbM@EA?]UDM@E@EDMDK@@@@@@?@?BA?CP",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "da85297b481c46ad",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T08:57:14-04:00",
+   "arrival": "2026-10-19T09:54:10-04:00",
+   "duration_seconds": 3416,
+   "transfers": 0,
+   "walk_meters": 81.1,
+   "walk_seconds": 356,
+   "accessibility_status": "meets",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Bay Ridge-95 St",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Bay Ridge-95 St",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "2 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL381",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Mezzanine to platform for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL380",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Street (NW corner of 95 St & 4 Av) to mezzanine for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "34 St-Herald Sq",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "6 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL200X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 32 St (NW corner) to mezzanine for PATH service and access to subway service via stairs or non-ADA ramp",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL213",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 34 St entrance (SW corner) to mezzanine for service in both directions on all lines",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL212",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL211",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL210",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL209",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 34 St-Herald Sq to Destination",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.6168,
+      "lon": -74.0308,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "start_time": "2026-10-19T08:57:14-04:00",
+     "end_time": "2026-10-19T09:00:00-04:00",
+     "realtime": false,
+     "distance_meters": 20.8,
+     "geometry": "_~{vFpczbMFBLBHBB@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "R",
+     "route_id": "MTASBWY:R",
+     "agency": "MTA New York City Transit",
+     "headsign": "Forest Hills-71 Av",
+     "trip_id": "MTASBWY:L0S3-R-1097-S01_054000_R..N93R",
+     "origin": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "destination": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "start_time": "2026-10-19T09:00:00-04:00",
+     "end_time": "2026-10-19T09:51:00-04:00",
+     "realtime": false,
+     "distance_meters": 18717.0,
+     "geometry": "{|{vF~czbM{d@oNck@aQs_@iLeHwBKEICIEIEIEIEIEIEGGIEGGGGIGEGIGmHyH}OsPcVaWeWeX}[a]{HiIy_@aa@k^s_@EGGEEEGGEEEEGEEEGEEEGEEEGEEEGEu]sXy]uXKIIGKIIGIGKGIGIGIGIEIGIEIEIEIEwCgBuf@{YyDyBIEGCGEGCICGCGCGAIAGAGAIAG?G?GAyL`AI@I@I@IBGBIDGDGDGFGFGHEFGJEHEJeClIELELEJGJGJGJGHIHGFIHIFKDIDKDKDuFzBwD~AMDKFKFIHIJGHGLELELENCNCPAPARARSjOQtM?ZC\\AXEXEVGVGRKRIPMPMNMJOJQJSFOFMHMHMHKHKJKLILILINGLGPEPEPEPw@dEoHva@ETETETEVGTEVGVEVGXGVGXGXGXIXGXqVlcAkBdGKXMVMVMTOROROPQNQNSLSJSJUHUFUD_GbAeBVK@MBM@MBO@O@OBQ@QBQ@S@SBU@UBU@G@G?I@G@GBG@GBGBGBGBGDGBGDGFGDo@f@MHKHKFKFKBKBK@K@I?KAICICKEIGIGcAaACACCAACCCAACCACCCAACCACCCACCCAEEGEEEGCGEEEGC}RiLmDoBIIIGEIGICKCKCKAK?M@M?MBOBMDODQFQFQBODOBO@M?O@MAM?MCMCKCKEMGKGI_D_CAAAAAAAAAAAAA?AA?AAAAAAA?AAAAAAA?AAAAAAA?AAAAAA?AA?AAAA?AAAAoB}AqCwB?AA?AA??AAA?AA??AAA?A?AA??AAA?A?AA??A?AAA?AA??AAA?A??AA?AA??a`@}ZqAeAmZgVod@w^_F{DGGGEGEGEICGEGCGEICGAICGAGCIAIAwU}CsIgAGAGAIAGAIAGAIAIAGAICIAIAIAIAICkIuAIAICIAIAIAIAIAIAIAIAIAIAIAG?IAyCUkG]KAIAK?IAKAI?IAIAI?IAIAGAIAG?IAaLmAmXuC",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.7496,
+      "lon": -73.9877,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:51:00-04:00",
+     "end_time": "2026-10-19T09:54:10-04:00",
+     "realtime": false,
+     "distance_meters": 60.3,
+     "geometry": "w{uwFtwqbM@EA?]UDM@E@EDMDK@@@@@@?@?BA?CP",
+     "street_features": []
+    }
+   ]
+  },
+  {
+   "route_id": "7fb16fe349d006d2",
+   "origin_type": "otp_baseline",
+   "departure": "2026-10-19T09:04:14-04:00",
+   "arrival": "2026-10-19T10:00:40-04:00",
+   "duration_seconds": 3386,
+   "transfers": 0,
+   "walk_meters": 81.1,
+   "walk_seconds": 356,
+   "accessibility_status": "meets",
+   "accessibility_findings": [
+    {
+     "kind": "street",
+     "location": "Walk from Origin to Bay Ridge-95 St",
+     "leg_index": 0,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    },
+    {
+     "kind": "station",
+     "location": "Bay Ridge-95 St",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "2 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL381",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Mezzanine to platform for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL380",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "Street (NW corner of 95 St & 4 Av) to mezzanine for Manhattan-bound R service.",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "station",
+     "location": "34 St-Herald Sq",
+     "leg_index": 1,
+     "status": "meets",
+     "description": "6 elevators in service.",
+     "source": "mta_elevators",
+     "data_as_of": "2026-10-18T17:42:17.325905Z",
+     "equipment": [
+      {
+       "equipment_id": "EL200X",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 32 St (NW corner) to mezzanine for PATH service and access to subway service via stairs or non-ADA ramp",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL213",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "6th Ave & 34 St entrance (SW corner) to mezzanine for service in both directions on all lines",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL212",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL211",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown N/Q/R/W platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL210",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to uptown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      },
+      {
+       "equipment_id": "EL209",
+       "type": "elevator",
+       "status": "in_service",
+       "serving": "mezzanine to downtown B/D/F/M platform",
+       "reason": null,
+       "estimated_return_at": null
+      }
+     ]
+    },
+    {
+     "kind": "street",
+     "location": "Walk from 34 St-Herald Sq to Destination",
+     "leg_index": 2,
+     "status": "meets",
+     "description": "No stairs found in OpenStreetMap along this walk.",
+     "source": "openstreetmap",
+     "data_as_of": null,
+     "equipment": []
+    }
+   ],
+   "legs": [
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "Origin",
+      "lat": 40.6168,
+      "lon": -74.0308,
+      "stop_id": null,
+      "station_id": null
+     },
+     "destination": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "start_time": "2026-10-19T09:04:14-04:00",
+     "end_time": "2026-10-19T09:07:00-04:00",
+     "realtime": false,
+     "distance_meters": 20.8,
+     "geometry": "_~{vFpczbMFBLBHBB@??",
+     "street_features": []
+    },
+    {
+     "mode": "SUBWAY",
+     "route": "R",
+     "route_id": "MTASBWY:R",
+     "agency": "MTA New York City Transit",
+     "headsign": "Forest Hills-71 Av",
+     "trip_id": "MTASBWY:L0S3-R-1097-S01_054700_R..N93R",
+     "origin": {
+      "name": "Bay Ridge-95 St",
+      "lat": 40.616622,
+      "lon": -74.030876,
+      "stop_id": "MTASBWY:R45N",
+      "station_id": "MTASBWY:R45"
+     },
+     "destination": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "start_time": "2026-10-19T09:07:00-04:00",
+     "end_time": "2026-10-19T09:57:30-04:00",
+     "realtime": false,
+     "distance_meters": 18717.0,
+     "geometry": "{|{vF~czbM{d@oNck@aQs_@iLeHwBKEICIEIEIEIEIEIEGGIEGGGGIGEGIGmHyH}OsPcVaWeWeX}[a]{HiIy_@aa@k^s_@EGGEEEGGEEEEGEEEGEEEGEEEGEEEGEu]sXy]uXKIIGKIIGIGKGIGIGIGIEIGIEIEIEIEwCgBuf@{YyDyBIEGCGEGCICGCGCGAIAGAGAIAG?G?GAyL`AI@I@I@IBGBIDGDGDGFGFGHEFGJEHEJeClIELELEJGJGJGJGHIHGFIHIFKDIDKDKDuFzBwD~AMDKFKFIHIJGHGLELELENCNCPAPARARSjOQtM?ZC\\AXEXEVGVGRKRIPMPMNMJOJQJSFOFMHMHMHKHKJKLILILINGLGPEPEPEPw@dEoHva@ETETETEVGTEVGVEVGXGVGXGXGXIXGXqVlcAkBdGKXMVMVMTOROROPQNQNSLSJSJUHUFUD_GbAeBVK@MBM@MBO@O@OBQ@QBQ@S@SBU@UBU@G@G?I@G@GBG@GBGBGBGBGDGBGDGFGDo@f@MHKHKFKFKBKBK@K@I?KAICICKEIGIGcAaACACCAACCCAACCACCCAACCACCCACCCAEEGEEEGCGEEEGC}RiLmDoBIIIGEIGICKCKCKAK?M@M?MBOBMDODQFQFQBODOBO@M?O@MAM?MCMCKCKEMGKGI_D_CAAAAAAAAAAAAA?AA?AAAAAAA?AAAAAAA?AAAAAAA?AAAAAA?AA?AAAA?AAAAoB}AqCwB?AA?AA??AAA?AA??AAA?A?AA??AAA?A?AA??A?AAA?AA??AAA?A??AA?AA??a`@}ZqAeAmZgVod@w^_F{DGGGEGEGEICGEGCGEICGAICGAGCIAIAwU}CsIgAGAGAIAGAIAGAIAIAGAICIAIAIAIAICkIuAIAICIAIAIAIAIAIAIAIAIAIAIAG?IAyCUkG]KAIAK?IAKAI?IAIAI?IAIAGAIAG?IAaLmAmXuC",
+     "street_features": []
+    },
+    {
+     "mode": "WALK",
+     "route": null,
+     "route_id": null,
+     "agency": null,
+     "headsign": null,
+     "trip_id": null,
+     "origin": {
+      "name": "34 St-Herald Sq",
+      "lat": 40.749567,
+      "lon": -73.98795,
+      "stop_id": "MTASBWY:R17N",
+      "station_id": "MTASBWY:R17"
+     },
+     "destination": {
+      "name": "Destination",
+      "lat": 40.7496,
+      "lon": -73.9877,
+      "stop_id": null,
+      "station_id": null
+     },
+     "start_time": "2026-10-19T09:57:30-04:00",
+     "end_time": "2026-10-19T10:00:40-04:00",
+     "realtime": false,
+     "distance_meters": 60.3,
+     "geometry": "w{uwFtwqbM@EA?]UDM@E@EDMDK@@@@@@?@?BA?CP",
+     "street_features": []
+    }
+   ]
+  }
+ ],
+ "review_only_routes": [],
+ "notices": [],
+ "data_freshness": [
+  {
+   "source": "mta_elevators",
+   "freshness": "fresh",
+   "as_of": "2026-10-18T17:42:17.325905Z"
+  }
+ ],
+ "investigation": {
+  "id": "321a52b73a08c2579a42c624",
+  "status": "completed",
+  "poll_after_ms": 0
+ }
+}

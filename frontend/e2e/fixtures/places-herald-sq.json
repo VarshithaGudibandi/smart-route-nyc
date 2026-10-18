@@ -1,0 +1,20 @@
+{
+ "results": [
+  {
+   "id": "MTASBWY:D17",
+   "name": "34 St-Herald Sq",
+   "detail": "Subway \u00b7 B C D E F M N Q R W",
+   "kind": "station",
+   "lat": 40.749643,
+   "lon": -73.987887,
+   "source": "transit"
+  }
+ ],
+ "notices": [
+  {
+   "code": "ADDRESS_SEARCH_UNAVAILABLE",
+   "message": "Address search is unavailable right now; stations still work."
+  }
+ ],
+ "attribution": null
+}

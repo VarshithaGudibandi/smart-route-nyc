@@ -1,0 +1,10 @@
+{
+ "id": "10795082d1a65efe0a4f2526",
+ "status": "completed",
+ "generator": "rules",
+ "applicable": false,
+ "reason": "No transfer stations were found on this subway segment.",
+ "suggestions": [],
+ "rejected": {},
+ "updated_at": "2026-10-18T17:42:54.283831Z"
+}
