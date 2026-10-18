@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     rate_limit_route_search_per_minute: int = Field(default=20, ge=1)
     rate_limit_interpret_per_minute: int = Field(default=10, ge=1)
     rate_limit_investigation_poll_per_minute: int = Field(default=120, ge=1)
+    rate_limit_feedback_per_minute: int = Field(default=5, ge=1)
+    rate_limit_explain_per_minute: int = Field(default=20, ge=1)
+
+    # How long a search's results can be explained or rated.
+    search_result_ttl_s: int = Field(default=900, ge=60)
+    explanation_cache_ttl_s: int = Field(default=3600, gt=0)
 
     # Transfer suggestions, investigated in the background after a search.
     suggestions_enabled: bool = True

@@ -139,6 +139,10 @@ class InvestigationRunner:
             updated_at=record.updated_at,
         )
 
+    async def suggestion_routes(self, investigation_id: str) -> list[Route]:
+        view = await self.view(investigation_id)
+        return [s.route for s in view.suggestions] if view else []
+
     async def cancel(self, investigation_id: str) -> bool:
         record = await self._read(investigation_id)
         if record is None:

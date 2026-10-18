@@ -42,6 +42,7 @@ async def search_routes(
             result.investigation = await resources.investigations.start(
                 outcome.cache_key, body, outcome.requested, baseline, result.graph_version
             )
+    await resources.search_results.save(result)
     return result
 
 

@@ -13,7 +13,9 @@ from app.core.config import Settings
 from app.core.errors import RateLimitedError
 from app.core.rate_limit import RateLimiter
 from app.integrations.otp.client import OtpClient
+from app.services.feedback import FeedbackStore
 from app.services.route_search import RouteSearchService
+from app.services.search_results import SearchResults
 from app.services.suggestions.jobs import InvestigationRunner
 
 
@@ -28,6 +30,8 @@ class Resources:
     rate_limiter: RateLimiter
     route_search: RouteSearchService
     preferences: PreferenceInterpreter
+    search_results: SearchResults
+    feedback: FeedbackStore
     # None when suggestions are disabled.
     investigations: InvestigationRunner | None = None
 

@@ -24,7 +24,9 @@ from app.core.resilience import CircuitBreaker
 from app.db.session import create_engine
 from app.integrations.otp.client import OtpClient
 from app.services.accessibility.snapshot import SnapshotProvider
+from app.services.feedback import FeedbackStore
 from app.services.route_search import RouteSearchService
+from app.services.search_results import SearchResults
 from app.services.suggestions.jobs import InvestigationRunner
 from app.services.suggestions.outcomes import OutcomeRecorder
 from app.services.suggestions.service import SuggestionService
@@ -101,6 +103,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             route_search=RouteSearchService(otp, redis, graph_version, accessibility, settings),
             preferences=PreferenceInterpreter(llm, redis, secret, settings.preference_cache_ttl_s),
             investigations=investigations,
+            search_results=SearchResults(
+                redis,
+                settings.search_result_ttl_s,
+                investigations.suggestion_routes if investigations else None,
+            ),
+            feedback=FeedbackStore(db_engine, secret),
         )
         app.state.resources = resources
         logger.info("startup", env=settings.app_env)
