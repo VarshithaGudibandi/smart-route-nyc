@@ -107,3 +107,34 @@ class DownloadTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReuseTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dest = Path(tempfile.mkdtemp()) / "extract.pbf"
+        self.dest.write_bytes(BODY)
+        self.result = fetch_inputs.SourceResult(file="extract.pbf", url="u", ok=False)
+        self.local = fetch_inputs.md5_of(self.dest)
+
+    def reusable(self, published: object) -> bool:
+        with mock.patch.object(fetch_inputs, "published_md5", side_effect=[published]):
+            return fetch_inputs.reusable(self.dest, "extract.pbf", "u", self.result)
+
+    def test_reuses_a_file_matching_the_published_checksum(self) -> None:
+        self.assertTrue(self.reusable(self.local))
+
+    def test_downloads_again_when_the_provider_published_a_new_file(self) -> None:
+        self.assertFalse(self.reusable("0" * 32))
+
+    def test_unreachable_checksums_reuse_only_a_previously_verified_copy(self) -> None:
+        unreachable = urllib.error.URLError("timed out")
+        self.assertFalse(self.reusable(unreachable))
+
+        self.dest.with_name("extract.pbf.verified-md5").write_text(self.local + "\n")
+        self.assertTrue(self.reusable(unreachable))
+        self.assertIn("checksum list unreachable", self.result.warnings[0])
+
+    def test_a_changed_file_is_not_trusted_from_its_old_marker(self) -> None:
+        self.dest.with_name("extract.pbf.verified-md5").write_text(self.local + "\n")
+        self.dest.write_bytes(BODY[:-1])
+        self.assertFalse(self.reusable(urllib.error.URLError("timed out")))

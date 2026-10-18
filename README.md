@@ -79,7 +79,7 @@ cd smart-route-nyc
 
 Then open **http://localhost:3000**.
 
-The first run takes about 15 minutes. It downloads the current MTA and PATH timetables and the OpenStreetMap street network for NYC and Hudson County (about 220 MB), builds the routing graph, starts every service, and waits until live elevator status has loaded. Later runs reuse the graph and start in about a minute.
+The first run takes about 10 to 15 minutes (6½ minutes on a 4-CPU GitHub Actions machine). It downloads the current MTA and PATH timetables and the OpenStreetMap street network for NYC and Hudson County (about 220 MB), builds the routing graph, starts every service, and waits until live elevator status has loaded. Later runs reuse the graph and start in about a minute.
 
 | Command | What it does |
 |---|---|
@@ -105,7 +105,7 @@ All ports are bound to `127.0.0.1`, so nothing is reachable from other machines.
 |---|---|
 | "Docker has N GB of memory" | Give Docker at least 8 GB: Docker Desktop → Settings → Resources → Memory, then Apply & restart |
 | "Port 5432 (or 3000, 8000, 8080, 6379) is already in use" | Stop the program using it, often a local PostgreSQL, Redis or dev server. `lsof -i :5432` shows which |
-| A download fails | Each feed is retried with backoff first. If it still fails, check your connection and run `./start.sh` again; setup starts again from the downloads |
+| A download fails | Each download is retried for about ten minutes and resumes where it stopped; the street map mirror (BBBike) is volunteer-run and sometimes unreachable for a few minutes. If it still fails, run `./start.sh` again later: files already downloaded and verified are reused |
 | Graph build stops with `OutOfMemoryError` or exit code 137 | Docker ran out of memory. Raise its limit and run `./start.sh` again |
 | "The API did not become ready" | `docker compose logs --tail 50 otp backend` shows which service failed |
 | Behind a corporate proxy | Set `SMARTROUTE_DOCKER_ARGS="-e HTTPS_PROXY=http://proxy:port"` so the download step can reach the feeds |

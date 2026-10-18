@@ -43,11 +43,37 @@ jobs:
           df -h .
           docker version --format '{{.Server.Version}}'
 
+      # The street map comes from BBBike, a volunteer-run mirror that is
+      # sometimes unreachable for minutes. Reuse this week's copy instead of
+      # downloading 150 MB on every run; start.sh still checks it against the
+      # published checksum and downloads a newer extract when there is one.
+      - name: Week
+        id: week
+        run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+      - name: This week's street map
+        id: osm
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            data/otp/graph/nyc-region.osm.pbf
+            data/otp/graph/nyc-region.osm.pbf.verified-md5
+          key: osm-${{ steps.week.outputs.week }}
+
       - name: First run of ./start.sh
         run: |
           start=$SECONDS
           ./start.sh --with-dashboards
           echo "FIRST_RUN_S=$((SECONDS - start))" >> "$GITHUB_ENV"
+
+      # Saved as soon as it is verified, even if a later step fails.
+      - name: Keep the street map for this week's runs
+        if: steps.osm.outputs.cache-hit != 'true' && hashFiles('data/otp/graph/nyc-region.osm.pbf.verified-md5') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            data/otp/graph/nyc-region.osm.pbf
+            data/otp/graph/nyc-region.osm.pbf.verified-md5
+          key: osm-${{ steps.week.outputs.week }}
 
       - name: A PATH-to-subway trip routes on the fresh graph
         run: |

@@ -35,10 +35,15 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_FILE = REPO_ROOT / "otp" / "sources.json"
 CONFIG_DIR = REPO_ROOT / "otp" / "config"
 
-MAX_ATTEMPTS = 4
+# Failed attempts in a row before giving up. With the timeout and backoff
+# below, a download waits out a mirror that is unreachable for about ten
+# minutes, which BBBike sometimes is.
+MAX_ATTEMPTS = 10
 BACKOFF_BASE_S = 2.0
-BACKOFF_CAP_S = 30.0
-TIMEOUT_S = 120
+BACKOFF_CAP_S = 60.0
+# Per socket operation: connecting, or waiting for the next bytes. A stall
+# mid-download resumes from what was received.
+TIMEOUT_S = 30
 # Resumed attempts allowed per file, on top of MAX_ATTEMPTS failures in a row.
 MAX_RESUMES = 20
 PROGRESS_STEP_BYTES = 25 << 20
@@ -184,32 +189,70 @@ class ChecksumMismatchError(Exception):
     pass
 
 
-def verify_published_md5(path: Path, published_name: str, checksum_url: str) -> None:
-    """Compare ``path`` with the MD5 a provider lists for ``published_name``."""
-    with urllib.request.urlopen(checksum_url, timeout=TIMEOUT_S) as resp:
-        listing = resp.read().decode()
+def md5_of(path: Path) -> str:
+    digest = hashlib.md5(usedforsecurity=False)
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def published_md5(published_name: str, checksum_url: str, graph_dir: Path) -> str:
+    """The MD5 a provider lists for ``published_name``."""
+    listing_path = graph_dir / ".checksums.txt"
+    download(checksum_url, listing_path)
+    listing = listing_path.read_text()
+    listing_path.unlink()
     expected = next(
         (line.split()[0] for line in listing.splitlines() if line.endswith(published_name)), None
     )
     if expected is None:
         raise ChecksumMismatchError(f"{published_name} is not listed in {checksum_url}")
-    digest = hashlib.md5(usedforsecurity=False)
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            digest.update(chunk)
-    if digest.hexdigest() != expected:
-        raise ChecksumMismatchError(f"MD5 mismatch for {path.name}")
+    return expected
+
+
+def _verified_marker(dest: Path) -> Path:
+    # Written only after a file matched its published checksum.
+    return dest.with_name(dest.name + ".verified-md5")
+
+
+def reusable(dest: Path, published_name: str, checksum_url: str, result: SourceResult) -> bool:
+    """Whether a file from an earlier run can be kept instead of downloaded again.
+
+    It must match the provider's current checksum, or, when the checksum list
+    cannot be reached, the checksum it was verified against on an earlier
+    run, so an unreachable mirror does not block a rebuild from good data.
+    """
+    if not dest.exists():
+        return False
+    local = md5_of(dest)
+    try:
+        return local == published_md5(published_name, checksum_url, dest.parent)
+    except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException):
+        marker = _verified_marker(dest)
+        if marker.exists() and marker.read_text().strip() == local:
+            result.warnings.append(
+                "checksum list unreachable; reusing the copy verified on an earlier run"
+            )
+            return True
+        return False
 
 
 def fetch_source(entry: dict[str, str], graph_dir: Path) -> SourceResult:
     result = SourceResult(file=entry["file"], url=entry["url"], ok=False)
     dest = graph_dir / entry["file"]
-    print(f"Fetching {entry['file']}")
+    published_name = entry["url"].rsplit("/", 1)[-1]
     try:
-        download(entry["url"], dest)
-        if "md5_url" in entry:
-            published_name = entry["url"].rsplit("/", 1)[-1]
-            verify_published_md5(dest, published_name, entry["md5_url"])
+        if "md5_url" in entry and reusable(dest, published_name, entry["md5_url"], result):
+            print(f"Reusing {entry['file']} (checksum matches)")
+        else:
+            print(f"Fetching {entry['file']}")
+            download(entry["url"], dest)
+            if "md5_url" in entry:
+                expected = published_md5(published_name, entry["md5_url"], graph_dir)
+                if md5_of(dest) != expected:
+                    raise ChecksumMismatchError(f"MD5 mismatch for {dest.name}")
+                _verified_marker(dest).write_text(expected + "\n")
         result.sha256 = sha256_of(dest)
         result.size_bytes = dest.stat().st_size
         if dest.suffix == ".zip":
