@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.cache.redis import ResilientRedis
 from app.core.freshness import SourceKind
+from app.core.metrics import INGEST_DURATION, INGEST_LAST_SUCCESS, INGEST_RUNS
 from app.ingestion.http import FetchError
 from app.ingestion.runs import (
     RunContext,
@@ -53,21 +54,28 @@ async def run_job(
                 outcome = await job.run(ctx)
             except FetchError as exc:
                 await fail_run(sessions, ctx, job.source_key, job.kind, exc.code)
+                INGEST_RUNS.labels(job.source_key, "failed").inc()
                 log.warning("ingest_failed", error_code=exc.code, error=str(exc))
                 return False
             except Exception as exc:
                 await fail_run(sessions, ctx, job.source_key, job.kind, type(exc).__name__)
+                INGEST_RUNS.labels(job.source_key, "crashed").inc()
                 log.exception("ingest_crashed")
                 return False
             await finish_run(sessions, ctx, job.source_key, job.kind, outcome)
     except SourceLockedError:
+        INGEST_RUNS.labels(job.source_key, "skipped_locked").inc()
         log.info("ingest_skipped_locked")
         return True
 
+    elapsed = time.perf_counter() - started
+    INGEST_RUNS.labels(job.source_key, "unchanged" if outcome.unchanged else "updated").inc()
+    INGEST_DURATION.labels(job.source_key).observe(elapsed)
+    INGEST_LAST_SUCCESS.labels(job.source_key).set_to_current_time()
     log.info(
         "ingest_succeeded",
         unchanged=outcome.unchanged,
-        duration_ms=round((time.perf_counter() - started) * 1000, 1),
+        duration_ms=round(elapsed * 1000, 1),
         **outcome.stats,
     )
     return True

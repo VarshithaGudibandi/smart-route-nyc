@@ -27,6 +27,7 @@ from app.cache.redis import ResilientRedis
 from app.core.config import Settings
 from app.core.freshness import SourceKind, classify
 from app.core.graph_version import GraphVersion
+from app.core.metrics import ROUTE_SEARCHES
 from app.core.single_flight import SingleFlight
 from app.integrations.otp.client import OtpClient, PlanQuery
 from app.integrations.otp.mapper import to_route
@@ -155,6 +156,7 @@ class RouteSearchService:
                     )
                 )
 
+        ROUTE_SEARCHES.labels(status.value).inc()
         logger.info(
             "route_search",
             cache=status,

@@ -22,6 +22,7 @@ Without Redis there is nowhere to share state, so no investigation starts.
 import asyncio
 import hashlib
 import hmac
+import time
 from collections import Counter
 from collections.abc import Awaitable, Callable, Sequence
 from datetime import UTC, datetime, timedelta
@@ -30,6 +31,12 @@ import structlog
 from pydantic import BaseModel, ValidationError
 
 from app.cache.redis import ResilientRedis
+from app.core.metrics import (
+    INVESTIGATION_DURATION,
+    INVESTIGATIONS,
+    INVESTIGATIONS_RUNNING,
+    SUGGESTIONS_VERIFIED,
+)
 from app.schemas.routes import InvestigationRef, InvestigationState, Route, RouteSearchRequest
 from app.schemas.suggestions import TERMINAL_STATES, InvestigationResult, InvestigationView
 
@@ -93,8 +100,10 @@ class InvestigationRunner:
         investigation_id = self.investigation_id(search_key, requested)
         existing = await self._read(investigation_id)
         if existing is not None:
+            INVESTIGATIONS.labels("deduplicated").inc()
             return self._ref(investigation_id, existing.status)
         if self.pending >= self._max_pending:
+            INVESTIGATIONS.labels("shed").inc()
             logger.info("investigation_shed", pending=self.pending)
             return None
 
@@ -110,13 +119,17 @@ class InvestigationRunner:
         if created is None:
             return None
         if created is False:  # another instance won the race
+            INVESTIGATIONS.labels("deduplicated").inc()
             return self._ref(investigation_id, "queued")
+
+        INVESTIGATIONS.labels("started").inc()
 
         task = asyncio.create_task(
             self._run(investigation_id, request, list(baseline), graph_version, record.deadline)
         )
         self._tasks[investigation_id] = task
-        task.add_done_callback(lambda _: self._tasks.pop(investigation_id, None))
+        INVESTIGATIONS_RUNNING.inc()
+        task.add_done_callback(lambda _: self._finished(investigation_id))
         return self._ref(investigation_id, "queued")
 
     async def view(self, investigation_id: str) -> InvestigationView | None:
@@ -173,27 +186,40 @@ class InvestigationRunner:
         try:
             async with self._slots:
                 if await self._cancelled(investigation_id):
+                    INVESTIGATIONS.labels("cancelled").inc()
                     return
                 await self._write(investigation_id, record, "running")
+                started = time.perf_counter()
                 result = await asyncio.wait_for(
                     self._investigate(request, baseline), self._timeout_s
                 )
+                INVESTIGATION_DURATION.observe(time.perf_counter() - started)
             if await self._cancelled(investigation_id):
+                INVESTIGATIONS.labels("cancelled").inc()
                 return
             await self._write(investigation_id, record, "completed", result=result)
+            INVESTIGATIONS.labels("completed").inc()
+            SUGGESTIONS_VERIFIED.inc(len(result.suggestions))
             if self._record_outcome is not None:
                 await self._record_outcome(graph_version, result)
         except asyncio.CancelledError:
+            INVESTIGATIONS.labels("cancelled").inc()
             log.info("investigation_cancelled")
             raise
         except TimeoutError:
+            INVESTIGATIONS.labels("timed_out").inc()
             log.warning("investigation_timed_out")
             await self._write(investigation_id, record, "failed", reason="Timed out.")
         except Exception:
+            INVESTIGATIONS.labels("failed").inc()
             log.exception("investigation_crashed")
             await self._write(
                 investigation_id, record, "failed", reason="The investigation failed."
             )
+
+    def _finished(self, investigation_id: str) -> None:
+        self._tasks.pop(investigation_id, None)
+        INVESTIGATIONS_RUNNING.dec()
 
     async def _cancelled(self, investigation_id: str) -> bool:
         return await self._redis.get(self._cancel_key(investigation_id)) is not None

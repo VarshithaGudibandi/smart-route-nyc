@@ -16,6 +16,7 @@ dependencies = [
   "httpx>=0.28",
   "gtfs-realtime-bindings>=3.0",
   "protobuf>=7.36",
+  "prometheus-client>=0.26",
 ]
 
 [dependency-groups]

@@ -11,6 +11,8 @@ x-backend-env: &backend-env
   GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
   LLM_PROVIDER: ${LLM_PROVIDER:-baseline}
+  # Prometheus metrics, reachable only on the Compose network.
+  METRICS_PORT: "9100"
 
 services:
   postgres:
@@ -100,5 +102,39 @@ services:
       - backend
     restart: unless-stopped
 
+  # Optional: ./start.sh --with-dashboards, or docker compose --profile dashboards up -d
+  prometheus:
+    image: prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+    profiles: [dashboards]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:13.2.4@sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f
+    profiles: [dashboards]
+    environment:
+      # Local use only: anyone who can reach 127.0.0.1:3001 can view, not edit.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/smartroute.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   postgres-data:
+  prometheus-data:

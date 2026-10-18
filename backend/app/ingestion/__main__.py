@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.cache.redis import ResilientRedis
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
+from app.core.metrics import serve_metrics
 from app.db.session import create_engine, create_session_factory
 from app.ingestion.retention import RetentionJob, RetentionPolicy
 from app.ingestion.runner import Job, run_job
@@ -114,6 +115,7 @@ async def main(once: bool, only: str | None) -> int:
             )
             for job, every in jobs
         ]
+        serve_metrics(settings.metrics_port)
         logger.info("worker_started", jobs=[job.name for job in scheduled])
         await run_scheduler(scheduled, stop, on_tick=heartbeat)
         logger.info("worker_stopped")

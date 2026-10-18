@@ -101,6 +101,8 @@ class Settings(BaseSettings):
     retention_suggestion_outcomes_days: int = Field(default=180, ge=1)
 
     health_check_timeout_s: float = Field(default=1.0, gt=0)
+    # Prometheus metrics on their own port, for the internal network only. Unset: off.
+    metrics_port: int | None = Field(default=None, ge=1024, le=65535)
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
@@ -111,11 +113,20 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def require_real_secret_in_production(self) -> Self:
-        if self.app_env == "production" and (
-            self.key_hashing_secret.get_secret_value() == "development-only-secret"
-        ):
+    def check_production_settings(self) -> Self:
+        """Refuse to start in production with settings only fit for a laptop."""
+        if self.app_env != "production":
+            return self
+        secret = self.key_hashing_secret.get_secret_value()
+        if secret == "development-only-secret":
             raise ValueError("KEY_HASHING_SECRET must be set in production")
+        if len(secret) < 32:
+            raise ValueError("KEY_HASHING_SECRET must be at least 32 characters in production")
+        for origin in self.allowed_origins:
+            if origin == "*" or not origin.startswith("https://"):
+                raise ValueError(f"ALLOWED_ORIGINS must list https origins in production: {origin}")
+        if "smartroute:smartroute@" in str(self.database_url):
+            raise ValueError("DATABASE_URL uses the local development password")
         return self
 
 

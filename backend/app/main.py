@@ -19,7 +19,12 @@ from app.core.config import Settings, get_settings
 from app.core.errors import register_error_handlers
 from app.core.graph_version import GraphVersion
 from app.core.logging import configure_logging
-from app.core.middleware import RequestContextMiddleware, RequestSizeLimitMiddleware
+from app.core.metrics import serve_metrics
+from app.core.middleware import (
+    RequestContextMiddleware,
+    RequestSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+)
 from app.core.rate_limit import RateLimiter
 from app.core.resilience import CircuitBreaker
 from app.db.session import create_engine
@@ -146,10 +151,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             places=PlaceSearch(StationIndex(otp, graph_version), geocoder),
         )
         app.state.resources = resources
+        metrics = serve_metrics(settings.metrics_port)
         logger.info("startup", env=settings.app_env)
         try:
             yield
         finally:
+            if metrics is not None:
+                metrics.shutdown()
             if resources.investigations is not None:
                 await resources.investigations.close()
             await resources.otp.close()
@@ -184,6 +192,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "RateLimit-Remaining",
         ],
     )
+    # Outside CORS, so preflight and error responses carry the headers too.
+    app.add_middleware(SecurityHeadersMiddleware, hsts=settings.app_env == "production")
     app.add_middleware(RequestContextMiddleware)
 
     app.include_router(api_router)

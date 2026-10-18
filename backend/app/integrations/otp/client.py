@@ -8,6 +8,7 @@ are never retried: repeating a malformed query cannot succeed.
 
 import asyncio
 import random
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -16,6 +17,7 @@ import httpx
 import structlog
 
 from app.core.errors import RoutingTimeoutError, RoutingUnavailableError
+from app.core.metrics import OTP_DURATION, OTP_REQUESTS
 from app.core.resilience import CircuitBreaker, CircuitOpenError
 
 logger = structlog.get_logger(__name__)
@@ -234,19 +236,23 @@ class OtpClient:
             try:
                 self.breaker.before_call()
             except CircuitOpenError as exc:
+                OTP_REQUESTS.labels("circuit_open").inc()
                 raise RoutingUnavailableError(
                     "The routing engine is temporarily unavailable"
                 ) from exc
+            started = time.perf_counter()
             try:
                 response = await self._http.post(
                     self.GRAPHQL_PATH, json={"query": query, "variables": variables}
                 )
+                OTP_DURATION.observe(time.perf_counter() - started)
                 if response.status_code in RETRYABLE_STATUS:
                     raise _TransientError(f"HTTP {response.status_code}")
                 response.raise_for_status()
                 payload: dict[str, Any] = response.json()
             except (httpx.TimeoutException, httpx.TransportError, _TransientError) as exc:
                 self.breaker.record_failure()
+                OTP_REQUESTS.labels("transient_error").inc()
                 logger.warning(
                     "otp_request_failed",
                     attempt=attempt,
@@ -267,11 +273,14 @@ class OtpClient:
                 continue
             except httpx.HTTPStatusError as exc:
                 self.breaker.record_success()
+                OTP_REQUESTS.labels("query_error").inc()
                 raise OtpQueryError(f"OTP answered HTTP {exc.response.status_code}") from exc
 
             self.breaker.record_success()
             if payload.get("errors"):
+                OTP_REQUESTS.labels("query_error").inc()
                 raise OtpQueryError(f"GraphQL errors: {payload['errors']}")
+            OTP_REQUESTS.labels("ok").inc()
             data: dict[str, Any] = payload["data"]
             return data
         raise AssertionError("unreachable")
