@@ -126,6 +126,28 @@ The response holds up to five itineraries with every leg, its timing and its geo
 
 Measured against the full NYC + PATH graph: about 1.7 s for an uncached search and under 5 ms for a cached one.
 
+### Data ingestion
+
+The `worker` service (`python -m app.ingestion`) keeps transit and accessibility data current:
+
+| Job | Every | What it does |
+|---|---|---|
+| `mta_elevators` | 2 min | Elevator and escalator inventory plus current outages from MTA. Each piece of equipment is mapped to the GTFS stops it serves. Scheduled future outages are ignored |
+| `mta_subway_realtime`, `path_realtime`, `mta_bus_realtime` | 1 min | Track how current each GTFS-Realtime feed is, using the feed's own timestamp |
+| `gtfs_static` | 1 h | Record when each published timetable stops covering service |
+| `retention` | 1 day | Delete records past their retention period (events 90 days, run history 30 days, feedback comments 12 months) |
+
+Every run is recorded in `feed_sync_runs`. Unchanged payloads are detected by checksum and skipped. Writes are idempotent upserts, and an older observation never overwrites a newer one. An empty or malformed feed is rejected instead of wiping existing data. A Redis lock keeps two worker instances from processing the same source at once, and each job runs independently, so one failing source never delays the others.
+
+```bash
+cd backend
+uv run python -m app.ingestion --once                    # run every job once
+uv run python -m app.ingestion --once --job mta_elevators
+curl localhost:8000/api/v1/data/freshness                # fresh / stale / expired per source
+```
+
+Timetables are refreshed by [`otp/scripts/refresh_graph.sh`](otp/scripts/refresh_graph.sh), intended for a nightly schedule. It builds a new graph beside the live one, swaps it in, runs the routing smoke tests, and rolls back automatically if they fail.
+
 ### Backend development
 
 The backend uses [uv](https://docs.astral.sh/uv/) for dependency management.
@@ -145,7 +167,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Transit data pipeline and OpenTripPlanner graph for NYC + PATH
 - [x] Backend foundation: API skeleton, PostgreSQL, Redis, structured logging, CI
 - [x] Route search with caching, deduplication and rate limiting
-- [ ] Feed ingestion: schedules, realtime updates, elevator outages
+- [x] Feed ingestion: schedules, realtime updates, elevator outages
 - [ ] Accessibility assessment engine
 - [ ] Natural-language preference interpretation
 - [ ] Asynchronous AI route investigation with routing-engine verification

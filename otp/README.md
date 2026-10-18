@@ -46,6 +46,23 @@ python otp/scripts/smoke_test.py
 
 `fetch_inputs.py` retries transient failures with exponential backoff and jitter. It writes files atomically and records each source's SHA-256 checksum, size and service dates in `manifest.json`. It warns when a feed's service is about to end, and when a feed carries no stop-level accessibility data.
 
+## Refreshing timetables
+
+Published timetables cover only a few months, so the graph must be rebuilt regularly. [`scripts/refresh_graph.sh`](scripts/refresh_graph.sh) does this without taking routing offline:
+
+1. Fetch and validate fresh inputs into `data/otp/graph-next`. The live graph keeps serving.
+2. Build the new graph there.
+3. Swap directories (the previous graph is kept as `graph-previous`) and restart OTP.
+4. Wait for OTP to answer, then run the smoke tests. If either fails, the previous graph is restored automatically.
+
+Run it on a schedule, for example nightly:
+
+```cron
+30 3 * * * cd /srv/smart-route-nyc && OTP_BUILD_HEAP=10g otp/scripts/refresh_graph.sh >> /var/log/smartroute-refresh.log 2>&1
+```
+
+The ingestion worker's `gtfs_static` job reports each feed's end of service at `/api/v1/data/freshness`, so a refresh that stops running shows up there before routing starts missing trips.
+
 ## Routing configuration
 
 [`config/router-config.json`](config/router-config.json) changes one OTP default. With wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.

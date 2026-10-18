@@ -125,6 +125,20 @@ class ResilientRedis:
         self.breaker.record_success()
         return int(count)
 
+    async def increment(self, key: str) -> int | None:
+        """Increment a persistent counter (data-version stamps). None if unavailable."""
+        try:
+            self.breaker.before_call()
+        except CircuitOpenError:
+            return None
+        try:
+            value = await self._client.incr(key)
+        except (RedisError, OSError) as exc:
+            self._failed("increment", exc)
+            return None
+        self.breaker.record_success()
+        return int(value)
+
     async def close(self) -> None:
         await self._client.aclose()
 

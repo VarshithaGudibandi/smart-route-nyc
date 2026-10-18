@@ -14,6 +14,8 @@ dependencies = [
   "redis>=8.1",
   "structlog>=26.1",
   "httpx>=0.28",
+  "gtfs-realtime-bindings>=3.0",
+  "protobuf>=7.36",
 ]
 
 [dependency-groups]
@@ -23,6 +25,7 @@ dev = [
   "testcontainers[postgres,redis]>=4.15",
   "mypy>=2.4",
   "ruff>=0.17",
+  "types-protobuf>=6.30",
 ]
 
 [tool.uv]
@@ -42,5 +45,5 @@ python_version = "3.12"
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["testcontainers.*"]
+module = ["testcontainers.*", "google.transit.*"]
 ignore_missing_imports = true

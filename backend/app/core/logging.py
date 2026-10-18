@@ -31,3 +31,5 @@ def configure_logging(level: str) -> None:
     # replaced by the request middleware's structured line.
     logging.basicConfig(level=level, stream=sys.stdout, format="%(message)s")
     logging.getLogger("uvicorn.access").disabled = True
+    # httpx logs every request at INFO in plain text; our own logs cover it.
+    logging.getLogger("httpx").setLevel(logging.WARNING)

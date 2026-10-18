@@ -1,0 +1,44 @@
+[
+ {
+  "station": "Flushing-Main St",
+  "borough": "",
+  "trainno": "7",
+  "equipment": "ES456",
+  "equipmenttype": "ES",
+  "serving": "Roosevelt Ave (E of Main St) to platform for Manhattan-bound service",
+  "ADA": "N",
+  "outagedate": "10/18/2026 12:28:00 AM",
+  "estimatedreturntoservice": "10/18/2026 04:00:00 AM",
+  "reason": "Cleaning",
+  "isupcomingoutage": "N",
+  "ismaintenanceoutage": "N"
+ },
+ {
+  "station": "Lexington Av/53 St",
+  "borough": "",
+  "trainno": "E/F/6",
+  "equipment": "ES269",
+  "equipmenttype": "ES",
+  "serving": "6 mezzanine (53 St & Lexington Av) to E/F platform for both directions.",
+  "ADA": "N",
+  "outagedate": "10/18/2026 12:28:00 AM",
+  "estimatedreturntoservice": "10/18/2026 06:28:00 AM",
+  "reason": "Cleaning",
+  "isupcomingoutage": "N",
+  "ismaintenanceoutage": "N"
+ },
+ {
+  "station": "Prospect Park",
+  "borough": "",
+  "trainno": "B/Q/S",
+  "equipment": "EL382",
+  "equipmenttype": "EL",
+  "serving": "Lincoln Rd & Ocean Ave (NE corner) to platform for Manhattan-bound B/Q service and Franklin Shuttle",
+  "ADA": "Y",
+  "outagedate": "10/30/2026 10:00:00 PM",
+  "estimatedreturntoservice": "10/31/2026 06:00:00 AM",
+  "reason": "Maintenance",
+  "isupcomingoutage": "Y",
+  "ismaintenanceoutage": "N"
+ }
+]

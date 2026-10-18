@@ -7,7 +7,8 @@ x-backend-env: &backend-env
   DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-smartroute}:${POSTGRES_PASSWORD:-smartroute}@postgres:5432/${POSTGRES_DB:-smartroute}
   REDIS_URL: redis://redis:6379/0
   OTP_BASE_URL: http://otp:8080
-  OTP_GRAPH_VERSION_FILE: /otp-graph/graph-version
+  OTP_GRAPH_VERSION_FILE: /otp-data/graph/graph-version
+  GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
 
 services:
@@ -62,10 +63,24 @@ services:
     build: ./backend
     environment: *backend-env
     volumes:
-      # Read-only, for the graph-version file written by build_graph.sh.
-      - ./data/otp/graph:/otp-graph:ro
+      # The parent directory, not graph/ itself: refresh_graph.sh swaps graph/
+      # by renaming, and a direct bind mount would keep the old directory.
+      - ./data/otp:/otp-data:ro
     ports:
       - "127.0.0.1:8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: ./backend
+    command: ["python", "-m", "app.ingestion"]
+    environment: *backend-env
+    volumes:
+      - ./data/otp:/otp-data:ro
     depends_on:
       migrate:
         condition: service_completed_successfully

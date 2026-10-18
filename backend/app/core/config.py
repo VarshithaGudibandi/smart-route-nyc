@@ -50,6 +50,24 @@ class Settings(BaseSettings):
 
     rate_limit_route_search_per_minute: int = Field(default=20, ge=1)
 
+    # Ingestion worker sources (public feeds; no API keys required).
+    mta_feed_base_url: str = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds"
+    path_gtfs_rt_url: str = "https://path.transitdata.nyc/gtfsrt"
+    mta_bus_gtfs_rt_url: str = "https://gtfsrt.prod.obanyc.com/vehiclePositions"
+    # manifest.json written by otp/scripts/fetch_inputs.py next to the graph.
+    gtfs_manifest_file: Path | None = None
+
+    ingest_elevators_interval_s: int = Field(default=120, ge=10)
+    ingest_realtime_interval_s: int = Field(default=60, ge=10)
+    ingest_static_interval_s: int = Field(default=3600, ge=60)
+    ingest_retention_interval_s: int = Field(default=86_400, ge=60)
+    ingest_fetch_timeout_s: float = Field(default=20.0, gt=0)
+
+    retention_events_days: int = Field(default=90, ge=1)
+    retention_sync_runs_days: int = Field(default=30, ge=1)
+    retention_feedback_comment_days: int = Field(default=365, ge=1)
+    retention_feedback_days: int = Field(default=730, ge=1)
+
     health_check_timeout_s: float = Field(default=1.0, gt=0)
 
     @field_validator("allowed_origins", mode="before")
