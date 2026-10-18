@@ -31,6 +31,7 @@ query Plan(
   $dateTime: PlanDateTimeInput!
   $first: Int!
   $preferences: PlanPreferencesInput
+  $via: [PlanViaLocationInput!]
 ) {
   planConnection(
     origin: $origin
@@ -38,6 +39,7 @@ query Plan(
     dateTime: $dateTime
     first: $first
     preferences: $preferences
+    via: $via
   ) {
     edges {
       node {
@@ -118,6 +120,10 @@ class PlanQuery:
     wheelchair: bool = False
     walk_reluctance: float | None = None
     transfer_cost: int | None = None
+    # Verification of a proposed transfer: OTP may only use these routes (GTFS
+    # IDs, for the whole trip) and must stop at each via station.
+    include_routes: tuple[str, ...] = ()
+    via_stations: tuple[str, ...] = ()
 
     def variables(self) -> dict[str, Any]:
         preferences: dict[str, Any] = {}
@@ -126,13 +132,19 @@ class PlanQuery:
         if self.walk_reluctance is not None:
             preferences["street"] = {"walk": {"reluctance": self.walk_reluctance}}
         if self.transfer_cost is not None:
-            preferences["transit"] = {"transfer": {"cost": self.transfer_cost}}
+            preferences.setdefault("transit", {})["transfer"] = {"cost": self.transfer_cost}
+        if self.include_routes:
+            preferences.setdefault("transit", {})["filters"] = [
+                {"include": [{"routes": list(self.include_routes)}]}
+            ]
         return {
             "origin": {"location": _coordinate(*self.origin)},
             "destination": {"location": _coordinate(*self.destination)},
             "dateTime": {"earliestDeparture": self.earliest_departure.isoformat()},
             "first": self.itineraries,
             "preferences": preferences or None,
+            "via": [{"visit": {"stopLocationIds": [station]}} for station in self.via_stations]
+            or None,
         }
 
 

@@ -79,6 +79,28 @@ class SearchOutcome:
     cache: CacheStatus
 
 
+def plan_query(request: RouteSearchRequest, earliest: datetime, itineraries: int) -> PlanQuery:
+    """The OTP query for a search; suggestion checks reuse it so that a
+    suggestion is planned under exactly the rider's settings."""
+    accessibility, optimization = request.accessibility, request.optimization
+    less_walking = optimization.primary == "LEAST_WALKING" or optimization.prefer_less_walking
+    fewer_transfers = (
+        optimization.primary == "FEWEST_TRANSFERS" or optimization.prefer_fewer_transfers
+    )
+    return PlanQuery(
+        origin=(request.origin.lat, request.origin.lon),
+        destination=(request.destination.lat, request.destination.lon),
+        earliest_departure=earliest,
+        itineraries=itineraries,
+        # OTP has a single accessibility mode. NYC feeds publish no
+        # wheelchair_boarding data, so OTP can only penalise unknown stops,
+        # not exclude them; verdicts come from the accessibility assessor.
+        wheelchair=accessibility.needs_accessible_routing,
+        walk_reluctance=4.0 if less_walking else None,
+        transfer_cost=600 if fewer_transfers else None,
+    )
+
+
 class RouteSearchService:
     def __init__(
         self,
@@ -194,23 +216,7 @@ class RouteSearchService:
                 await self._redis.delete_if_equals(lock_key, token)
 
     async def _compute(self, request: RouteSearchRequest, bucket: datetime) -> CachedSearch:
-        accessibility, optimization = request.accessibility, request.optimization
-        less_walking = optimization.primary == "LEAST_WALKING" or optimization.prefer_less_walking
-        fewer_transfers = (
-            optimization.primary == "FEWEST_TRANSFERS" or optimization.prefer_fewer_transfers
-        )
-        query = PlanQuery(
-            origin=(request.origin.lat, request.origin.lon),
-            destination=(request.destination.lat, request.destination.lon),
-            earliest_departure=bucket,
-            itineraries=self._settings.search_itineraries + EXTRA_ITINERARIES,
-            # OTP has a single accessibility mode. NYC feeds publish no
-            # wheelchair_boarding data, so OTP can only penalise unknown stops,
-            # not exclude them; verdicts come from the accessibility assessor.
-            wheelchair=accessibility.needs_accessible_routing,
-            walk_reluctance=4.0 if less_walking else None,
-            transfer_cost=600 if fewer_transfers else None,
-        )
+        query = plan_query(request, bucket, self._settings.search_itineraries + EXTRA_ITINERARIES)
         plan = await self._otp.plan(query)
         # OTP reports some errors once per endpoint (origin and destination);
         # show each distinct problem once.

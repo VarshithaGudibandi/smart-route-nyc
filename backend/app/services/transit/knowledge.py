@@ -18,6 +18,7 @@ them. If Redis is down, OTP is queried directly.
 
 import statistics
 from datetime import datetime, timedelta
+from itertools import pairwise
 from typing import Any
 
 import structlog
@@ -73,7 +74,7 @@ class PatternService(BaseModel):
         """Median gap between departures in the window; ``None`` below two trips."""
         if len(self.departures) < 2:
             return None
-        gaps = (b - a for a, b in zip(self.departures, self.departures[1:], strict=False))
+        gaps = (b - a for a, b in pairwise(self.departures))
         return int(statistics.median(gaps))
 
 

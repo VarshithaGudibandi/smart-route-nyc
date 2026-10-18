@@ -1,16 +1,18 @@
 import copy
 import json
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
 import pytest
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.cache.redis import ResilientRedis
 from app.db.models import FeedSyncRun, ServiceAlert, SourceFreshness
 from app.ingestion.runner import run_job
 from app.ingestion.sources.mta_alerts import ALERTS_VERSION_KEY, MtaAlertsSource
+from app.services.transit.alerts import AlertsProvider
 from tests.fakes import FIXTURES
 
 pytestmark = pytest.mark.usefixtures("no_backoff")
@@ -132,3 +134,18 @@ async def test_malformed_feed_fails_and_keeps_alerts(
     async with sessions() as session:
         freshness = await session.get(SourceFreshness, "mta_subway_alerts")
     assert freshness is not None and freshness.current_status == "failing"
+
+
+async def test_provider_maps_feed_ids_to_graph_ids_and_filters_by_time(
+    engine: AsyncEngine, sessions: async_sessionmaker[AsyncSession], redis: ResilientRedis
+) -> None:
+    feed = AlertFeed()
+    await run_job(source(feed, sessions, redis), sessions, redis)
+    snapshot = await AlertsProvider(engine, redis).current()
+
+    now = datetime.fromtimestamp(feed.feed["header"]["timestamp"], UTC)
+    delays = snapshot.for_route("MTASBWY:4", now)
+    assert [a.alert_type for a in delays] == ["Delays"]
+    assert not delays[0].suspends_service
+    assert snapshot.for_route("4", now) == []  # feed IDs are never used unprefixed
+    assert snapshot.for_route("MTASBWY:4", now - timedelta(hours=1)) == []

@@ -137,7 +137,9 @@ class AccessibilityFinding(BaseModel):
 
 class Route(BaseModel):
     route_id: str
-    origin_type: Literal["otp_baseline", "ai_proposal_verified"] = "otp_baseline"
+    # How the journey was found. Suggestions are always full OTP itineraries;
+    # the label says whether the transfer idea came from rules or a model.
+    origin_type: Literal["otp_baseline", "rules_suggestion", "model_suggestion"] = "otp_baseline"
     departure: datetime
     arrival: datetime
     duration_seconds: int

@@ -15,3 +15,10 @@ inactive unit.
 `otp_station_departures_chambers_st.json` is a real `StationDepartures`
 response for Chambers St (`MTASBWY:137`), 2026-10-19 08:30 to 09:30
 America/New_York, from the same graph.
+
+`mta_subway_alerts.json` holds six real alerts from MTA's
+`camsys/subway-alerts.json` feed, recorded on 2026-10-18 (two active, four
+scheduled), with each alert's affected-entity list shortened.
+
+`tests/suggestion_fakes.py` builds a small synthetic subway (lines X and L,
+stations A to E) for suggestion tests. It is DEMO DATA, not a real network.
