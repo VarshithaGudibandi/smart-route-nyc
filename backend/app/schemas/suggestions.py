@@ -7,11 +7,12 @@ complete itinerary that follows it exactly and arrives earlier than the
 baseline.
 """
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.routes import Notice, Route
+from app.schemas.routes import InvestigationState, Notice, Route
 
 MAX_PROPOSALS = 3
 
@@ -72,3 +73,18 @@ class InvestigationResult(BaseModel):
     generator: str
     suggestions: list[VerifiedSuggestion] = Field(default_factory=list)
     rejected: list[RejectedProposal] = Field(default_factory=list)
+
+
+TERMINAL_STATES: frozenset[str] = frozenset({"completed", "failed", "cancelled"})
+
+
+class InvestigationView(BaseModel):
+    id: str
+    status: InvestigationState
+    generator: str | None = None
+    applicable: bool | None = None
+    reason: str | None = None
+    suggestions: list[VerifiedSuggestion] = Field(default_factory=list)
+    # How many proposals were rejected, by reason.
+    rejected: dict[str, int] = Field(default_factory=dict)
+    updated_at: datetime

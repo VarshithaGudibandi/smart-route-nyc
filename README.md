@@ -13,8 +13,8 @@ SmartRouteNYC compares multimodal journeys against each rider's individual needs
 
 - **Deterministic routing.** Journeys are calculated by [OpenTripPlanner 2](https://www.opentripplanner.org/) from official GTFS schedules and OpenStreetMap, covering MTA subway, MTA bus and PATH.
 - **Evidence-based accessibility.** Each segment and transfer is classified as `meets`, `violates` or `unknown`. Live elevator outages and source freshness are checked every time a result is served. A stale feed downgrades a claim to `unknown`; it never upgrades one.
-- **Verified AI route suggestions.** An LLM proposes specific transfer experiments, such as switching to the express for part of the trip. Each one is enforced and timed by the routing engine before it can be shown. Unverified suggestions are discarded, never displayed.
-- **Fast first results.** Baseline routes return immediately. AI investigation runs as a background job, and verified improvements are added when it finishes.
+- **Verified transfer suggestions.** Specific transfer experiments, such as switching to the express for part of the trip, are proposed by rules (and, once a provider is configured, by a language model) and then enforced and timed by the routing engine. Only a complete itinerary that makes the transfer and arrives earlier is shown; everything else is discarded with its reason.
+- **Fast first results.** Baseline routes return immediately. The suggestion investigation runs as a background job, and verified improvements are fetched when it finishes.
 - **Built for reliability.** Redis-backed caching with versioned invalidation, deduplication of identical in-flight searches, distributed rate limiting, timeouts, jittered retries and circuit breakers on every external dependency.
 - **Privacy by design.** No accounts and no stored locations or route histories. Feedback is anonymous.
 
@@ -39,8 +39,8 @@ flowchart LR
 | **Frontend** (Next.js, TypeScript) | Place search, current location, preferences, route comparison, map, transfer details |
 | **API** (FastAPI, Pydantic v2) | Validation, search coordination, accessibility assessment, AI job orchestration |
 | **OpenTripPlanner** | Multimodal itinerary computation over the GTFS + OSM graph |
-| **Redis** | Cache-aside for routing and LLM results, distributed locks, background job state, rate limiting |
-| **PostgreSQL** | Elevator and escalator status, data provenance, anonymous feedback |
+| **Redis** | Cache-aside for routing, timetable and LLM results, distributed locks, background job state, rate limiting |
+| **PostgreSQL** | Elevator and escalator status, service alerts, data provenance, suggestion outcomes, anonymous feedback |
 | **Ingestion worker** | Scheduled fetching of MTA and PATH feeds, idempotent upserts, freshness tracking |
 
 ## Tech stack
@@ -178,6 +178,48 @@ cd backend && uv run python -m evals.preferences --provider baseline
 
 The baseline's two misses ("as few transfers as possible", and not reporting "stairs are fine" as a conflict) are left unfixed on purpose: tuning rules to the test set would make the baseline meaningless as the bar a model has to beat. CI fails if critical recall, false positives or injection safety regress.
 
+### Transfer suggestions
+
+OpenTripPlanner ranks itineraries by a generalized cost that penalizes transfers, so it often prefers a one-seat ride over a faster trip with a change. After each search, a background investigation looks for those faster changes:
+
+1. **Facts from the timetable.** For the fastest route's subway segment, every station passed in the direction of travel is checked for lines the rider could change to, with stop counts, scheduled headways and current MTA alerts.
+2. **Proposals.** A rules generator proposes express/local and line-to-line changes from those facts. A model generator (`app/ai/suggestions.py`) answers in a strict schema from the same facts; it is not enabled until a model provider is configured.
+3. **Checks.** Station and line IDs must come from the facts, the lines must actually run between the stations, and no line may have an unplanned suspension.
+4. **Verification.** One door-to-door OTP query, restricted to the proposed lines (plus PATH or bus lines elsewhere in the trip) and forced to visit the transfer station, under the rider's own settings. The itinerary must ride the proposed lines into and out of that station, arrive at least a minute earlier than the fastest route, and meet any accessibility requirement. Timing, including minimum transfer times, is OTP's.
+
+```bash
+# The search response carries {"investigation": {"id": "...", "status": "queued", "poll_after_ms": 1500}}
+curl -s localhost:8000/api/v1/routes/investigations/<id>            # status, suggestions, rejection counts
+curl -s -X DELETE localhost:8000/api/v1/routes/investigations/<id>  # cancel
+```
+
+| Behavior | Detail |
+|---|---|
+| Sharing | The investigation ID is derived from the search's cache key, so identical searches on any instance share one investigation; Redis `SET NX` decides which instance runs it |
+| Bounds | At most 2 running and 16 pending per instance; beyond that a search gets no investigation rather than a slower response. 20 s timeout |
+| State | In Redis with a 15-minute TTL, so any instance answers a poll. An investigation whose instance stopped reads as `failed` once its deadline passes |
+| Outcomes | Each proposal's fate (verified or the rejection reason, and seconds saved) is stored in `suggestion_outcomes`: lines and stations only, no locations or times of travel; deleted after 180 days |
+
+#### Evaluation
+
+30 trips across Manhattan, Brooklyn, Queens, the Bronx and PATH from New Jersey ([`backend/evals/suggestion_trips.jsonl`](backend/evals/suggestion_trips.jsonl)), each searched at four times of the week, with and without a step-free requirement, against the live graph:
+
+```bash
+cd backend && uv run python -m evals.suggestions     # needs the running stack and ingested data
+```
+
+| Metric | Rules generator |
+|---|---|
+| Searches | 240 |
+| Investigation applicable (fastest route has a subway segment with transfer options) | 63.3% |
+| Proposals per applicable search | 2.9 |
+| Searches with a verified faster route | 10 (6.6% of applicable) |
+| Time saved when faster | 1 to 13 min (median 4.3 min) |
+| Rejections | not faster 323, no matching itinerary 85, accessibility 16 |
+| Search plus investigation, p50 / p95 | 574 / 1330 ms |
+
+The wins are the changes experienced riders make: from Bay Ridge, the R to 59 St and then the N express over the Manhattan Bridge arrives 13 minutes earlier than OTP's one-seat R ride, and still meets a step-free requirement; from Pelham Bay, the 6 express to 125 St and then the 4/5 express saves 5.5 minutes. Most proposals do not beat OTP, which is why each is verified and the rest discarded. Only single-transfer changes are considered.
+
 ### Data ingestion
 
 The `worker` service (`python -m app.ingestion`) keeps transit and accessibility data current:
@@ -185,9 +227,10 @@ The `worker` service (`python -m app.ingestion`) keeps transit and accessibility
 | Job | Every | What it does |
 |---|---|---|
 | `mta_elevators` | 2 min | Elevator and escalator inventory plus current outages from MTA. Each piece of equipment is mapped to the GTFS stops it serves. Scheduled future outages are ignored |
+| `mta_subway_alerts` | 2 min | MTA subway service alerts (delays, suspensions, planned work), mirrored from the full feed; unchanged alert sets are skipped |
 | `mta_subway_realtime`, `path_realtime`, `mta_bus_realtime` | 1 min | Track how current each GTFS-Realtime feed is, using the feed's own timestamp |
 | `gtfs_static` | 1 h | Record when each published timetable stops covering service |
-| `retention` | 1 day | Delete records past their retention period (events 90 days, run history 30 days, feedback comments 12 months) |
+| `retention` | 1 day | Delete records past their retention period (events 90 days, run history 30 days, suggestion outcomes 180 days, feedback comments 12 months) |
 
 Every run is recorded in `feed_sync_runs`. Unchanged payloads are detected by checksum and skipped. Writes are idempotent upserts, and an older observation never overwrites a newer one. An empty or malformed feed is rejected instead of wiping existing data. A Redis lock keeps two worker instances from processing the same source at once, and each job runs independently, so one failing source never delays the others.
 
@@ -209,7 +252,7 @@ cd backend
 uv sync                          # install dependencies from uv.lock
 uv run pytest                    # unit + integration tests (integration tests start PostgreSQL and Redis via Docker)
 uv run pytest tests/unit         # unit tests only, no Docker needed
-uv run mypy app tests alembic    # strict type checking
+uv run mypy app tests evals alembic  # strict type checking
 uv run alembic upgrade head      # apply migrations to the database in DATABASE_URL
 ```
 
@@ -222,7 +265,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Feed ingestion: schedules, realtime updates, elevator outages
 - [x] Accessibility assessment engine
 - [x] Natural-language preference interpretation (model provider pluggable; keyword baseline included)
-- [ ] Asynchronous AI route investigation with routing-engine verification
+- [x] Asynchronous transfer investigation with routing-engine verification (rules generator; model generator ready for a provider)
 - [ ] Grounded route explanations and anonymous feedback
 - [ ] Web application
 - [ ] Load testing, dashboards, end-to-end tests and deployment

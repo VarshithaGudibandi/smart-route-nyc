@@ -77,6 +77,9 @@ class CachedSearch(BaseModel):
 class SearchOutcome:
     response: RouteSearchResponse
     cache: CacheStatus
+    # Identify the search for background work that depends on it.
+    cache_key: str
+    requested: datetime
 
 
 def plan_query(request: RouteSearchRequest, earliest: datetime, itineraries: int) -> PlanQuery:
@@ -177,7 +180,7 @@ class RouteSearchService:
                 )
             ],
         )
-        return SearchOutcome(response=response, cache=status)
+        return SearchOutcome(response=response, cache=status, cache_key=key, requested=requested)
 
     async def _cached_or_computed(
         self, key: str, request: RouteSearchRequest, bucket: datetime, now: datetime

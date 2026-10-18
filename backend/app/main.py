@@ -25,6 +25,11 @@ from app.db.session import create_engine
 from app.integrations.otp.client import OtpClient
 from app.services.accessibility.snapshot import SnapshotProvider
 from app.services.route_search import RouteSearchService
+from app.services.suggestions.jobs import InvestigationRunner
+from app.services.suggestions.outcomes import OutcomeRecorder
+from app.services.suggestions.service import SuggestionService
+from app.services.transit.alerts import AlertsProvider
+from app.services.transit.knowledge import TransitKnowledge
 
 logger = structlog.get_logger(__name__)
 
@@ -64,26 +69,46 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ),
             timeout_s=settings.llm_timeout_s,
         )
+        graph_version = GraphVersion(settings.otp_graph_version_file)
+        accessibility = SnapshotProvider(db_engine, redis)
+        investigations = None
+        if settings.suggestions_enabled:
+            # No language model generates proposals yet: only "baseline" or
+            # "disabled" providers exist, and neither is a model.
+            suggestions = SuggestionService(
+                otp,
+                TransitKnowledge(otp, redis, graph_version),
+                AlertsProvider(db_engine, redis),
+                accessibility,
+            )
+            investigations = InvestigationRunner(
+                suggestions.investigate,
+                redis,
+                secret,
+                max_concurrent=settings.investigation_max_concurrent,
+                max_pending=settings.investigation_max_pending,
+                timeout_s=settings.investigation_timeout_s,
+                ttl_s=settings.investigation_ttl_s,
+                poll_after_ms=settings.investigation_poll_after_ms,
+                record_outcome=OutcomeRecorder(db_engine),
+            )
         resources = Resources(
             settings=settings,
             db_engine=db_engine,
             redis=redis,
             otp=otp,
             rate_limiter=RateLimiter(redis, secret),
-            route_search=RouteSearchService(
-                otp,
-                redis,
-                GraphVersion(settings.otp_graph_version_file),
-                SnapshotProvider(db_engine, redis),
-                settings,
-            ),
+            route_search=RouteSearchService(otp, redis, graph_version, accessibility, settings),
             preferences=PreferenceInterpreter(llm, redis, secret, settings.preference_cache_ttl_s),
+            investigations=investigations,
         )
         app.state.resources = resources
         logger.info("startup", env=settings.app_env)
         try:
             yield
         finally:
+            if resources.investigations is not None:
+                await resources.investigations.close()
             await resources.otp.close()
             await resources.redis.close()
             await resources.db_engine.dispose()

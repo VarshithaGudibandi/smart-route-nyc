@@ -14,6 +14,7 @@ from app.core.errors import RateLimitedError
 from app.core.rate_limit import RateLimiter
 from app.integrations.otp.client import OtpClient
 from app.services.route_search import RouteSearchService
+from app.services.suggestions.jobs import InvestigationRunner
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,8 @@ class Resources:
     rate_limiter: RateLimiter
     route_search: RouteSearchService
     preferences: PreferenceInterpreter
+    # None when suggestions are disabled.
+    investigations: InvestigationRunner | None = None
 
 
 def get_resources(request: Request) -> Resources:

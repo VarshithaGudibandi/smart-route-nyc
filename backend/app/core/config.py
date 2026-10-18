@@ -50,6 +50,15 @@ class Settings(BaseSettings):
 
     rate_limit_route_search_per_minute: int = Field(default=20, ge=1)
     rate_limit_interpret_per_minute: int = Field(default=10, ge=1)
+    rate_limit_investigation_poll_per_minute: int = Field(default=120, ge=1)
+
+    # Transfer suggestions, investigated in the background after a search.
+    suggestions_enabled: bool = True
+    investigation_max_concurrent: int = Field(default=2, ge=1)
+    investigation_max_pending: int = Field(default=16, ge=1)
+    investigation_timeout_s: float = Field(default=20.0, gt=0)
+    investigation_ttl_s: int = Field(default=900, ge=60)
+    investigation_poll_after_ms: int = Field(default=1500, ge=100)
 
     # Language model. "baseline" is a keyword-rule stand-in, not a model.
     llm_provider: Literal["disabled", "baseline"] = "disabled"
@@ -77,6 +86,7 @@ class Settings(BaseSettings):
     retention_sync_runs_days: int = Field(default=30, ge=1)
     retention_feedback_comment_days: int = Field(default=365, ge=1)
     retention_feedback_days: int = Field(default=730, ge=1)
+    retention_suggestion_outcomes_days: int = Field(default=180, ge=1)
 
     health_check_timeout_s: float = Field(default=1.0, gt=0)
 

@@ -1,7 +1,9 @@
 import asyncio
 import dataclasses
+import json
+import time
 import uuid
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -12,10 +14,20 @@ from app.cache.redis import ResilientRedis
 from app.core.config import Settings
 from app.core.graph_version import GraphVersion
 from app.main import create_app
+from app.schemas.routes import Route, RouteSearchRequest
+from app.schemas.suggestions import (
+    InvestigationResult,
+    RejectedProposal,
+    TransferProposal,
+    VerifiedSuggestion,
+)
+from app.services.cache_keys import NEW_YORK
 from app.services.route_search import CacheStatus, RouteSearchService
+from app.services.suggestions.jobs import InvestigationRunner
 from tests.fakes import FakeOtpServer, StaticSnapshots, fake_otp, make_request
 
 DEPART = datetime.fromisoformat("2026-10-19T08:30:00-04:00")
+FIXTURE_DAY = "2026-10-19"
 
 
 def settings(
@@ -75,8 +87,52 @@ def client(redis_url: str, server: FakeOtpServer) -> Iterator[TestClient]:
         route_search = RouteSearchService(
             otp, res.redis, GraphVersion(None), StaticSnapshots(), res.settings
         )
-        app.state.resources = dataclasses.replace(res, otp=otp, route_search=route_search)
+        investigations = InvestigationRunner(
+            stub_investigation,
+            res.redis,
+            res.settings.key_hashing_secret.get_secret_value().encode(),
+            max_concurrent=2,
+            max_pending=4,
+            timeout_s=5,
+            ttl_s=60,
+            poll_after_ms=100,
+        )
+        app.state.resources = dataclasses.replace(
+            res, otp=otp, route_search=route_search, investigations=investigations
+        )
         yield client
+
+
+async def stub_investigation(
+    request: RouteSearchRequest, baseline: Sequence[Route]
+) -> InvestigationResult:
+    """Pretends the first baseline route is a verified, faster suggestion.
+    DEMO DATA: only exercises the API around investigations."""
+    await asyncio.sleep(0.3)  # long enough to be cancelled mid-run
+    proposal = TransferProposal(
+        first_routes=["MTASBWY:2"], transfer_station="MTASBWY:120", second_routes=["MTASBWY:1"]
+    )
+    return InvestigationResult(
+        applicable=True,
+        generator="stub",
+        suggestions=[
+            VerifiedSuggestion(
+                proposal=proposal, source="rules", route=baseline[0], saves_seconds=120
+            )
+        ],
+        rejected=[
+            RejectedProposal(proposal=proposal, source="rules", code="not_faster", detail="x")
+        ],
+    )
+
+
+def wait_for(client: TestClient, investigation_id: str) -> dict[str, Any]:
+    for _ in range(50):
+        view = client.get(f"/api/v1/routes/investigations/{investigation_id}").json()
+        if view["status"] not in ("queued", "running"):
+            return dict(view)
+        time.sleep(0.05)
+    raise AssertionError("investigation did not finish")
 
 
 def search_body(**overrides: Any) -> dict[str, Any]:
@@ -136,3 +192,39 @@ def test_invalid_request_is_rejected(client: TestClient) -> None:
     )
     assert response.status_code == 422
     assert response.json()["details"][0]["loc"][:2] == ["body", "destination"]
+
+
+def fixture_body(server: FakeOtpServer) -> dict[str, Any]:
+    """A search two days ahead, with the recorded plan moved to that day."""
+    day = (datetime.now(NEW_YORK) + timedelta(days=2)).date()
+    server.payload = json.loads(json.dumps(server.payload).replace(FIXTURE_DAY, day.isoformat()))
+    depart = datetime.combine(day, datetime.min.time(), NEW_YORK).replace(hour=8, minute=30)
+    return search_body(depart_at=depart.isoformat())
+
+
+def test_search_starts_one_shared_investigation_that_can_be_polled(
+    client: TestClient, server: FakeOtpServer
+) -> None:
+    body = fixture_body(server)
+    first = client.post("/api/v1/routes/search", json=body).json()
+    second = client.post("/api/v1/routes/search", json=body).json()
+    ref = first["investigation"]
+    assert ref["status"] == "queued" and ref["poll_after_ms"] == 100
+    assert second["investigation"]["id"] == ref["id"]  # identical searches share it
+
+    view = wait_for(client, ref["id"])
+    assert view["status"] == "completed"
+    assert view["generator"] == "stub"
+    assert view["suggestions"][0]["saves_seconds"] == 120
+    assert view["rejected"] == {"not_faster": 1}
+
+
+def test_cancelled_investigation_and_unknown_ids(client: TestClient, server: FakeOtpServer) -> None:
+    ref = client.post("/api/v1/routes/search", json=fixture_body(server)).json()["investigation"]
+    assert client.delete(f"/api/v1/routes/investigations/{ref['id']}").status_code == 204
+    assert wait_for(client, ref["id"])["status"] == "cancelled"
+
+    missing = client.get("/api/v1/routes/investigations/" + "0" * 24)
+    assert missing.status_code == 404 and missing.json()["code"] == "not_found"
+    assert client.delete("/api/v1/routes/investigations/" + "0" * 24).status_code == 404
+    assert client.get("/api/v1/routes/investigations/not-an-id").status_code == 422

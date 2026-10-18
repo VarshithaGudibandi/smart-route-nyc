@@ -66,6 +66,11 @@ class AiInvalidResponseError(AppError):
     code = "ai_invalid_response"
 
 
+class NotFoundError(AppError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "not_found"
+
+
 class RateLimitedError(AppError):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     code = "rate_limited"

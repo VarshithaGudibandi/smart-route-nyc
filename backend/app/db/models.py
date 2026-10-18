@@ -201,3 +201,26 @@ class ServiceAlert(Base):
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     source_version: Mapped[str | None] = mapped_column(String(128))
+
+
+class SuggestionOutcome(Base):
+    """What became of each transfer proposal, for measuring suggestions.
+
+    Holds lines and stations only: no locations, times of travel or any
+    identifier of the rider or search.
+    """
+
+    __tablename__ = "suggestion_outcomes"
+    __table_args__ = (Index(None, "created_at"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    graph_version: Mapped[str] = mapped_column(String(64))
+    generator: Mapped[str] = mapped_column(String(64))
+    source: Mapped[str] = mapped_column(String(16))
+    first_routes: Mapped[str] = mapped_column(String(128))
+    transfer_station: Mapped[str] = mapped_column(String(64))
+    second_routes: Mapped[str] = mapped_column(String(128))
+    # "verified" or the rejection code.
+    outcome: Mapped[str] = mapped_column(String(32))
+    saves_seconds: Mapped[int | None] = mapped_column()

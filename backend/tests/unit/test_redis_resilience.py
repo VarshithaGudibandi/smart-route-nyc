@@ -16,7 +16,7 @@ class FailingRedis:
         self.calls += 1
         raise RedisConnectionError("connection refused")
 
-    async def set(self, key: str, value: bytes, ex: int) -> None:
+    async def set(self, key: str, value: bytes | str, **options: Any) -> None:
         self.calls += 1
         raise RedisConnectionError("connection refused")
 

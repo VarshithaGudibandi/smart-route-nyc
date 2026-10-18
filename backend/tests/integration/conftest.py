@@ -64,7 +64,7 @@ async def sessions(engine: AsyncEngine) -> AsyncIterator[async_sessionmaker[Asyn
             text(
                 "TRUNCATE accessibility_equipment, accessibility_equipment_stops, "
                 "equipment_status, accessibility_events, source_freshness, feed_sync_runs, "
-                "route_feedback, service_alerts CASCADE"
+                "route_feedback, service_alerts, suggestion_outcomes CASCADE"
             )
         )
     yield create_session_factory(engine)

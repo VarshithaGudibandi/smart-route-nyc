@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.config import Settings
-from app.db.models import AccessibilityEvent, FeedSyncRun, RouteFeedback
+from app.db.models import AccessibilityEvent, FeedSyncRun, RouteFeedback, SuggestionOutcome
 from app.ingestion.runs import RunContext, RunOutcome
 
 BATCH_SIZE = 5000
@@ -26,6 +26,7 @@ class RetentionPolicy:
     sync_runs: timedelta
     feedback_comments: timedelta
     feedback: timedelta
+    suggestion_outcomes: timedelta
 
     @classmethod
     def from_settings(cls, settings: Settings) -> "RetentionPolicy":
@@ -34,6 +35,7 @@ class RetentionPolicy:
             sync_runs=timedelta(days=settings.retention_sync_runs_days),
             feedback_comments=timedelta(days=settings.retention_feedback_comment_days),
             feedback=timedelta(days=settings.retention_feedback_days),
+            suggestion_outcomes=timedelta(days=settings.retention_suggestion_outcomes_days),
         )
 
 
@@ -59,6 +61,9 @@ class RetentionJob:
         feedback = await self._batched_delete(
             RouteFeedback.feedback_id, RouteFeedback.created_at < now - p.feedback
         )
+        outcomes = await self._batched_delete(
+            SuggestionOutcome.id, SuggestionOutcome.created_at < now - p.suggestion_outcomes
+        )
         comments = await self._clear_old_comments(now - p.feedback_comments)
         return RunOutcome(
             stats={
@@ -66,6 +71,7 @@ class RetentionJob:
                 "sync_runs_deleted": runs,
                 "feedback_deleted": feedback,
                 "comments_cleared": comments,
+                "suggestion_outcomes_deleted": outcomes,
             }
         )
 

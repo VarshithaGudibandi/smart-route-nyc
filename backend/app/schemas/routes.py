@@ -163,6 +163,17 @@ class DataFreshness(BaseModel):
     as_of: datetime | None
 
 
+InvestigationState = Literal["queued", "running", "completed", "failed", "cancelled"]
+
+
+class InvestigationRef(BaseModel):
+    """Returned with a search: where and when to ask for transfer suggestions."""
+
+    id: str
+    status: InvestigationState
+    poll_after_ms: int
+
+
 class RouteSearchResponse(BaseModel):
     search_id: str
     graph_version: str
@@ -172,3 +183,5 @@ class RouteSearchResponse(BaseModel):
     review_only_routes: list[Route] = Field(default_factory=list)
     notices: list[Notice]
     data_freshness: list[DataFreshness] = Field(default_factory=list)
+    # Background search for a faster transfer; absent when none was started.
+    investigation: InvestigationRef | None = None
