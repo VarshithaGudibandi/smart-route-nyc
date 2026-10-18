@@ -38,9 +38,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: Type check
-        run: uv run mypy app tests alembic
+        run: uv run mypy app tests evals alembic
       - name: Tests (unit and integration, with PostgreSQL and Redis containers)
         run: uv run pytest -v
+      - name: Preference interpretation evaluation (baseline)
+        run: uv run python -m evals.preferences
 
   otp-scripts:
     name: OTP data scripts

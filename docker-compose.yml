@@ -10,6 +10,7 @@ x-backend-env: &backend-env
   OTP_GRAPH_VERSION_FILE: /otp-data/graph/graph-version
   GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
+  LLM_PROVIDER: ${LLM_PROVIDER:-baseline}
 
 services:
   postgres:

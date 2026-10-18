@@ -56,6 +56,16 @@ class RoutingTimeoutError(UpstreamTimeoutError):
     code = "routing_timeout"
 
 
+class AiUnavailableError(AppError):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    code = "ai_unavailable"
+
+
+class AiInvalidResponseError(AppError):
+    status_code = status.HTTP_502_BAD_GATEWAY
+    code = "ai_invalid_response"
+
+
 class RateLimitedError(AppError):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     code = "rate_limited"

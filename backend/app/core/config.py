@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     single_flight_wait_s: float = Field(default=3.0, gt=0)
 
     rate_limit_route_search_per_minute: int = Field(default=20, ge=1)
+    rate_limit_interpret_per_minute: int = Field(default=10, ge=1)
+
+    # Language model. "baseline" is a keyword-rule stand-in, not a model.
+    llm_provider: Literal["disabled", "baseline"] = "disabled"
+    llm_timeout_s: float = Field(default=8.0, gt=0)
+    llm_daily_call_limit: int = Field(default=2000, ge=1)
+    llm_breaker_failure_threshold: int = Field(default=5, ge=1)
+    llm_breaker_reset_s: float = Field(default=60.0, gt=0)
+    preference_cache_ttl_s: int = Field(default=86_400, gt=0)
 
     # Ingestion worker sources (public feeds; no API keys required).
     mta_feed_base_url: str = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds"

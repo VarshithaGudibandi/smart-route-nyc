@@ -7,6 +7,10 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.baseline import KeywordBaselineProvider
+from app.ai.guard import DailyCallBudget, GuardedLlm
+from app.ai.preferences import PreferenceInterpreter
+from app.ai.provider import DisabledProvider, LlmProvider
 from app.api.deps import Resources
 from app.api.v1.router import api_router
 from app.cache.redis import ResilientRedis
@@ -16,12 +20,19 @@ from app.core.graph_version import GraphVersion
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware, RequestSizeLimitMiddleware
 from app.core.rate_limit import RateLimiter
+from app.core.resilience import CircuitBreaker
 from app.db.session import create_engine
 from app.integrations.otp.client import OtpClient
 from app.services.accessibility.snapshot import SnapshotProvider
 from app.services.route_search import RouteSearchService
 
 logger = structlog.get_logger(__name__)
+
+
+def build_provider(settings: Settings) -> LlmProvider:
+    if settings.llm_provider == "baseline":
+        return KeywordBaselineProvider()
+    return DisabledProvider()
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -45,6 +56,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         secret = settings.key_hashing_secret.get_secret_value().encode()
         db_engine = create_engine(settings)
+        llm = GuardedLlm(
+            build_provider(settings),
+            DailyCallBudget(redis, settings.llm_daily_call_limit),
+            CircuitBreaker(
+                "llm", settings.llm_breaker_failure_threshold, settings.llm_breaker_reset_s
+            ),
+            timeout_s=settings.llm_timeout_s,
+        )
         resources = Resources(
             settings=settings,
             db_engine=db_engine,
@@ -58,6 +77,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 SnapshotProvider(db_engine, redis),
                 settings,
             ),
+            preferences=PreferenceInterpreter(llm, redis, secret, settings.preference_cache_ttl_s),
         )
         app.state.resources = resources
         logger.info("startup", env=settings.app_env)

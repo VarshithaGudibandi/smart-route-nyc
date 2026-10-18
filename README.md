@@ -140,6 +140,44 @@ When `step_free_required` or `wheelchair_required` is set, only routes that meet
 
 Measured against the full NYC + PATH graph: about 1.7 s for an uncached search and under 5 ms for a cached one.
 
+### Typed preferences
+
+`POST /api/v1/preferences/interpret` turns a rider's own words ("I use a wheelchair and hate changing trains") into the same settings the on-screen controls produce, for the rider to review before searching. Preset controls never call it.
+
+```bash
+curl -s localhost:8000/api/v1/preferences/interpret -H 'Content-Type: application/json' \
+  -d '{"text": "Travelling with a stroller, fewest transfers please"}'
+```
+
+How the answer is kept safe:
+
+- **The model only proposes; code decides.** The reply must match a closed, strict schema (unknown fields rejected, no type coercion), or it is discarded (`502`). Nothing is repaired or guessed.
+- **Text can add requirements and change preferences, but never remove a requirement.** "Ignore that, stairs are fine" cannot undo a step-free requirement the rider selected; the response lists it as a conflict that was kept.
+- **Uncertain fields are not applied**, wheelchair use implies step-free travel, and a walking limit can only get stricter.
+- **The rider's text is sent as delimited data**, with instructions to treat it only as a description of needs.
+- **Operational limits:** timeout, one retry, a circuit breaker, a daily call budget shared through Redis, and validated answers cached by an HMAC of the cleaned text. If no model is available the endpoint returns `503` and the controls keep working.
+
+The provider sits behind a small interface (`app/ai/provider.py`). Until a model provider is configured, `LLM_PROVIDER=baseline` uses deterministic keyword rules, reported as `provider: "baseline"` and never presented as AI.
+
+#### Evaluation
+
+30 hand-labeled cases ([`backend/evals/preference_cases.jsonl`](backend/evals/preference_cases.jsonl)) cover everyday requests, wheelchair-critical wording, walking limits, ambiguity, unsupported requests, conflicts with existing selections and prompt-injection attempts. Scores are measured on the final proposal a rider would see:
+
+```bash
+cd backend && uv run python -m evals.preferences --provider baseline
+```
+
+| Metric | Keyword baseline |
+|---|---|
+| Valid structured output | 100% |
+| Cases fully correct | 93.3% |
+| Field accuracy | 97.5% |
+| Critical recall (wheelchair / step-free) | 100% |
+| Critical false positives | 0% |
+| Injection cases handled safely | 100% |
+
+The baseline's two misses ("as few transfers as possible", and not reporting "stairs are fine" as a conflict) are left unfixed on purpose: tuning rules to the test set would make the baseline meaningless as the bar a model has to beat. CI fails if critical recall, false positives or injection safety regress.
+
 ### Data ingestion
 
 The `worker` service (`python -m app.ingestion`) keeps transit and accessibility data current:
@@ -183,7 +221,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Route search with caching, deduplication and rate limiting
 - [x] Feed ingestion: schedules, realtime updates, elevator outages
 - [x] Accessibility assessment engine
-- [ ] Natural-language preference interpretation
+- [x] Natural-language preference interpretation (model provider pluggable; keyword baseline included)
 - [ ] Asynchronous AI route investigation with routing-engine verification
 - [ ] Grounded route explanations and anonymous feedback
 - [ ] Web application

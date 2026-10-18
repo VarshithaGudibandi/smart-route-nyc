@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from app.ai.preferences import PreferenceInterpreter
 from app.cache.redis import ResilientRedis
 from app.core.config import Settings
 from app.core.errors import RateLimitedError
@@ -25,6 +26,7 @@ class Resources:
     otp: OtpClient
     rate_limiter: RateLimiter
     route_search: RouteSearchService
+    preferences: PreferenceInterpreter
 
 
 def get_resources(request: Request) -> Resources:
