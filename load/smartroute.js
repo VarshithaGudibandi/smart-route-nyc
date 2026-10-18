@@ -20,6 +20,8 @@ const PLACE_QUERIES = ["times sq", "herald", "columbia", "journal sq", "bay ridg
 const HEADERS = { headers: { "Content-Type": "application/json" } };
 
 const cacheResults = new Counter("route_search_cache");
+// Responses by status and error code, so a failed check can be explained.
+const outcomes = new Counter("route_search_outcome");
 
 const SCENARIOS = {
   mixed: {
@@ -45,15 +47,24 @@ const THRESHOLDS = {
     "http_req_duration{name:search}": ["p(95)<5000"],
     "http_req_duration{name:places}": ["p(95)<500"],
   },
-  // One search reaches OpenTripPlanner; everyone else shares its answer.
-  same_search: { "route_search_cache{cache:MISS}": ["count<=1"], checks: ["rate==1"] },
+  // Exactly one search reaches OpenTripPlanner; everyone else shares its answer.
+  same_search: { "route_search_cache{cache:MISS}": ["count==1"], checks: ["rate==1"] },
   // Fail fast and say so: 503 within a second, never a 500 or an invented route.
+  // A trip already in the cache may still be answered with its real routes.
   otp_outage: { checks: ["rate==1"], "http_req_duration{name:search}": ["p(95)<1000"] },
 };
 
+// Always-true thresholds, only so the summary reports these breakdowns.
+const REPORTED = Object.fromEntries(
+  [
+    ...["200", "429", "500", "503", "504"].map((status) => `route_search_outcome{status:${status}}`),
+    ...["HIT", "MISS", "SHARED"].map((cache) => `route_search_cache{cache:${cache}}`),
+  ].map((name) => [name, ["count>=0"]]),
+);
+
 export const options = {
   scenarios: { [SCENARIO]: SCENARIOS[SCENARIO] },
-  thresholds: THRESHOLDS[SCENARIO],
+  thresholds: { ...REPORTED, ...THRESHOLDS[SCENARIO] },
   summaryTrendStats: ["med", "p(90)", "p(95)", "p(99)", "max"],
 };
 
@@ -81,6 +92,15 @@ function departure(minutesAhead) {
 function search(body) {
   const response = http.post(`${BASE}/api/v1/routes/search`, body, { ...HEADERS, tags: { name: "search" } });
   cacheResults.add(1, { cache: response.headers["X-Cache"] || "none" });
+  let code = "";
+  if (response.status >= 400) {
+    try {
+      code = response.json("code") || "";
+    } catch (_) {
+      code = "unparsed";
+    }
+  }
+  outcomes.add(1, { status: String(response.status), code });
   return response;
 }
 
@@ -106,7 +126,8 @@ function mixed() {
 }
 
 export function setup() {
-  return { departAt: departure(120) };
+  // Later than any departure the mixed scenario uses, so this search starts uncached.
+  return { departAt: departure(9 * 60 + 17) };
 }
 
 export default function (data) {
@@ -119,7 +140,9 @@ export default function (data) {
   // otp_outage: a different trip and time each time, so nothing is cached.
   const response = search(searchBody(pick(TRIPS), departure(60 + Math.floor(Math.random() * 600)), false));
   check(response, {
-    "503 routing_unavailable": (r) => r.status === 503 && r.json("code") === "routing_unavailable",
+    "503 routing_unavailable, or real routes from the cache": (r) =>
+      (r.status === 503 && r.json("code") === "routing_unavailable") ||
+      (r.status === 200 && r.headers["X-Cache"] === "HIT"),
   });
   sleep(0.5);
 }
@@ -132,7 +155,7 @@ export function handleSummary(data) {
 function textSummary(data) {
   const lines = [`scenario: ${SCENARIO}`];
   for (const [name, metric] of Object.entries(data.metrics)) {
-    if (!/http_req_duration\{name|http_reqs$|http_req_failed|route_search_cache|checks/.test(name)) continue;
+    if (!/http_req_duration\{name|http_reqs$|http_req_failed|route_search_|checks/.test(name)) continue;
     lines.push(`${name}: ${JSON.stringify(metric.values)}`);
   }
   return lines.join("\n") + "\n";

@@ -110,7 +110,7 @@ jobs:
           name = sys.argv[1].rsplit("/", 1)[-1].removesuffix(".json")
           print(f"### {name}")
           for key, metric in sorted(data["metrics"].items()):
-              if key.startswith(("http_req_duration{", "http_reqs", "http_req_failed", "route_search_cache", "checks")):
+              if key.startswith(("http_req_duration{", "http_reqs", "http_req_failed", "route_search_", "checks")):
                   values = {k: round(v, 3) if isinstance(v, float) else v for k, v in metric["values"].items()}
                   ok = metric.get("thresholds")
                   print(f"- `{key}` {values}" + (f" thresholds: {ok}" if ok else ""))
