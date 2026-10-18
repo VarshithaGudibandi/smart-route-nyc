@@ -1,0 +1,79 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 26px;
+  color: #c8c0b3;
+  cursor: pointer;
+}
+
+.star:hover,
+.filled {
+  color: var(--black);
+}
+
+.star:focus-within {
+  outline: 3px solid var(--ok);
+  outline-offset: 2px;
+}
+
+.commentLabel {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.comment {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.send {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radius-control);
+  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thanks {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  color: var(--barrier-ink);
+  font-weight: 600;
+}

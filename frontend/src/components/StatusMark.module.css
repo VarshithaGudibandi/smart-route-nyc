@@ -1,0 +1,61 @@
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.small {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.meets {
+  background: var(--ok);
+  color: #fff;
+}
+
+.violates {
+  background: var(--barrier);
+  color: #fff;
+}
+
+.unknown {
+  border: 2px dashed var(--unknown);
+  color: var(--unknown-ink);
+  background: transparent;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chip_meets {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.chip_violates {
+  background: var(--barrier-bg);
+  color: var(--barrier-ink);
+}
+
+.chip_unknown {
+  background: var(--unknown-bg);
+  color: var(--unknown-ink);
+}

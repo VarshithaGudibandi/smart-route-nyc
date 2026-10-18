@@ -1,0 +1,131 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  position: relative;
+}
+
+.featured {
+  padding: 18px;
+  box-shadow: 0 0 0 2.5px var(--black), 0 6px 20px rgba(31, 29, 26, 0.1);
+}
+
+/* Selection matters only where the detail panel is beside the list. */
+@media (min-width: 721px) {
+  .selected:not(.featured) {
+    box-shadow: 0 0 0 2px var(--ink-soft), var(--shadow-card);
+  }
+
+  .featured.selected {
+    box-shadow: 0 0 0 4px var(--black), 0 8px 24px rgba(31, 29, 26, 0.14);
+  }
+}
+
+.compact {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.compactLeft,
+.compactRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.times {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.featured .times {
+  font-size: 27px;
+}
+
+.compact .times {
+  font-size: 18px;
+}
+
+.duration {
+  font-weight: 700;
+}
+
+.lines {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.lineStep {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash {
+  color: #9a9388;
+}
+
+.via {
+  margin-left: 4px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.faster {
+  background: var(--black);
+  color: var(--yellow);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--ink-muted);
+}

@@ -52,7 +52,9 @@ def _place(name: str | None, fallback: str) -> str:
 
 
 def _clock(moment: datetime) -> str:
-    return moment.astimezone(NEW_YORK).strftime("%H:%M")
+    """ "8:34 AM", as riders in New York read times."""
+    local = moment.astimezone(NEW_YORK)
+    return f"{local.hour % 12 or 12}:{local.minute:02d} {'AM' if local.hour < 12 else 'PM'}"
 
 
 def _minutes(delta: timedelta) -> int:

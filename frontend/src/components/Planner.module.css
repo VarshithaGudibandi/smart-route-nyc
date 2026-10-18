@@ -1,0 +1,219 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.results {
+  flex: 1 1 380px;
+  max-width: 440px;
+  min-width: 0;
+  outline: none;
+}
+
+.detail {
+  flex: 999 1 560px;
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.listHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.count {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.investigating {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 0 0 rgba(252, 204, 10, 0.7);
+  animation: pulse 1.4s ease-out infinite;
+}
+
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 0 10px rgba(252, 204, 10, 0);
+  }
+}
+
+.reviewNotice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--barrier-bg);
+  border: 2px solid var(--barrier);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.reviewNotice p {
+  margin: 0;
+}
+
+.reviewTitle {
+  font-weight: 700;
+}
+
+.error {
+  background: var(--barrier-bg);
+  border: 2px solid var(--barrier);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.error p {
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+
+.retry {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--black);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.welcome {
+  background: var(--surface);
+  border-radius: var(--radius-panel);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.welcomeTitle {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.legend {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton {
+  height: 96px;
+  border-radius: var(--radius-card);
+  background: linear-gradient(90deg, #f1ece3, #f8f4ee, #f1ece3);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.footer {
+  font-size: 12px;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+/* Phones: one column. The list shows until a route is chosen, then the detail. */
+@media (max-width: 720px) {
+  .page {
+    padding: 16px 16px 32px;
+  }
+
+  .results {
+    max-width: none;
+  }
+
+  .detail {
+    display: none;
+  }
+
+  .showDetail .results {
+    display: none;
+  }
+
+  .showDetail .detail {
+    display: block;
+  }
+}

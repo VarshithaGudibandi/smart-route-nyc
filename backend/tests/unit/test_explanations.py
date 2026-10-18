@@ -38,7 +38,7 @@ def fixture_route() -> Route:
 
 def test_facts_cover_every_leg_transfer_and_finding() -> None:
     facts = {f.id: f for f in scenario_facts()}
-    assert facts["summary"].text.startswith("Leaves at 08:34 and arrives at 09:33")
+    assert facts["summary"].text.startswith("Leaves at 8:34 AM and arrives at 9:33 AM")
     assert "from your starting point to Journal Square" in facts["leg0"].text
     assert facts["transfer3"].text.endswith("with 10 min between trains.")
     assert {k for k, f in facts.items() if f.required} == {
@@ -49,7 +49,7 @@ def test_facts_cover_every_leg_transfer_and_finding() -> None:
         "finding5",
         "alert0",
     }
-    assert "MTA elevator status as of 08:20" in facts["finding5"].text
+    assert "MTA elevator status as of 8:20 AM" in facts["finding5"].text
 
 
 def test_stale_elevator_data_is_a_required_fact() -> None:
@@ -208,4 +208,6 @@ def test_trips_later_on_say_that_elevator_status_is_current_not_forecast() -> No
     soon = route_facts(assessed, True, snapshot, AlertSnapshot(), NOW)
     later = route_facts(assessed, True, snapshot, AlertSnapshot(), NOW - timedelta(days=1))
     assert "status_now" not in {f.id for f in soon}
-    assert "it can change before you travel at 08:34" in {f.id: f.text for f in later}["status_now"]
+    assert (
+        "it can change before you travel at 8:34 AM" in {f.id: f.text for f in later}["status_now"]
+    )

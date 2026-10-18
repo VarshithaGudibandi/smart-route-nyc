@@ -1,0 +1,113 @@
+/* Design tokens. Status colors are reserved for accessibility states and are
+   always paired with a shape and a word, never used alone. */
+:root {
+  --ground: #fbf8f3;
+  --surface: #ffffff;
+  --surface-muted: #f6f2ea;
+  --line: #ece6dc;
+  --line-strong: #e2dbcf;
+  --ink: #1f1d1a;
+  --ink-soft: #47423b;
+  --ink-muted: #5e5850;
+  --black: #111111;
+  --yellow: #fccc0a;
+
+  --ok: #123e8c;
+  --ok-bg: #e3ecfb;
+  --barrier: #b4410b;
+  --barrier-ink: #8a3208;
+  --barrier-bg: #fff1e6;
+  --unknown: #5b6170;
+  --unknown-ink: #3d4250;
+  --unknown-bg: #f1efeb;
+
+  --radius-card: 18px;
+  --radius-panel: 22px;
+  --radius-control: 12px;
+  --shadow-card: 0 1px 2px rgba(31, 29, 26, 0.06), 0 4px 14px rgba(31, 29, 26, 0.05);
+  --shadow-panel: 0 1px 2px rgba(31, 29, 26, 0.06), 0 8px 28px rgba(31, 29, 26, 0.07);
+
+  --font-body: var(--font-figtree), system-ui, sans-serif;
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--black);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ok);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 10;
+  background: var(--black);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.label-caps {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

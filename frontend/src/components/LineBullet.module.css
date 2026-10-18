@@ -1,0 +1,36 @@
+.bullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 15px;
+}
+
+.pill {
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.small.circle {
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+}
+
+.small.pill {
+  height: 22px;
+  font-size: 11px;
+}

@@ -1,0 +1,144 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.form {
+  flex: 1 1 680px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: var(--shadow-card);
+}
+
+.form > :nth-child(1),
+.form > :nth-child(3) {
+  flex: 1 1 200px;
+}
+
+.swap {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.when {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  border-left: 1px solid var(--line);
+}
+
+.when :global(.label-caps) {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.time {
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+  min-height: 32px;
+}
+
+.help {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.search {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--black);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.problem {
+  margin: 0;
+  color: var(--barrier-ink);
+  font-weight: 600;
+}
+
+.needs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.on {
+  background: var(--black);
+  border-color: var(--black);
+  color: #fff;
+  font-weight: 700;
+}
+
+.select {
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.describe {
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  padding: 8px 6px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .when {
+    border-left: 0;
+  }
+
+  .search {
+    flex: 1 1 100%;
+  }
+}
