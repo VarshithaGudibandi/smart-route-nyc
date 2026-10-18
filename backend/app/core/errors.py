@@ -25,10 +25,17 @@ class AppError(Exception):
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
     code: str = "internal_error"
 
-    def __init__(self, message: str, *, details: Any | None = None) -> None:
+    def __init__(
+        self,
+        message: str,
+        *,
+        details: Any | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         super().__init__(message)
         self.message = message
         self.details = details
+        self.headers = headers
 
 
 class DependencyUnavailableError(AppError):
@@ -41,17 +48,34 @@ class UpstreamTimeoutError(AppError):
     code = "upstream_timeout"
 
 
+class RoutingUnavailableError(DependencyUnavailableError):
+    code = "routing_unavailable"
+
+
+class RoutingTimeoutError(UpstreamTimeoutError):
+    code = "routing_timeout"
+
+
+class RateLimitedError(AppError):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    code = "rate_limited"
+
+
 def error_response(
-    status_code: int, code: str, message: str, details: Any | None = None
+    status_code: int,
+    code: str,
+    message: str,
+    details: Any | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body = ErrorResponse(code=code, message=message, request_id=get_request_id(), details=details)
-    return JSONResponse(status_code=status_code, content=jsonable_encoder(body))
+    return JSONResponse(status_code=status_code, content=jsonable_encoder(body), headers=headers)
 
 
 async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)
     logger.warning("app_error", code=exc.code, status=exc.status_code)
-    return error_response(exc.status_code, exc.code, exc.message, exc.details)
+    return error_response(exc.status_code, exc.code, exc.message, exc.details, exc.headers)
 
 
 async def _validation_error(_: Request, exc: Exception) -> JSONResponse:

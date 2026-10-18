@@ -46,6 +46,14 @@ python otp/scripts/smoke_test.py
 
 `fetch_inputs.py` retries transient failures with exponential backoff and jitter. It writes files atomically and records each source's SHA-256 checksum, size and service dates in `manifest.json`. It warns when a feed's service is about to end, and when a feed carries no stop-level accessibility data.
 
+## Routing configuration
+
+[`config/router-config.json`](config/router-config.json) changes one OTP default. With wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.
+
+## Graph versioning
+
+`build_graph.sh` writes `graph-version` (a fingerprint of `graph.obj`) next to the graph. The API includes it in cache keys, so cached routes from a previous graph are never served after a rebuild.
+
 ## Smoke tests
 
 | Check | What it proves |

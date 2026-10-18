@@ -20,6 +20,10 @@ class FailingRedis:
         self.calls += 1
         raise RedisConnectionError("connection refused")
 
+    def pipeline(self, transaction: bool = True) -> Any:
+        self.calls += 1
+        raise RedisConnectionError("connection refused")
+
 
 def make(client: Any) -> ResilientRedis:
     return ResilientRedis(client, CircuitBreaker("redis", failure_threshold=2, reset_timeout_s=60))

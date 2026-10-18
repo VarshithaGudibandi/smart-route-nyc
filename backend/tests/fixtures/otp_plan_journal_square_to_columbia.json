@@ -1,0 +1,407 @@
+{
+ "data": {
+  "planConnection": {
+   "edges": [
+    {
+     "node": {
+      "start": "2026-10-19T08:34:03-04:00",
+      "end": "2026-10-19T09:33:35-04:00",
+      "duration": 3572,
+      "numberOfTransfers": 1,
+      "walkDistance": 311.41999999999996,
+      "walkTime": 805,
+      "legs": [
+       {
+        "mode": "WALK",
+        "distance": 165.7,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "Origin",
+         "lat": 40.73301,
+         "lon": -74.06289,
+         "stop": null
+        },
+        "to": {
+         "name": "Journal Square",
+         "lat": 40.73199,
+         "lon": -74.062854,
+         "stop": {
+          "gtfsId": "PATH:781722"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:34:03-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T08:39:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ctrwFbl`cM@QPJ@DJJLB@M@C?C@QP@j@HF?j@HCTF?B@F@Dg@NBGB"
+        }
+       },
+       {
+        "mode": "SUBWAY",
+        "distance": 4957.0,
+        "headsign": "Newark - World Trade Center",
+        "route": {
+         "gtfsId": "PATH:RED",
+         "shortName": "RED",
+         "longName": "NWK_WTC"
+        },
+        "agency": {
+         "name": "PATH"
+        },
+        "trip": {
+         "gtfsId": "PATH:1546244-26B-AllLines-Weekday-02"
+        },
+        "from": {
+         "name": "Journal Square",
+         "lat": 40.73199,
+         "lon": -74.062854,
+         "stop": {
+          "gtfsId": "PATH:781722"
+         }
+        },
+        "to": {
+         "name": "World Trade Center",
+         "lat": 40.71224,
+         "lon": -74.012522,
+         "stop": {
+          "gtfsId": "PATH:781750"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:39:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T08:51:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "_mrwFrl`cMvA}Df@{@`C{C`AeAt@}@b@i@nAwAb@u@|@aAxCmDtDoEvAoAzK_HnAw@~@q@jAiARSz@{@R]v@oAl@wB^oBj@kChEwQvByJbB_InAcJn@oCDU|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A"
+        }
+       },
+       {
+        "mode": "WALK",
+        "distance": 67.19,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "World Trade Center",
+         "lat": 40.71224,
+         "lon": -74.012522,
+         "stop": {
+          "gtfsId": "PATH:781750"
+         }
+        },
+        "to": {
+         "name": "WTC Cortlandt",
+         "lat": 40.711835,
+         "lon": -74.012188,
+         "stop": {
+          "gtfsId": "MTASBWY:138N"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:51:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T08:55:53-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??"
+        }
+       },
+       {
+        "mode": "SUBWAY",
+        "distance": 11632.0,
+        "headsign": "215 St",
+        "route": {
+         "gtfsId": "MTASBWY:1",
+         "shortName": "1",
+         "longName": "Broadway - 7 Avenue Local"
+        },
+        "agency": {
+         "name": "MTA New York City Transit"
+        },
+        "trip": {
+         "gtfsId": "MTASBWY:L0S4-1-1094-S01_053750_1..N17R"
+        },
+        "from": {
+         "name": "WTC Cortlandt",
+         "lat": 40.711835,
+         "lon": -74.012188,
+         "stop": {
+          "gtfsId": "MTASBWY:138N"
+         }
+        },
+        "to": {
+         "name": "116 St-Columbia University",
+         "lat": 40.807722,
+         "lon": -73.96411,
+         "stop": {
+          "gtfsId": "MTASBWY:117N"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T09:00:30-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T09:30:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP"
+        }
+       },
+       {
+        "mode": "WALK",
+        "distance": 78.53,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "116 St-Columbia University",
+         "lat": 40.807722,
+         "lon": -73.96411,
+         "stop": {
+          "gtfsId": "MTASBWY:117N"
+         }
+        },
+        "to": {
+         "name": "Destination",
+         "lat": 40.80755,
+         "lon": -73.96449,
+         "stop": null
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T09:30:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T09:33:35-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ggaxFvbmbMFS`An@ELEJCLGPOI"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "node": {
+      "start": "2026-10-19T08:39:03-04:00",
+      "end": "2026-10-19T09:36:35-04:00",
+      "duration": 3452,
+      "numberOfTransfers": 1,
+      "walkDistance": 311.41999999999996,
+      "walkTime": 805,
+      "legs": [
+       {
+        "mode": "WALK",
+        "distance": 165.7,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "Origin",
+         "lat": 40.73301,
+         "lon": -74.06289,
+         "stop": null
+        },
+        "to": {
+         "name": "Journal Square",
+         "lat": 40.73199,
+         "lon": -74.062854,
+         "stop": {
+          "gtfsId": "PATH:781722"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:39:03-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T08:44:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ctrwFbl`cM@QPJ@DJJLB@M@C?C@QP@j@HF?j@HCTF?B@F@Dg@NBGB"
+        }
+       },
+       {
+        "mode": "SUBWAY",
+        "distance": 4957.0,
+        "headsign": "Newark - World Trade Center",
+        "route": {
+         "gtfsId": "PATH:RED",
+         "shortName": "RED",
+         "longName": "NWK_WTC"
+        },
+        "agency": {
+         "name": "PATH"
+        },
+        "trip": {
+         "gtfsId": "PATH:1546245-26B-AllLines-Weekday-02"
+        },
+        "from": {
+         "name": "Journal Square",
+         "lat": 40.73199,
+         "lon": -74.062854,
+         "stop": {
+          "gtfsId": "PATH:781722"
+         }
+        },
+        "to": {
+         "name": "World Trade Center",
+         "lat": 40.71224,
+         "lon": -74.012522,
+         "stop": {
+          "gtfsId": "PATH:781750"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:44:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T08:56:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "_mrwFrl`cMvA}Df@{@`C{C`AeAt@}@b@i@nAwAb@u@|@aAxCmDtDoEvAoAzK_HnAw@~@q@jAiARSz@{@R]v@oAl@wB^oBj@kChEwQvByJbB_InAcJn@oCDU|@{Df@eBrAoEfAwEFWBI`AyF`@eDb@gF?AtAyHb@cHxHau@~Guf@p@iFtBuLjCyH?A"
+        }
+       },
+       {
+        "mode": "WALK",
+        "distance": 67.19,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "World Trade Center",
+         "lat": 40.71224,
+         "lon": -74.012522,
+         "stop": {
+          "gtfsId": "PATH:781750"
+         }
+        },
+        "to": {
+         "name": "WTC Cortlandt",
+         "lat": 40.711835,
+         "lon": -74.012188,
+         "stop": {
+          "gtfsId": "MTASBWY:138N"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T08:56:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T09:00:53-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ornwFhqvbM@?b@uA??B@B@D@B@D@B@H@B@@@??"
+        }
+       },
+       {
+        "mode": "SUBWAY",
+        "distance": 11632.0,
+        "headsign": "Van Cortlandt Park-242 St",
+        "route": {
+         "gtfsId": "MTASBWY:1",
+         "shortName": "1",
+         "longName": "Broadway - 7 Avenue Local"
+        },
+        "agency": {
+         "name": "MTA New York City Transit"
+        },
+        "trip": {
+         "gtfsId": "MTASBWY:L0S4-1-1094-S01_054050_1..N15R"
+        },
+        "from": {
+         "name": "WTC Cortlandt",
+         "lat": 40.711835,
+         "lon": -74.012188,
+         "stop": {
+          "gtfsId": "MTASBWY:138N"
+         }
+        },
+        "to": {
+         "name": "116 St-Columbia University",
+         "lat": 40.807722,
+         "lon": -73.96411,
+         "stop": {
+          "gtfsId": "MTASBWY:117N"
+         }
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T09:03:30-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T09:33:00-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "}onwFdovbMu@OIAICICICGCIEIEGEIEGEGGIEGGGIGGuAiBACCCCCACCCCCCCCCACCCCCCCCACCCCgAu@WScAy@aFqDGE_OsKECECECECGCEAGCEAGCGAEAGAGAGAG?uC]cUyBw`@uDgCSm@GWEYGWGUIo@YwAq@kRcJ}NaHe@Ue@Wm@[c@UsEyCcSqM_R{LqRiMwRmMw]gUyKiHy@k@WOYMYM[Ik@Qs@QyCu@}@U{@Uu@W}@]m@Yk@]gCyAwCaBcB_AuAo@{@a@}@_@gA]wA_@{@QcAQcAMgE]iAI]CW@W?WBQDWFeAZi@PYFUBS@uA@kYToC@ySWiAGeAIo@GiAKwB]yHwAgFmAk@Oq@Sa@Oc@Qa@Sa@S{B{A{QcMaCmBoEqD}@u@_^sUQKc[qSMGKIKIMIKGMGKIKGKEMGKGKEKEKEKGaAa@eAWmAUgAI}EQ}@I}@Mc@M[Kg@Wg@]_C}AoVaP"
+        }
+       },
+       {
+        "mode": "WALK",
+        "distance": 78.53,
+        "headsign": null,
+        "route": null,
+        "agency": null,
+        "trip": null,
+        "from": {
+         "name": "116 St-Columbia University",
+         "lat": 40.807722,
+         "lon": -73.96411,
+         "stop": {
+          "gtfsId": "MTASBWY:117N"
+         }
+        },
+        "to": {
+         "name": "Destination",
+         "lat": 40.80755,
+         "lon": -73.96449,
+         "stop": null
+        },
+        "start": {
+         "scheduledTime": "2026-10-19T09:33:00-04:00",
+         "estimated": null
+        },
+        "end": {
+         "scheduledTime": "2026-10-19T09:36:35-04:00",
+         "estimated": null
+        },
+        "legGeometry": {
+         "points": "ggaxFvbmbMFS`An@ELEJCLGPOI"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "routingErrors": []
+  }
+ }
+}

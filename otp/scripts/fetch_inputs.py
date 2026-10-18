@@ -28,7 +28,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_FILE = REPO_ROOT / "otp" / "sources.json"
-BUILD_CONFIG = REPO_ROOT / "otp" / "config" / "build-config.json"
+CONFIG_DIR = REPO_ROOT / "otp" / "config"
 
 MAX_ATTEMPTS = 4
 BACKOFF_BASE_S = 2.0
@@ -179,7 +179,8 @@ def main() -> int:
     sources = json.loads(SOURCES_FILE.read_text())
     graph_dir: Path = args.graph_dir
     graph_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy(BUILD_CONFIG, graph_dir / "build-config.json")
+    for config in ("build-config.json", "router-config.json"):
+        shutil.copy(CONFIG_DIR / config, graph_dir / config)
 
     results = [fetch_source(entry, graph_dir) for entry in sources["gtfs"]]
 

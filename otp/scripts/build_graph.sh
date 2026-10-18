@@ -21,4 +21,7 @@ docker run --rm \
   -v "$GRAPH_DIR":/var/opentripplanner \
   "$OTP_IMAGE" --build --save
 
-echo "Graph written to $GRAPH_DIR/graph.obj"
+# The API includes this fingerprint in its cache keys, so deploying a rebuilt
+# graph retires every route cached from the previous one.
+sha256sum "$GRAPH_DIR/graph.obj" | cut -c1-16 > "$GRAPH_DIR/graph-version"
+echo "Graph written to $GRAPH_DIR/graph.obj (version $(cat "$GRAPH_DIR/graph-version"))"

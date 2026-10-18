@@ -9,7 +9,7 @@ from testcontainers.community.redis import RedisContainer
 
 from app.cache.redis import ResilientRedis
 from app.core.config import Settings
-from app.core.resilience import BreakerState
+from app.core.resilience import BreakerState, CircuitBreaker
 from app.integrations.otp.client import OtpClient
 from app.main import create_app
 
@@ -22,9 +22,8 @@ def fake_otp(healthy: bool) -> OtpClient:
             return httpx.Response(503)
         return httpx.Response(200, json={"data": {"__typename": "QueryType"}})
 
-    return OtpClient(
-        httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://otp")
-    )
+    http = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://otp")
+    return OtpClient(http, CircuitBreaker("otp", 5, 15))
 
 
 def make_client(database_url: str, redis_url: str, otp_healthy: bool) -> Iterator[TestClient]:

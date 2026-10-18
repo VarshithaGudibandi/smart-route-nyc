@@ -14,6 +14,15 @@ from app.core.resilience import CircuitBreaker, CircuitOpenError
 
 logger = structlog.get_logger(__name__)
 
+# Compare-and-delete in one round trip, so a lock that expired and was
+# re-acquired by another instance is never released by the old holder.
+_DELETE_IF_EQUALS = """
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return redis.call("DEL", KEYS[1])
+end
+return 0
+"""
+
 
 class ResilientRedis:
     def __init__(self, client: Redis, breaker: CircuitBreaker) -> None:
@@ -67,6 +76,54 @@ class ResilientRedis:
             return False
         self.breaker.record_success()
         return True
+
+    async def set_if_absent(self, key: str, value: str, ttl_ms: int) -> bool | None:
+        """Atomically set ``key`` if it does not exist.
+
+        Returns True if set, False if the key already existed, and None if
+        Redis is unavailable (callers must decide how to proceed without it).
+        """
+        try:
+            self.breaker.before_call()
+        except CircuitOpenError:
+            return None
+        try:
+            created = await self._client.set(key, value, nx=True, px=ttl_ms)
+        except (RedisError, OSError) as exc:
+            self._failed("set_if_absent", exc)
+            return None
+        self.breaker.record_success()
+        return bool(created)
+
+    async def delete_if_equals(self, key: str, value: str) -> None:
+        """Delete ``key`` only if it still holds ``value`` (safe lock release)."""
+        try:
+            self.breaker.before_call()
+        except CircuitOpenError:
+            return
+        try:
+            await self._client.eval(_DELETE_IF_EQUALS, 1, key, value)
+        except (RedisError, OSError) as exc:
+            self._failed("delete_if_equals", exc)
+            return
+        self.breaker.record_success()
+
+    async def increment_window(self, key: str, ttl_s: int) -> int | None:
+        """Increment a counter, setting its expiry on first use. None if unavailable."""
+        try:
+            self.breaker.before_call()
+        except CircuitOpenError:
+            return None
+        try:
+            async with self._client.pipeline(transaction=True) as pipe:
+                pipe.incr(key)
+                pipe.expire(key, ttl_s, nx=True)
+                count, _ = await pipe.execute()
+        except (RedisError, OSError) as exc:
+            self._failed("increment_window", exc)
+            return None
+        self.breaker.record_success()
+        return int(count)
 
     async def close(self) -> None:
         await self._client.aclose()

@@ -100,6 +100,32 @@ curl localhost:8000/api/v1/health/ready   # PostgreSQL, Redis and OpenTripPlanne
 
 `/ready` returns `503` and names the failing dependency when any of them is down.
 
+### Searching for routes
+
+```bash
+curl -s localhost:8000/api/v1/routes/search \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "origin":      {"lat": 40.73301, "lon": -74.06289, "label": "Journal Square"},
+        "destination": {"lat": 40.80755, "lon": -73.96449, "label": "Columbia University"},
+        "depart_at":   "2026-10-19T08:30:00-04:00",
+        "accessibility": {"step_free_required": true},
+        "optimization":  {"primary": "FASTEST"}
+      }'
+```
+
+The response holds up to five itineraries with every leg, its timing and its geometry (encoded polyline). Accessibility is reported as `unknown` until the accessibility assessment is in place; the API never labels a route accessible without evidence.
+
+| Behavior | Detail |
+|---|---|
+| Caching | Results are cached in Redis by rounded coordinates (about 11 m), 5-minute departure bucket, every accessibility and routing preference, and the routing graph version. The `X-Cache` header reports `HIT`, `MISS` or `SHARED` |
+| Request coalescing | Identical concurrent searches share one routing computation, within an instance and across instances (Redis lock) |
+| Rate limiting | 20 searches per minute per client, shared across instances; `429` with `Retry-After` when exceeded |
+| Failures | Routing engine down: `503 routing_unavailable`; too slow: `504 routing_timeout`. No itinerary is ever fabricated, and errors are never cached |
+| Privacy | Cache and rate-limit keys are HMACs; no coordinates or client addresses are stored in readable form |
+
+Measured against the full NYC + PATH graph: about 1.7 s for an uncached search and under 5 ms for a cached one.
+
 ### Backend development
 
 The backend uses [uv](https://docs.astral.sh/uv/) for dependency management.
@@ -118,7 +144,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Repository foundation: tooling, CI, conventions
 - [x] Transit data pipeline and OpenTripPlanner graph for NYC + PATH
 - [x] Backend foundation: API skeleton, PostgreSQL, Redis, structured logging, CI
-- [ ] Route search with caching, deduplication and rate limiting
+- [x] Route search with caching, deduplication and rate limiting
 - [ ] Feed ingestion: schedules, realtime updates, elevator outages
 - [ ] Accessibility assessment engine
 - [ ] Natural-language preference interpretation

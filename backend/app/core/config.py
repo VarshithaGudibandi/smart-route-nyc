@@ -1,9 +1,10 @@
 """Application settings loaded from environment variables."""
 
 from functools import lru_cache
-from typing import Annotated, Literal
+from pathlib import Path
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, PostgresDsn, RedisDsn, field_validator
+from pydantic import Field, PostgresDsn, RedisDsn, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -30,6 +31,24 @@ class Settings(BaseSettings):
 
     otp_base_url: str = "http://localhost:8080"
     otp_timeout_s: float = Field(default=6.0, gt=0)
+    otp_retries: int = Field(default=1, ge=0, le=3)
+    otp_breaker_failure_threshold: int = Field(default=5, ge=1)
+    otp_breaker_reset_s: float = Field(default=15.0, gt=0)
+    # Written by otp/scripts/build_graph.sh; changes whenever the graph is rebuilt.
+    otp_graph_version_file: Path | None = None
+
+    # Secret mixed into cache and rate-limit keys so they reveal nothing about
+    # locations or client addresses. Must be overridden in production.
+    key_hashing_secret: SecretStr = SecretStr("development-only-secret")
+
+    search_itineraries: int = Field(default=5, ge=1, le=10)
+    route_cache_ttl_s: int = Field(default=600, gt=0)
+    route_cache_near_term_ttl_s: int = Field(default=60, gt=0)
+    route_cache_empty_ttl_s: int = Field(default=30, gt=0)
+    single_flight_lock_ttl_ms: int = Field(default=10_000, gt=0)
+    single_flight_wait_s: float = Field(default=3.0, gt=0)
+
+    rate_limit_route_search_per_minute: int = Field(default=20, ge=1)
 
     health_check_timeout_s: float = Field(default=1.0, gt=0)
 
@@ -40,6 +59,14 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @model_validator(mode="after")
+    def require_real_secret_in_production(self) -> Self:
+        if self.app_env == "production" and (
+            self.key_hashing_secret.get_secret_value() == "development-only-secret"
+        ):
+            raise ValueError("KEY_HASHING_SECRET must be set in production")
+        return self
 
 
 @lru_cache
