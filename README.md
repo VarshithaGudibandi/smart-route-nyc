@@ -81,7 +81,7 @@ Setup for the remaining services will be documented here as they are added.
 ## Roadmap
 
 - [x] Repository foundation: tooling, CI, conventions
-- [ ] Transit data pipeline and OpenTripPlanner graph for NYC + PATH
+- [x] Transit data pipeline and OpenTripPlanner graph for NYC + PATH
 - [ ] Backend foundation: API skeleton, PostgreSQL, Redis, observability
 - [ ] Route search with caching, deduplication and rate limiting
 - [ ] Feed ingestion: schedules, realtime updates, elevator outages
