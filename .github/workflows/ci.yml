@@ -106,5 +106,34 @@ jobs:
         with:
           context: ${{ matrix.context }}
           push: false
+          load: true
+          tags: smartroute-${{ matrix.context }}:ci
           cache-from: type=gha,scope=${{ matrix.context }}
           cache-to: type=gha,mode=max,scope=${{ matrix.context }}
+      # Pinned to a commit: this action's version tags were once hijacked
+      # (CVE-2026-33634). v0.36.0, an immutable release.
+      - name: Scan the image for known vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: smartroute-${{ matrix.context }}:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+  dependencies:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Python packages shipped in the API image
+        working-directory: backend
+        run: |
+          uv export --frozen --no-dev --format requirements-txt -q > requirements.txt
+          uvx pip-audit --disable-pip --strict -r requirements.txt
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: npm packages shipped in the web app
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=moderate

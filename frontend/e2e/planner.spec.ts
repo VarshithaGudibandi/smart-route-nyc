@@ -116,3 +116,21 @@ test("typed needs are proposed, labelled honestly and applied on request", async
   await expect(page.getByRole("button", { name: "Wheelchair", pressed: true })).toBeVisible();
   expect(page.url()).toContain("wc=1");
 });
+
+test("pages are served with security headers and nothing breaks the content policy", async ({ page }) => {
+  const violations: string[] = [];
+  page.on("console", (message) => {
+    if (/Content Security Policy/i.test(message.text())) violations.push(message.text());
+  });
+  await mockApi(page);
+  const response = await page.goto(BAY_RIDGE);
+  const headers = response?.headers() ?? {};
+  expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+  expect(headers["referrer-policy"]).toBe("no-referrer");
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-powered-by"]).toBeUndefined();
+
+  await page.getByText("13 MIN FASTER").click();
+  await expect(page.getByRole("article").getByText("Change at 59 St")).toBeVisible();
+  expect(violations).toEqual([]);
+});

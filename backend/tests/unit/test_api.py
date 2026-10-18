@@ -117,3 +117,22 @@ def test_cors_allows_configured_origin_only(client: TestClient) -> None:
     )
     assert allowed.headers.get("access-control-allow-origin") == "http://localhost:3000"
     assert "access-control-allow-origin" not in denied.headers
+
+
+def test_responses_carry_security_headers(client: TestClient) -> None:
+    for response in (
+        client.get("/api/v1/health/live"),
+        client.get("/no/such/path"),
+        client.post("/test/echo", json={"stars": 9, "comment": ""}),
+    ):
+        assert response.headers["content-security-policy"].startswith("default-src 'none'")
+        assert response.headers["x-content-type-options"] == "nosniff"
+        assert response.headers["referrer-policy"] == "no-referrer"
+        assert "strict-transport-security" not in response.headers
+
+
+def test_docs_page_can_load_swagger_ui(client: TestClient) -> None:
+    response = client.get("/api/docs")
+    assert response.status_code == 200
+    assert "content-security-policy" not in response.headers
+    assert response.headers["x-content-type-options"] == "nosniff"
