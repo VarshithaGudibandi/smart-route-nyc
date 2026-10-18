@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import http.client
 import io
 import json
 import random
@@ -38,6 +39,9 @@ MAX_ATTEMPTS = 4
 BACKOFF_BASE_S = 2.0
 BACKOFF_CAP_S = 30.0
 TIMEOUT_S = 120
+# Resumed attempts allowed per file, on top of MAX_ATTEMPTS failures in a row.
+MAX_RESUMES = 20
+PROGRESS_STEP_BYTES = 25 << 20
 # Warn when a feed stops covering service within this window.
 EXPIRY_WARNING = timedelta(days=21)
 RETRYABLE_STATUS = {408, 429, 500, 502, 503, 504}
@@ -61,24 +65,74 @@ def download(url: str, dest: Path) -> None:
     """Download ``url`` to ``dest`` atomically, retrying transient failures.
 
     Retries use exponential backoff with full jitter. Client errors other than
-    408/429 are not retried because repeating them cannot succeed.
+    408/429 are not retried because repeating them cannot succeed. A retry
+    resumes from the bytes already received when the server supports ranges,
+    with ``If-Range`` so a file that changed in between is fetched whole, and
+    an attempt that made progress does not use up the retry budget: a slow
+    mirror can take many attempts to finish a large extract.
     """
     tmp = dest.with_suffix(dest.suffix + ".part")
-    for attempt in range(1, MAX_ATTEMPTS + 1):
+    tmp.unlink(missing_ok=True)
+    validator: str | None = None
+    failures = 0
+    while True:
+        have = tmp.stat().st_size if tmp.exists() else 0
+        before = have
+        request = urllib.request.Request(url)
+        if have and validator:
+            request.add_header("Range", f"bytes={have}-")
+            request.add_header("If-Range", validator)
         try:
-            with urllib.request.urlopen(url, timeout=TIMEOUT_S) as resp, tmp.open("wb") as out:
-                shutil.copyfileobj(resp, out, length=1 << 20)
+            with urllib.request.urlopen(request, timeout=TIMEOUT_S) as resp:
+                validator = resp.headers.get("ETag") or resp.headers.get("Last-Modified")
+                resumed = resp.status == 206
+                total = _expected_size(resp, have if resumed else 0)
+                with tmp.open("ab" if resumed else "wb") as out:
+                    have = have if resumed else 0
+                    reported = have
+                    while chunk := resp.read(1 << 20):
+                        out.write(chunk)
+                        have += len(chunk)
+                        if total and have - reported >= PROGRESS_STEP_BYTES:
+                            print(f"  {have >> 20} of {total >> 20} MB", file=sys.stderr)
+                            reported = have
+            if total and have != total:
+                raise ConnectionError(f"connection closed at {have} of {total} bytes")
             tmp.replace(dest)
             return
         except urllib.error.HTTPError as exc:
-            if exc.code not in RETRYABLE_STATUS or attempt == MAX_ATTEMPTS:
+            if exc.code not in RETRYABLE_STATUS:
                 raise
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
-            if attempt == MAX_ATTEMPTS:
-                raise
-        delay = random.uniform(0, min(BACKOFF_CAP_S, BACKOFF_BASE_S * 2**attempt))
-        print(f"  retry {attempt}/{MAX_ATTEMPTS - 1} in {delay:.1f}s", file=sys.stderr)
+            error: Exception = exc
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+            http.client.IncompleteRead,
+        ) as exc:
+            error = exc
+        progressed = tmp.exists() and tmp.stat().st_size > before
+        failures = 0 if progressed else failures + 1
+        if failures >= MAX_ATTEMPTS or (progressed and _resumes(tmp) > MAX_RESUMES):
+            raise error
+        delay = random.uniform(0, min(BACKOFF_CAP_S, BACKOFF_BASE_S * 2 ** max(failures, 1)))
+        done = tmp.stat().st_size >> 20 if tmp.exists() else 0
+        print(f"  retrying in {delay:.1f}s ({done} MB received; {error})", file=sys.stderr)
         time.sleep(delay)
+
+
+def _expected_size(resp: http.client.HTTPResponse, offset: int) -> int | None:
+    length = resp.headers.get("Content-Length")
+    return offset + int(length) if length and length.isdigit() else None
+
+
+_resume_counts: dict[Path, int] = {}
+
+
+def _resumes(tmp: Path) -> int:
+    """Count resumed attempts per file, so a server that trickles bytes forever still ends."""
+    _resume_counts[tmp] = _resume_counts.get(tmp, 0) + 1
+    return _resume_counts[tmp]
 
 
 def sha256_of(path: Path) -> str:
@@ -165,6 +219,7 @@ def fetch_source(entry: dict[str, str], graph_dir: Path) -> SourceResult:
         urllib.error.URLError,
         TimeoutError,
         ConnectionError,
+        http.client.HTTPException,
         zipfile.BadZipFile,
         ChecksumMismatchError,
     ) as exc:
