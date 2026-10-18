@@ -75,6 +75,39 @@ query Plan(
 }
 """
 
+# Scheduled departures from every platform of a station, grouped by stopping
+# pattern, with each pattern's full stop sequence. Used to tell which lines
+# run between two stations and how often, before asking OTP to verify a
+# specific transfer.
+_DEPARTURES_FIELDS = """
+    gtfsId
+    name
+    stoptimesForPatterns(
+      startTime: $start
+      timeRange: $range
+      numberOfDepartures: $perPattern
+      omitNonPickups: true
+      omitCanceled: true
+    ) {
+      pattern {
+        code
+        directionId
+        headsign
+        route { gtfsId shortName mode }
+        stops { gtfsId name parentStation { gtfsId name } }
+      }
+      stoptimes { scheduledDeparture serviceDay }
+    }
+"""
+# PATH platforms have no parent station in GTFS, so the API's station ID for
+# them is the platform's own stop ID: ask for both and use whichever exists.
+STATION_DEPARTURES_QUERY = f"""
+query StationDepartures($id: String!, $start: Long!, $range: Int!, $perPattern: Int!) {{
+  station(id: $id) {{ {_DEPARTURES_FIELDS} }}
+  stop(id: $id) {{ {_DEPARTURES_FIELDS} }}
+}}
+"""
+
 
 @dataclass(frozen=True)
 class PlanQuery:
@@ -140,6 +173,22 @@ class OtpClient:
             itineraries=[edge["node"] for edge in connection["edges"]],
             routing_errors=connection["routingErrors"],
         )
+
+    async def station_departures(
+        self, station_id: str, start: datetime, window_s: int, per_pattern: int
+    ) -> dict[str, Any] | None:
+        """Departures by pattern; ``None`` if OTP does not know the station."""
+        data = await self._execute(
+            STATION_DEPARTURES_QUERY,
+            {
+                "id": station_id,
+                "start": int(start.timestamp()),
+                "range": window_s,
+                "perPattern": per_pattern,
+            },
+        )
+        station: dict[str, Any] | None = data["station"] or data["stop"]
+        return station
 
     async def is_ready(self, timeout_s: float) -> bool:
         """True if OTP answers a trivial query. Bypasses the breaker on purpose."""

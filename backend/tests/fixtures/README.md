@@ -11,3 +11,7 @@ MTA's elevator and escalator feeds (`nyct_ene_equipments.json`, `nyct_ene.json`)
 recorded on 2026-10-18. They were chosen to cover two current outages, one
 scheduled future outage, a multi-station complex, an escalator and an
 inactive unit.
+
+`otp_station_departures_chambers_st.json` is a real `StationDepartures`
+response for Chambers St (`MTASBWY:137`), 2026-10-19 08:30 to 09:30
+America/New_York, from the same graph.
