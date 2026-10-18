@@ -1,8 +1,9 @@
 """Download and validate the GTFS and OpenStreetMap inputs for the OTP graph.
 
 Reads ``otp/sources.json``, downloads every source into the graph directory,
-verifies published checksums where the provider offers them, and records a
-manifest (checksum, size, service dates) for every input.
+verifies published checksums where the provider offers them, derives subway
+station accessibility from MTA's elevator inventory (see gtfs_accessibility.py),
+and records a manifest (checksum, size, service dates) for every input.
 
 Usage:
     python otp/scripts/fetch_inputs.py [--graph-dir data/otp/graph] [--skip-osm]
@@ -25,6 +26,9 @@ import zipfile
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+
+# Sibling module; the script's directory is on sys.path when run directly.
+from gtfs_accessibility import enrich_wheelchair_boarding
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_FILE = REPO_ROOT / "otp" / "sources.json"
@@ -168,6 +172,48 @@ def fetch_source(entry: dict[str, str], graph_dir: Path) -> SourceResult:
     return result
 
 
+def enrich_accessibility(
+    config: dict[str, str] | None, graph_dir: Path, results: list[SourceResult]
+) -> dict[str, object]:
+    """Derive wheelchair_boarding for subway stations; fail the feed if that is impossible.
+
+    Building a graph without it would silently stop wheelchair routing from
+    preferring accessible stations, so a failure here fails the whole fetch.
+    """
+    if config is None:
+        return {}
+    feed = next((r for r in results if r.file == config["feed_file"]), None)
+    if feed is None or not feed.ok:
+        return {}
+    print("Deriving station accessibility from the MTA elevator inventory")
+    equipment_path = graph_dir / "mta-elevator-equipment.json"
+    try:
+        download(config["equipment_url"], equipment_path)
+        stats = enrich_wheelchair_boarding(graph_dir / feed.file, equipment_path.read_bytes())
+    except (urllib.error.URLError, TimeoutError, ConnectionError, ValueError, KeyError) as exc:
+        feed.ok = False
+        feed.error = f"accessibility enrichment failed: {type(exc).__name__}: {exc}"
+        return {}
+
+    feed.sha256 = sha256_of(graph_dir / feed.file)
+    feed.size_bytes = (graph_dir / feed.file).stat().st_size
+    feed.warnings = [w for w in feed.warnings if "wheelchair_boarding" not in w]
+    if stats.unmatched_equipment_stops:
+        feed.warnings.append(
+            f"elevators reference stops missing from GTFS: {stats.unmatched_equipment_stops}"
+        )
+    print(f"  {stats.accessible_stations} of {stats.stations} stations have an ADA elevator")
+    return {
+        "wheelchair_boarding": {
+            "feed": feed.file,
+            "derived_from": config["equipment_url"],
+            "equipment_sha256": sha256_of(equipment_path),
+            "stations": stats.stations,
+            "accessible_stations": stats.accessible_stations,
+        }
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
@@ -183,6 +229,7 @@ def main() -> int:
         shutil.copy(CONFIG_DIR / config, graph_dir / config)
 
     results = [fetch_source(entry, graph_dir) for entry in sources["gtfs"]]
+    derived = enrich_accessibility(sources.get("accessibility"), graph_dir, results)
 
     if not args.skip_osm:
         results += [fetch_source(entry, graph_dir) for entry in sources["osm"]]
@@ -190,6 +237,7 @@ def main() -> int:
     manifest = {
         "fetched_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "sources": [asdict(r) for r in results],
+        "derived": derived,
     }
     (graph_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 

@@ -63,6 +63,16 @@ Run it on a schedule, for example nightly:
 
 The ingestion worker's `gtfs_static` job reports each feed's end of service at `/api/v1/data/freshness`, so a refresh that stops running shows up there before routing starts missing trips.
 
+## Derived station accessibility
+
+MTA's subway GTFS leaves `wheelchair_boarding` empty, so OTP's wheelchair routing cannot tell accessible stations from inaccessible ones. `fetch_inputs.py` fills it in from MTA's elevator inventory ([`scripts/gtfs_accessibility.py`](scripts/gtfs_accessibility.py)) before the graph is built:
+
+- `1` (accessible) for a station with at least one active ADA-accessible elevator
+- `2` (not accessible) for every other subway station
+- platforms inherit their parent station's value
+
+The router configuration then penalises inaccessible stops heavily for wheelchair requests, so routing steers toward accessible stations. Only the static inventory is used here; live outages are applied when each route is assessed. The source and counts are recorded under `derived` in `manifest.json`. PATH publishes no equivalent data, so PATH stops stay unknown. If the inventory cannot be fetched, the whole fetch fails and a refresh keeps the current graph.
+
 ## Routing configuration
 
 [`config/router-config.json`](config/router-config.json) changes one OTP default. With wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.
@@ -102,7 +112,7 @@ Measured on a 4-core, 16 GB machine with all eight feeds and the street extract 
 ## Data notes
 
 - **Short feed validity.** The subway feed covers about five months and PATH about four, and both are republished frequently. Inputs must be refreshed and the graph rebuilt on a schedule.
-- **No accessibility in GTFS.** None of the MTA or PATH feeds set `wheelchair_boarding`. Accessibility comes from MTA's elevator and escalator feeds instead. Every active elevator in the equipment feed carries the GTFS stop ID it serves, so outages map directly onto stations in the graph.
+- **No accessibility in GTFS.** None of the MTA or PATH feeds set `wheelchair_boarding`. For the subway it is derived from MTA's elevator inventory (see above); live status comes from MTA's outage feed. Every active elevator in the equipment feed carries the GTFS stop ID it serves, so outages map directly onto stations in the graph.
 - **Upcoming vs. current outages.** MTA's current-outage feed also lists scheduled future outages, flagged with `isupcomingoutage`. Those must be filtered out, or working elevators are reported as broken.
 - **PATH stations.** The PATH feed does not group platforms under parent stations, so each station appears as several unrelated stops. Address-based planning is unaffected; stop-based queries need a station mapping.
 - **Transfers.** The subway feed defines 613 transfer rules with minimum transfer times. Walking transfers between stations are routed over the OpenStreetMap network.

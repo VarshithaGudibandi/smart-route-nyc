@@ -42,6 +42,17 @@ jobs:
       - name: Tests (unit and integration, with PostgreSQL and Redis containers)
         run: uv run pytest -v
 
+  otp-scripts:
+    name: OTP data scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Unit tests (standard library only)
+        run: python -m unittest discover -s otp/tests -v
+
   docker:
     name: Backend image
     runs-on: ubuntu-latest

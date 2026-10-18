@@ -9,6 +9,11 @@
     { "file": "mta-buscompany-gtfs.zip", "feed_id": "MTABC", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_busco.zip", "description": "MTA Bus Company" },
     { "file": "path-gtfs.zip", "feed_id": "PATH", "url": "https://rapid.nationalrtap.org/GTFSFileManagement/UserUploadFiles/14843/PATHGTFS.zip", "description": "Port Authority Trans-Hudson (PATH)" }
   ],
+  "accessibility": {
+    "feed_file": "mta-subway-gtfs.zip",
+    "equipment_url": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fnyct_ene_equipments.json",
+    "description": "MTA elevator inventory, used to derive wheelchair_boarding for subway stations"
+  },
   "osm": [
     {
       "file": "nyc-region.osm.pbf",
