@@ -1,0 +1,10 @@
+# Raises the per-client rate limits for load tests, which send everything
+# from one address. Use: COMPOSE_FILE=docker-compose.yml:load/compose.load.yml
+x-load-limits: &load-limits
+  RATE_LIMIT_ROUTE_SEARCH_PER_MINUTE: "100000"
+  RATE_LIMIT_PLACES_PER_MINUTE: "100000"
+  RATE_LIMIT_INVESTIGATION_POLL_PER_MINUTE: "100000"
+
+services:
+  backend:
+    environment: *load-limits

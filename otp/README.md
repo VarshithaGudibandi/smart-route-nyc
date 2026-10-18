@@ -28,7 +28,7 @@ The street extract covers `-74.36, 40.48, -73.67, 40.96` (west, south, east, nor
 
 ## Usage
 
-Prerequisites: Docker and Python 3.12.
+`./start.sh` at the repository root runs these steps for you, with Python in a container, so it needs only Docker. To run them by hand you need Docker and Python 3.12.
 
 ```bash
 # 1. Download and validate all inputs, write manifest.json

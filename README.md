@@ -49,7 +49,7 @@ flowchart LR
 - **Backend:** Python, FastAPI, Pydantic v2, SQLAlchemy 2 (async), Alembic, Redis
 - **Frontend:** Next.js, React, TypeScript, CSS modules, MapLibre GL with OpenFreeMap tiles
 - **Routing:** OpenTripPlanner 2, GTFS, GTFS-Realtime, OpenStreetMap
-- **Infrastructure:** Docker Compose, GitHub Actions, Prometheus, Grafana, OpenTelemetry
+- **Infrastructure:** Docker Compose, GitHub Actions, Prometheus, Grafana, k6, Trivy
 - **Testing:** pytest, Testcontainers, Vitest, Testing Library, Playwright, axe-core
 
 ## Repository layout
@@ -60,36 +60,58 @@ frontend/     Next.js web app
 otp/          OpenTripPlanner configuration and graph-build scripts
 ```
 
-## Getting started
+## Run it yourself
 
-Prerequisites: Docker with Compose, Python 3.12 and Node.js 22. OpenTripPlanner runs in Docker, so no local Java install is needed.
+Everything runs in Docker on your own machine, using free and open data. No accounts, API keys or paid services are needed.
+
+**You need:**
+
+- [Docker Desktop](https://docs.docker.com/get-docker/) (macOS or Windows) or Docker Engine with Compose (Linux)
+- **8 GB of memory available to Docker.** Docker Desktop often defaults to less: Settings → Resources → Memory.
+- About 5 GB of free disk space
+- macOS (Intel or Apple silicon), Linux, or Windows with [WSL 2](https://learn.microsoft.com/windows/wsl/install). On Windows, clone and run inside the WSL terminal.
 
 ```bash
 git clone https://github.com/VarshithaGudibandi/smart-route-nyc.git
 cd smart-route-nyc
-cp .env.example .env
-pip install pre-commit && pre-commit install
+./start.sh
 ```
 
-**1. Build the routing graph.** Follow [`otp/README.md`](otp/README.md) to download the transit and street data and build the OpenTripPlanner graph into `data/otp/graph/`.
+Then open **http://localhost:3000**.
 
-**2. Start the stack.**
+The first run takes about 15 minutes. It downloads the current MTA and PATH timetables and the OpenStreetMap street network for NYC and Hudson County (about 220 MB), builds the routing graph, starts every service, and waits until live elevator status has loaded. Later runs reuse the graph and start in about a minute.
 
-```bash
-docker compose up -d --build
-```
+| Command | What it does |
+|---|---|
+| `./start.sh` | Start, or set everything up on the first run |
+| `./start.sh --with-dashboards` | Also start Prometheus and Grafana ([Observability](#observability)) |
+| `./start.sh --refresh` | Rebuild the routing graph from the latest timetables; the current graph keeps serving until the new one passes its routing checks |
+| `./start.sh --stop` | Stop everything; downloaded data and the graph are kept |
 
-| Service | Address | Notes |
-|---|---|---|
-| Web app | http://localhost:3000 | |
-| API | http://localhost:8000 | Interactive docs at `/api/docs` |
-| OpenTripPlanner | http://localhost:8080 | Takes about a minute to load the graph |
-| PostgreSQL | localhost:5432 | Schema applied by the one-shot `migrate` service |
-| Redis | localhost:6379 | Cache only; no persistence |
+The graph covers up to 60 days of service from the day it is built, less if a published timetable ends sooner. http://localhost:8000/api/v1/data/freshness shows when each feed's service ends; run `./start.sh --refresh` before then.
 
-All ports are bound to `127.0.0.1`.
+| Service | Address |
+|---|---|
+| Web app | http://localhost:3000 |
+| API and interactive docs | http://localhost:8000/api/docs |
+| OpenTripPlanner | http://localhost:8080 |
+| Grafana (with `--with-dashboards`) | http://localhost:3001 |
 
-**3. Check health.**
+All ports are bound to `127.0.0.1`, so nothing is reachable from other machines.
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| "Docker has N GB of memory" | Give Docker at least 8 GB: Docker Desktop → Settings → Resources → Memory, then Apply & restart |
+| "Port 5432 (or 3000, 8000, 8080, 6379) is already in use" | Stop the program using it, often a local PostgreSQL, Redis or dev server. `lsof -i :5432` shows which |
+| A download fails | Each feed is retried with backoff first. If it still fails, check your connection and run `./start.sh` again; setup starts again from the downloads |
+| Graph build stops with `OutOfMemoryError` or exit code 137 | Docker ran out of memory. Raise its limit and run `./start.sh` again |
+| "The API did not become ready" | `docker compose logs --tail 50 otp backend` shows which service failed |
+| Behind a corporate proxy | Set `SMARTROUTE_DOCKER_ARGS="-e HTTPS_PROXY=http://proxy:port"` so the download step can reach the feeds |
+| Start over from scratch | `./start.sh --stop`, delete `data/otp/graph`, then `./start.sh` |
+
+### Health checks
 
 ```bash
 curl localhost:8000/api/v1/health/live    # process is running
@@ -97,6 +119,18 @@ curl localhost:8000/api/v1/health/ready   # PostgreSQL, Redis and OpenTripPlanne
 ```
 
 `/ready` returns `503` and names the failing dependency when any of them is down.
+
+### Development setup
+
+For working on the code, rather than just running it, you also need Python 3.12 with [uv](https://docs.astral.sh/uv/) and Node.js 22:
+
+```bash
+pip install pre-commit && pre-commit install
+```
+
+[`otp/README.md`](otp/README.md) documents the graph-build scripts that `start.sh` runs; the backend and web app have their own sections below.
+
+## Features
 
 ### Web app
 
@@ -325,6 +359,46 @@ uv run mypy app tests evals alembic  # strict type checking
 uv run alembic upgrade head      # apply migrations to the database in DATABASE_URL
 ```
 
+## Operations
+
+### Observability
+
+`./start.sh --with-dashboards` adds Prometheus and Grafana. The SmartRouteNYC dashboard opens at http://localhost:3001 without a login (view only; the admin password is `GRAFANA_ADMIN_PASSWORD`, default `admin`, and only works locally). It shows:
+
+| Panel | Metric |
+|---|---|
+| Traffic, latency and errors by route | `srn_http_requests_total`, `srn_http_request_duration_seconds` |
+| Route cache: hit, miss, or shared with an identical search in flight | `srn_route_searches_total` |
+| OpenTripPlanner latency and outcomes, including circuit-breaker refusals | `srn_otp_request_duration_seconds`, `srn_otp_requests_total` |
+| Transfer investigations: started, deduplicated, shed, timed out; duration; verified suggestions | `srn_investigations_total`, `srn_investigation_duration_seconds`, `srn_suggestions_verified_total` |
+| Time since each feed was last fetched, and ingestion outcomes | `srn_ingest_last_success_timestamp_seconds`, `srn_ingest_runs_total` |
+
+The API and worker serve metrics on port 9100 inside the Compose network only; it is not published to the host or the browser. Labels never contain locations or IDs: requests are labelled with their route template, such as `/api/v1/routes/investigations/{investigation_id}`. Every log line is structured JSON with a request ID, which the API also returns in `X-Request-ID`.
+
+### Load testing
+
+[k6](https://k6.io) scenarios in [`load/smartroute.js`](load/smartroute.js), run in Docker against the local stack:
+
+```bash
+load/run.sh                 # all scenarios
+load/run.sh same_search     # one scenario
+```
+
+| Scenario | What it checks |
+|---|---|
+| `mixed` | Searches over 30 real trips, place lookups and investigation polls, rising from 1 to 8 requests per second |
+| `same_search` | 50 people send the same search at once: only one reaches OpenTripPlanner and the rest share its answer |
+| `otp_outage` | OpenTripPlanner stopped: searches fail fast with `503 routing_unavailable`, never a 500 or an invented route |
+
+`load/run.sh` raises the per-client rate limits while it runs, since all traffic comes from one address, and restores them afterwards. The [local setup workflow](.github/workflows/local-setup.yml) runs `./start.sh` on a fresh GitHub Actions machine every week, checks a real PATH-to-subway route, the dashboards and the metrics pipeline, runs these load tests and publishes the results in the run summary.
+
+### Security
+
+- **Headers.** The API sends `Content-Security-Policy: default-src 'none'`, `nosniff`, `no-referrer` and, in production, HSTS. The web app sends a content security policy limited to its own origin, the API and the map tiles, `frame-ancestors 'none'` and `Referrer-Policy: no-referrer`, so trip coordinates in the page URL are never sent to tile servers. A browser test checks that the policy blocks nothing the app needs.
+- **Production checks.** With `APP_ENV=production` the API refuses to start with the development secret, a secret shorter than 32 characters, non-https or wildcard CORS origins, or the local database password. Interactive docs are disabled.
+- **Scanning in CI.** `pip-audit` and `npm audit` on the packages that ship, Trivy on both container images (high and critical findings with a fix fail the build), gitleaks for secrets, and shellcheck for the setup scripts.
+- **Containers.** The API, worker and web app run as non-root users, and every port is bound to `127.0.0.1`.
+
 ## Roadmap
 
 - [x] Repository foundation: tooling, CI, conventions
@@ -337,11 +411,12 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Asynchronous transfer investigation with routing-engine verification (rules generator; model generator ready for a provider)
 - [x] Grounded route explanations and anonymous feedback
 - [x] Web application
-- [ ] Load testing, metrics dashboards, tracing and deployment
+- [x] One-command local setup, metrics dashboards, load tests and security hardening
+- [ ] Hosted deployment
 
 ## Data sources and attribution
 
-Planned sources: the MTA's public GTFS and GTFS-Realtime feeds, PATH's published GTFS schedule, and OpenStreetMap data (© OpenStreetMap contributors, ODbL). Each source is used under its own terms, and none of the downloaded data is committed to this repository.
+Sources: the MTA's public GTFS and GTFS-Realtime feeds, PATH's published GTFS schedule, and OpenStreetMap data (© OpenStreetMap contributors, ODbL). Each source is used under its own terms, and none of the downloaded data is committed to this repository.
 
 ## License
 

@@ -17,6 +17,11 @@ NEXT="$DATA/graph-next"
 PREVIOUS="$DATA/graph-previous"
 OTP_URL="${OTP_URL:-http://localhost:8080}"
 READY_TIMEOUT_S="${READY_TIMEOUT_S:-300}"
+# How to run the Python scripts: python3 on the host, or
+# otp/scripts/docker_python.sh when the host has only Docker.
+PYTHON="${PYTHON:-python3}"
+# Where the smoke tests reach OTP; differs from OTP_URL inside a container.
+SMOKE_OTP_URL="${SMOKE_OTP_URL:-$OTP_URL}"
 
 log() { echo "[$(date -u +%H:%M:%S)] $*"; }
 
@@ -34,13 +39,17 @@ rollback() {
   rm -rf "$LIVE"
   mv "$PREVIOUS" "$LIVE"
   docker compose -f "$ROOT/docker-compose.yml" restart otp
-  wait_for_otp && log "Previous graph restored" || log "OTP did not recover; manual action needed"
+  if wait_for_otp; then
+    log "Previous graph restored"
+  else
+    log "OTP did not recover; manual action needed"
+  fi
   exit 1
 }
 
 rm -rf "$NEXT"
 log "Fetching inputs"
-python3 "$ROOT/otp/scripts/fetch_inputs.py" --graph-dir "$NEXT"
+"$PYTHON" "$ROOT/otp/scripts/fetch_inputs.py" --graph-dir "$NEXT"
 
 log "Building graph"
 "$ROOT/otp/scripts/build_graph.sh" "$NEXT"
@@ -55,6 +64,6 @@ log "Waiting for OTP"
 wait_for_otp || rollback
 
 log "Running smoke tests"
-python3 "$ROOT/otp/scripts/smoke_test.py" --url "$OTP_URL" || rollback
+"$PYTHON" "$ROOT/otp/scripts/smoke_test.py" --url "$SMOKE_OTP_URL" || rollback
 
 log "Deployed graph version $(cat "$LIVE/graph-version")"

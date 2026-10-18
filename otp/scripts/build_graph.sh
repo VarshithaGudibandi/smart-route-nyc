@@ -5,7 +5,7 @@
 # Env:   OTP_BUILD_HEAP  JVM heap for the build (default 12g)
 set -euo pipefail
 
-GRAPH_DIR="$(realpath "${1:-data/otp/graph}")"
+GRAPH_DIR="$(cd "${1:-data/otp/graph}" && pwd)"
 HEAP="${OTP_BUILD_HEAP:-12g}"
 # Pinned by digest so every build uses an identical OTP binary.
 OTP_IMAGE="opentripplanner/opentripplanner:2.10.0@sha256:8d54e5c589186707ee365417f2202dc878c451fa3001b8edff07019531100933"
@@ -23,5 +23,6 @@ docker run --rm \
 
 # The API includes this fingerprint in its cache keys, so deploying a rebuilt
 # graph retires every route cached from the previous one.
-sha256sum "$GRAPH_DIR/graph.obj" | cut -c1-16 > "$GRAPH_DIR/graph-version"
+if command -v sha256sum >/dev/null; then sha256=(sha256sum); else sha256=(shasum -a 256); fi  # macOS
+"${sha256[@]}" "$GRAPH_DIR/graph.obj" | cut -c1-16 > "$GRAPH_DIR/graph-version"
 echo "Graph written to $GRAPH_DIR/graph.obj (version $(cat "$GRAPH_DIR/graph-version"))"

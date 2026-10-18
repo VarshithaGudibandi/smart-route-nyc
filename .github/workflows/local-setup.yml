@@ -1,0 +1,140 @@
+name: Local setup and load tests
+
+# Runs ./start.sh on a fresh machine exactly as a new user would: downloads
+# the live timetables and street map, builds the routing graph, starts the
+# stack with dashboards, then checks real routing, the web app and the
+# metrics pipeline, and runs the k6 load tests. Weekly, because published
+# timetables change, and whenever the setup itself changes.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - start.sh
+      - docker-compose.yml
+      - backend/Dockerfile
+      - frontend/Dockerfile
+      - "otp/**"
+      - "observability/**"
+      - "load/**"
+      - .github/workflows/local-setup.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    name: Fresh install, routing checks and load tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Machine
+        run: |
+          nproc
+          free -g
+          df -h .
+          docker version --format '{{.Server.Version}}'
+
+      - name: First run of ./start.sh
+        run: |
+          start=$SECONDS
+          ./start.sh --with-dashboards
+          echo "FIRST_RUN_S=$((SECONDS - start))" >> "$GITHUB_ENV"
+
+      - name: A PATH-to-subway trip routes on the fresh graph
+        run: |
+          depart=$(TZ=America/New_York date -d 'next monday 08:30' +%Y-%m-%dT%H:%M:%S%:z)
+          curl -sf localhost:8000/api/v1/routes/search -H 'Content-Type: application/json' -d "{
+            \"origin\": {\"lat\": 40.73301, \"lon\": -74.06289},
+            \"destination\": {\"lat\": 40.80755, \"lon\": -73.96449},
+            \"depart_at\": \"$depart\"}" > search.json
+          python3 - <<'EOF'
+          import json
+          body = json.load(open("search.json"))
+          routes = body["routes"] + body["review_only_routes"]
+          agencies = {leg.get("agency") for r in routes for leg in r["legs"]}
+          print(len(routes), "routes; agencies:", sorted(a for a in agencies if a))
+          assert routes, "no routes"
+          assert any("PATH" in (a or "") for a in agencies), "no PATH leg"
+          EOF
+
+      - name: Web app, metrics and dashboards answer
+        run: |
+          curl -sf localhost:3000 | grep -q SmartRoute
+          curl -sf localhost:3000 -D - -o /dev/null | grep -i '^content-security-policy'
+          sleep 20  # one Prometheus scrape interval, with margin
+          curl -sf localhost:9090/api/v1/targets | python3 -c "
+          import json, sys
+          targets = json.load(sys.stdin)['data']['activeTargets']
+          health = {t['labels']['job']: t['health'] for t in targets}
+          print(health)
+          assert health.get('api') == 'up' and health.get('worker') == 'up', health"
+          curl -sf localhost:3001/api/dashboards/uid/smartroute-overview | python3 -c "
+          import json, sys; print(json.load(sys.stdin)['dashboard']['title'])"
+
+      - name: Second run of ./start.sh reuses the graph
+        run: |
+          start=$SECONDS
+          ./start.sh --with-dashboards
+          echo "SECOND_RUN_S=$((SECONDS - start))" >> "$GITHUB_ENV"
+
+      - name: Load tests
+        run: |
+          while sleep 5; do docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}'; done > load/results-stats.log &
+          trap 'kill $!' EXIT
+          load/run.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Local setup"
+            echo "First run: ${FIRST_RUN_S:-?} s. Second run: ${SECOND_RUN_S:-?} s."
+            echo
+            echo "Runner: $(nproc) CPUs, $(free -g | awk '/Mem:/ {print $2}') GB RAM"
+            echo
+            echo "## Load tests"
+            for f in load/results/*.json; do
+              [ -f "$f" ] || continue
+              python3 - "$f" <<'EOF'
+          import json, sys
+          data = json.load(open(sys.argv[1]))
+          name = sys.argv[1].rsplit("/", 1)[-1].removesuffix(".json")
+          print(f"### {name}")
+          for key, metric in sorted(data["metrics"].items()):
+              if key.startswith(("http_req_duration{", "http_reqs", "http_req_failed", "route_search_cache", "checks")):
+                  values = {k: round(v, 3) if isinstance(v, float) else v for k, v in metric["values"].items()}
+                  ok = metric.get("thresholds")
+                  print(f"- `{key}` {values}" + (f" thresholds: {ok}" if ok else ""))
+          EOF
+            done
+            echo
+            echo "Peak memory per container during the load tests:"
+            echo '```'
+            sort -k1,1 -k2,2h load/results-stats.log 2>/dev/null | awk '{peak[$1]=$2} END {for (c in peak) print c, peak[c]}' | sort
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Rebuild the graph with ./start.sh --refresh
+        run: ./start.sh --refresh
+
+      - name: Logs
+        if: failure()
+        run: docker compose --profile dashboards logs --tail 100
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: load-test-results
+          path: |
+            load/results
+            load/results-stats.log
+          if-no-files-found: ignore
