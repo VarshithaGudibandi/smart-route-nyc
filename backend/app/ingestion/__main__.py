@@ -23,6 +23,7 @@ from app.db.session import create_engine, create_session_factory
 from app.ingestion.retention import RetentionJob, RetentionPolicy
 from app.ingestion.runner import Job, run_job
 from app.ingestion.scheduler import ScheduledJob, run_scheduler
+from app.ingestion.sources.mta_alerts import MtaAlertsSource
 from app.ingestion.sources.mta_elevators import MtaElevatorSource
 from app.ingestion.sources.realtime import GtfsRealtimeProbe
 from app.ingestion.sources.static_gtfs import StaticGtfsMonitor
@@ -45,6 +46,7 @@ def build_jobs(
     realtime_every = settings.ingest_realtime_interval_s
     return [
         (MtaElevatorSource(http, sessions, redis, base), settings.ingest_elevators_interval_s),
+        (MtaAlertsSource(http, sessions, redis, base), settings.ingest_alerts_interval_s),
         (
             GtfsRealtimeProbe(http, "mta", "mta_subway_realtime", f"{base}/nyct%2Fgtfs"),
             realtime_every,

@@ -1,0 +1,749 @@
+{
+ "header": {
+  "gtfs_realtime_version": "2.0",
+  "incrementality": "FULL_DATASET",
+  "timestamp": 1792335297,
+  "transit_realtime.mercury_feed_header": {
+   "mercury_version": "1.0"
+  }
+ },
+ "entity": [
+  {
+   "id": "lmm:alert:272416:26",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1792335220
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "4",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:4:26"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "6",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:6:26"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "Downtown [4][6] trains are delayed while we address a signal malfunction at 149 St-Hostos.",
+       "language": "en"
+      },
+      {
+       "text": "<p>Downtown [4][6] trains are delayed while we address a signal malfunction at <strong>149 St-Hostos</strong>.</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "Planned Work Reminder:\nNo [6] between Hunts Point Av and 125 St.",
+       "language": "en"
+      },
+      {
+       "text": "<p><strong>Planned Work Reminder:</strong><br>No [6] between <strong>Hunts Point Av</strong> and <strong>125 St</strong>. </p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1792335220,
+     "updated_at": 1792335296,
+     "alert_type": "Delays",
+     "display_before_active": 0
+    }
+   }
+  },
+  {
+   "id": "lmm:planned_work:35739",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1792764000,
+      "end": 1792782000
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S31",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S30",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S29",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S28",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S27",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S26",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:11"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "[SIR] runs on an adjusted schedule",
+       "language": "en"
+      },
+      {
+       "text": "<p>[SIR] runs on an adjusted schedule</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "Tottenville-bound trains depart 1 minute later than regularly scheduled.\nWhat's happening?\nScheduled maintenance",
+       "language": "en"
+      },
+      {
+       "text": "<ul><li><p>Tottenville-bound trains depart 1 minute later than regularly scheduled.</p></li></ul><p><strong>What's happening?</strong></p><p>Scheduled maintenance</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1792090109,
+     "updated_at": 1792090109,
+     "alert_type": "Special Schedule",
+     "display_before_active": 3600,
+     "human_readable_active_period": {
+      "translation": [
+       {
+        "text": "Oct 23, Friday, 10:00 AM to 3:00 PM",
+        "language": "en"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "lmm:planned_work:35738",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1792926000,
+      "end": 1792969200
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S26",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:10"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S25",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:10"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "SI",
+      "stop_id": "S24",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:SI:10"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "All [SIR] trains from Jefferson Av to Old Town board from the Tottenville-bound platform",
+       "language": "en"
+      },
+      {
+       "text": "<p>All [SIR] trains from <strong>Jefferson Av</strong> to <strong>Old Town</strong> board from the Tottenville-bound platform</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "Boarding change includes Jefferson Av, Dongan Hills and Old Town stations.\nWhat's happening?\nScheduled maintenance",
+       "language": "en"
+      },
+      {
+       "text": "<ul><li><p>Boarding change includes <strong>Jefferson Av</strong>, <strong>Dongan Hills</strong> and <strong>Old Town</strong> stations.</p></li></ul><p><strong>What's happening?</strong></p><p>Scheduled maintenance</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1792090054,
+     "updated_at": 1792090054,
+     "alert_type": "Boarding Change",
+     "display_before_active": 3600,
+     "human_readable_active_period": {
+      "translation": [
+       {
+        "text": "Oct 25, Sunday, 7:00 AM to 7:00 PM",
+        "language": "en"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "lmm:planned_work:35729",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1793677500,
+      "end": 1793700000
+     },
+     {
+      "start": 1793763900,
+      "end": 1793786400
+     },
+     {
+      "start": 1793850300,
+      "end": 1793872800
+     },
+     {
+      "start": 1793936700,
+      "end": 1793959200
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "A",
+      "stop_id": "A65",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:A:20"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "A",
+      "stop_id": "A64",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:A:20"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "A",
+      "stop_id": "A63",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:A:20"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "A",
+      "stop_id": "A61",
+      "direction_id": 1,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:A:20"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "In Queens, no [A] between Rockaway Blvd and Ozone Park-Lefferts Blvd",
+       "language": "en"
+      },
+      {
+       "text": "<p>In Queens, no [A] between <strong>Rockaway Blvd</strong> and <strong>Ozone Park-Lefferts Blvd</strong></p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "[A] trains run between Inwood-207 St and Far Rockaway-Mott Av.\n\n[shuttle bus icon] Free T366 shuttle buses make stops between Rockaway Blvd and Ozone Park-Lefferts Blvd, stopping at 104 St and 111 St.\nTransfer between [A] and [shuttle bus icon] at Rockaway Blvd.\nWhat's happening?\nWe're modernizing signals\n\n[accessibility icon] This service change affects one or more ADA accessible stations and these travel alternatives may not be fully accessible. Please contact 511 to plan your trip.",
+       "language": "en"
+      },
+      {
+       "text": "<p>[A] trains run between <strong>Inwood-207 St</strong> and <strong>Far Rockaway-Mott Av</strong>.</p><p style=\"min-height:10px\"></p><p>[shuttle bus icon]Free <strong>T366</strong> shuttle buses make stops between <strong>Rockaway Blvd</strong> and <strong>Ozone Park-Lefferts Blvd</strong>, stopping at <strong>104 St</strong> and <strong>111 St</strong>.</p><ul><li><p>Transfer between [A] and [shuttle bus icon]at <strong>Rockaway Blvd</strong>.</p></li></ul><p><strong>What's happening?</strong></p><p>We're modernizing signals</p><p style=\"min-height:10px\"></p><p>[accessibility icon] This service change affects one or more ADA accessible stations and these travel alternatives may not be fully accessible. Please contact 511 to plan your trip.</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1792087610,
+     "updated_at": 1792088621,
+     "alert_type": "Planned - Part Suspended",
+     "station_alternative": [
+      {
+       "affected_entity": {
+        "agency_id": "MTASBWY",
+        "stop_id": "A61"
+       },
+       "notes": {
+        "translation": [
+         {
+          "text": "[accessibility icon] | [A]\n[shuttle bus icon] 93 St at Liberty Av (to Lefferts Blvd)\n[shuttle bus icon] Rockaway Blvd at 97 St (to Lefferts Blvd)",
+          "language": "en"
+         },
+         {
+          "text": "<p>[accessibility icon] | [A]</p><p>[shuttle bus icon]93 St at Liberty Av (to Lefferts Blvd)</p><p>[shuttle bus icon]Rockaway Blvd at 97 St (to Lefferts Blvd)</p>",
+          "language": "en-html"
+         }
+        ]
+       }
+      },
+      {
+       "affected_entity": {
+        "agency_id": "MTASBWY",
+        "stop_id": "A63"
+       },
+       "notes": {
+        "translation": [
+         {
+          "text": "[shuttle bus icon] Rockaway Blvd at 102 St (to Lefferts Blvd)\n[shuttle bus icon] Rockaway Blvd at 104 St (to Rockaway Blvd)",
+          "language": "en"
+         },
+         {
+          "text": "<p>[shuttle bus icon]Rockaway Blvd at 102 St (to Lefferts Blvd)</p><p>[shuttle bus icon]Rockaway Blvd at 104 St (to Rockaway Blvd)</p>",
+          "language": "en-html"
+         }
+        ]
+       }
+      },
+      {
+       "affected_entity": {
+        "agency_id": "MTASBWY",
+        "stop_id": "A64"
+       },
+       "notes": {
+        "translation": [
+         {
+          "text": "[shuttle bus icon] 111 St at Liberty Av (to Lefferts Blvd)\n[shuttle bus icon] 111 St at 107 Av (to Rockaway Blvd)",
+          "language": "en"
+         },
+         {
+          "text": "<p>[shuttle bus icon]111 St at Liberty Av (to Lefferts Blvd)</p><p>[shuttle bus icon]111 St at 107 Av (to Rockaway Blvd)</p><p></p>",
+          "language": "en-html"
+         }
+        ]
+       }
+      },
+      {
+       "affected_entity": {
+        "agency_id": "MTASBWY",
+        "stop_id": "A65"
+       },
+       "notes": {
+        "translation": [
+         {
+          "text": "[shuttle bus icon] Lefferts Blvd at Liberty Av (to Rockaway Blvd)",
+          "language": "en"
+         },
+         {
+          "text": "<p>[shuttle bus icon]Lefferts Blvd at Liberty Av (to Rockaway Blvd)</p>",
+          "language": "en-html"
+         }
+        ]
+       }
+      }
+     ],
+     "display_before_active": 3600,
+     "human_readable_active_period": {
+      "translation": [
+       {
+        "text": "Nov 2 - 6, Mon to Fri, 10:45 PM to 5:00 AM",
+        "language": "en"
+       }
+      ]
+     },
+     "affected_stations": [
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A59",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A60",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A57",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A55",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A54",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A53",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A52",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A51",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A50",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A49",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A48",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A47",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A46",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A45",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A44",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A43",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A42",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      },
+      {
+       "agency_id": "MTASBWY",
+       "route_id": "A",
+       "stop_id": "A41",
+       "direction_id": 1,
+       "transit_realtime.mercury_entity_selector": {
+        "sort_order": "MTASBWY:A:20"
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "lmm:planned_work:35675",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1794372300,
+      "end": 1794391200
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "D43",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "B23",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "B22",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "B21",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "B20",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     },
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "D",
+      "stop_id": "B19",
+      "direction_id": 0,
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:D:16"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "In Brooklyn, Manhattan-bound [D] skips 20 Av, 18 Av, 79 St, 71 St, 55 St, 50 St and Fort Hamilton Pkwy",
+       "language": "en"
+      },
+      {
+       "text": "<p>In Brooklyn, Manhattan-bound [D] skips <strong>20 Av</strong>, <strong>18 Av</strong>, <strong>79 St</strong>, <strong>71 St</strong>, <strong>55 St</strong>, <strong>50 St</strong> and <strong>Fort Hamilton Pkwy</strong></p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "For service to these stations, take the [D] to 62 St or 9 Av and transfer to a Coney Island-bound [D].\n\nFor service from these stations, take the [D] to 62 St or Bay Pkwy and transfer to a Manhattan-bound [D].\nAt Bay Pkwy, 62 St and 9 Av trains board from the Coney Island-bound platform.\nWhat's happening?\nWe're replacing tracks",
+       "language": "en"
+      },
+      {
+       "text": "<p>For service to these stations, take the [D] to \u200c<strong>62 St</strong> or <strong>9 Av</strong> and transfer to a Coney Island-bound [D].</p><p></p><p>For service from these stations, take the [D] to \u200c<strong>62 St</strong> or <strong>Bay Pkwy</strong> and transfer to a Manhattan-bound [D].</p><ul><li><p>At <strong>Bay Pkwy</strong>, <strong>62 St</strong> and <strong>9 Av</strong> trains board from the Coney Island-bound platform.</p></li></ul><p><strong>What's happening?</strong></p><p>We're replacing tracks</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1791920479,
+     "updated_at": 1792159307,
+     "alert_type": "Planned - Stops Skipped",
+     "display_before_active": 3600,
+     "human_readable_active_period": {
+      "translation": [
+       {
+        "text": "Nov 10 - 11, Tue 11:45 PM to Wed 5:00 AM",
+        "language": "en"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "lmm:planned_work:35667",
+   "alert": {
+    "active_period": [
+     {
+      "start": 1792247400,
+      "end": 1792280700
+     },
+     {
+      "start": 1792333800,
+      "end": 1792367100
+     }
+    ],
+    "informed_entity": [
+     {
+      "agency_id": "MTASBWY",
+      "route_id": "Q",
+      "transit_realtime.mercury_entity_selector": {
+       "sort_order": "MTASBWY:Q:13"
+      }
+     }
+    ],
+    "header_text": {
+     "translation": [
+      {
+       "text": "[Q] runs every 10 minutes",
+       "language": "en"
+      },
+      {
+       "text": "<p>[Q] runs every 10 minutes</p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "description_text": {
+     "translation": [
+      {
+       "text": "What's happening?\nWe're replacing tracks",
+       "language": "en"
+      },
+      {
+       "text": "<p><strong>What's happening?</strong></p><p>We're replacing tracks </p>",
+       "language": "en-html"
+      }
+     ]
+    },
+    "transit_realtime.mercury_alert": {
+     "created_at": 1791907777,
+     "updated_at": 1791914443,
+     "alert_type": "Reduced Service",
+     "display_before_active": 3600,
+     "human_readable_active_period": {
+      "translation": [
+       {
+        "text": "Oct 17 - 18, Sat and Sun, days and evenings",
+        "language": "en"
+       }
+      ]
+     }
+    }
+   }
+  }
+ ]
+}

@@ -1,13 +1,13 @@
 import json
 import uuid
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select, text, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.cache.redis import ResilientRedis
@@ -20,13 +20,14 @@ from app.db.models import (
     RouteFeedback,
     SourceFreshness,
 )
-from app.db.session import create_session_factory
 from app.ingestion.retention import RetentionJob, RetentionPolicy
 from app.ingestion.runner import run_job
 from app.ingestion.sources.mta_elevators import MtaElevatorSource
 from app.main import create_app
 from app.services.accessibility.snapshot import ACCESSIBILITY_VERSION_KEY, SnapshotProvider
 from tests.fakes import FIXTURES
+
+pytestmark = pytest.mark.usefixtures("no_backoff")
 
 BASE = "https://feeds.example/mta"
 
@@ -54,38 +55,8 @@ class MtaFeeds:
 
 
 @pytest.fixture
-async def sessions(engine: AsyncEngine) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
-    async with engine.begin() as conn:
-        await conn.execute(
-            text(
-                "TRUNCATE accessibility_equipment, accessibility_equipment_stops, "
-                "equipment_status, accessibility_events, source_freshness, feed_sync_runs, "
-                "route_feedback CASCADE"
-            )
-        )
-    yield create_session_factory(engine)
-
-
-@pytest.fixture
-async def redis(redis_url: str) -> AsyncIterator[ResilientRedis]:
-    client = ResilientRedis.from_url(
-        redis_url, timeout_ms=500, failure_threshold=3, reset_timeout_s=10
-    )
-    yield client
-    await client.close()
-
-
-@pytest.fixture
 def feeds() -> MtaFeeds:
     return MtaFeeds()
-
-
-@pytest.fixture(autouse=True)
-def no_backoff(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def instant(_: float) -> None:
-        return None
-
-    monkeypatch.setattr("app.ingestion.http.asyncio.sleep", instant)
 
 
 def elevator_source(

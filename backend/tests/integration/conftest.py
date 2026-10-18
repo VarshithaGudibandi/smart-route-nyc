@@ -6,9 +6,18 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from testcontainers.community.postgres import PostgresContainer
 from testcontainers.community.redis import RedisContainer
+
+from app.cache.redis import ResilientRedis
+from app.db.session import create_session_factory
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
@@ -46,3 +55,33 @@ async def engine(migrated_postgres_url: str) -> AsyncIterator[AsyncEngine]:
     engine = create_async_engine(migrated_postgres_url)
     yield engine
     await engine.dispose()
+
+
+@pytest.fixture
+async def sessions(engine: AsyncEngine) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    async with engine.begin() as conn:
+        await conn.execute(
+            text(
+                "TRUNCATE accessibility_equipment, accessibility_equipment_stops, "
+                "equipment_status, accessibility_events, source_freshness, feed_sync_runs, "
+                "route_feedback, service_alerts CASCADE"
+            )
+        )
+    yield create_session_factory(engine)
+
+
+@pytest.fixture
+async def redis(redis_url: str) -> AsyncIterator[ResilientRedis]:
+    client = ResilientRedis.from_url(
+        redis_url, timeout_ms=500, failure_threshold=3, reset_timeout_s=10
+    )
+    yield client
+    await client.close()
+
+
+@pytest.fixture
+def no_backoff(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def instant(_: float) -> None:
+        return None
+
+    monkeypatch.setattr("app.ingestion.http.asyncio.sleep", instant)

@@ -1,12 +1,13 @@
 """Database schema.
 
 The application stores no accounts and no travel history. Tables hold
-anonymous feedback, provenance of ingested transit data, and accessibility
-equipment status.
+anonymous feedback, provenance of ingested transit data, accessibility
+equipment status and current service alerts.
 """
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -22,6 +23,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 # Deterministic constraint names keep Alembic migrations stable.
@@ -174,3 +176,28 @@ class AccessibilityEvent(Base):
     observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     raw_source_ref: Mapped[str | None] = mapped_column(Text)
+
+
+class ServiceAlert(Base):
+    """Current service alerts (delays, suspensions, planned work).
+
+    The operator publishes the full set on every fetch, so the table mirrors
+    the latest feed: alerts that disappear are deleted. Times are the feed's.
+    """
+
+    __tablename__ = "service_alerts"
+
+    operator: Mapped[str] = mapped_column(String(16), primary_key=True)
+    alert_external_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    alert_type: Mapped[str | None] = mapped_column(String(64))
+    header_text: Mapped[str] = mapped_column(Text)
+    description_text: Mapped[str | None] = mapped_column(Text)
+    # [[start, end], ...] in epoch seconds; end is null for open-ended periods.
+    active_periods: Mapped[list[list[int | None]]] = mapped_column(JSONB)
+    # [{"route_id": "C", "stop_id": "A24", "direction_id": 1}, ...], GTFS IDs
+    # without the feed prefix, exactly as the operator publishes them.
+    informed_entities: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    source_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    source_version: Mapped[str | None] = mapped_column(String(128))

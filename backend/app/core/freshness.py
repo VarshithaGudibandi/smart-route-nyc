@@ -23,6 +23,7 @@ class SourceKind(StrEnum):
     ACCESSIBILITY_STATUS = "accessibility_status"
     REALTIME_SERVICE = "realtime_service"
     STATIC_SCHEDULE = "static_schedule"
+    SERVICE_ALERTS = "service_alerts"
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,7 @@ class Thresholds:
 THRESHOLDS = {
     SourceKind.ACCESSIBILITY_STATUS: Thresholds(timedelta(minutes=10), timedelta(minutes=30)),
     SourceKind.REALTIME_SERVICE: Thresholds(timedelta(minutes=2), timedelta(minutes=10)),
+    SourceKind.SERVICE_ALERTS: Thresholds(timedelta(minutes=5), timedelta(minutes=20)),
 }
 # Static timetables are "stale" when they stop covering service this soon.
 STATIC_EXPIRY_WARNING = timedelta(days=7)

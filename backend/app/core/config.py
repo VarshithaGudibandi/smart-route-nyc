@@ -68,6 +68,7 @@ class Settings(BaseSettings):
 
     ingest_elevators_interval_s: int = Field(default=120, ge=10)
     ingest_realtime_interval_s: int = Field(default=60, ge=10)
+    ingest_alerts_interval_s: int = Field(default=120, ge=10)
     ingest_static_interval_s: int = Field(default=3600, ge=60)
     ingest_retention_interval_s: int = Field(default=86_400, ge=60)
     ingest_fetch_timeout_s: float = Field(default=20.0, gt=0)
