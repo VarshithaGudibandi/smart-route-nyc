@@ -73,7 +73,7 @@ async def verify(
     lines = [*proposal.first_routes, *proposal.second_routes]
     for route_id in lines:
         if suspended := [
-            a for a in data.alerts.for_route(route_id, data.now) if a.suspends_service
+            a for a in data.alerts.for_route(route_id, data.requested) if a.suspends_service
         ]:
             return reject("line_suspended", suspended[0].header[:200])
 
@@ -109,10 +109,15 @@ async def verify(
     ):
         return reject("accessibility", f"accessibility is {assessed.accessibility_status}")
 
+    # Alerts in effect while the rider is on each line.
+    alerts = {
+        alert.alert_id: alert
+        for leg in assessed.legs
+        if leg.route_id
+        for alert in data.alerts.for_route(leg.route_id, leg.start_time)
+    }
     notices = [
-        Notice(code="SERVICE_ALERT", message=alert.header[:300])
-        for route_id in dict.fromkeys(leg.route_id for leg in assessed.legs if leg.route_id)
-        for alert in data.alerts.for_route(route_id, data.now)
+        Notice(code="SERVICE_ALERT", message=alert.header[:300]) for alert in alerts.values()
     ]
     return VerifiedSuggestion(
         proposal=proposal,

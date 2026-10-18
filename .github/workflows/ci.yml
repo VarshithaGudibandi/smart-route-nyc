@@ -43,6 +43,8 @@ jobs:
         run: uv run pytest -v
       - name: Preference interpretation evaluation (baseline)
         run: uv run python -m evals.preferences
+      - name: Explanation grounding evaluation
+        run: uv run python -m evals.explanations
 
   otp-scripts:
     name: OTP data scripts

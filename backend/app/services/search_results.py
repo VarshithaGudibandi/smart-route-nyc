@@ -15,7 +15,7 @@ from collections.abc import Awaitable, Callable
 from pydantic import BaseModel, ValidationError
 
 from app.cache.redis import ResilientRedis
-from app.schemas.routes import DataFreshness, Route, RouteSearchResponse
+from app.schemas.routes import DataFreshness, Route, RouteSearchRequest, RouteSearchResponse
 
 KEY_PREFIX = "srn:v1:search"
 
@@ -29,6 +29,9 @@ class StoredSearch(BaseModel):
     routes: list[Route]
     data_freshness: list[DataFreshness]
     investigation_id: str | None = None
+    # The rider's requirements, so routes can be re-assessed when explained.
+    wheelchair_required: bool = False
+    accessibility_required: bool = False
 
 
 class SearchResults:
@@ -39,13 +42,15 @@ class SearchResults:
         self._ttl_s = ttl_s
         self._suggestions = suggestions
 
-    async def save(self, response: RouteSearchResponse) -> None:
+    async def save(self, response: RouteSearchResponse, request: RouteSearchRequest) -> None:
         stored = StoredSearch(
             search_id=response.search_id,
             graph_version=response.graph_version,
             routes=response.routes + response.review_only_routes,
             data_freshness=response.data_freshness,
             investigation_id=response.investigation.id if response.investigation else None,
+            wheelchair_required=request.accessibility.wheelchair_required,
+            accessibility_required=request.accessibility.needs_accessible_routing,
         )
         await self._redis.set(
             self._key(response.search_id), stored.model_dump_json().encode(), ttl_s=self._ttl_s

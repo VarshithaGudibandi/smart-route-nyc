@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Path, Response, status
 from app.api.deps import Resources, get_resources, rate_limit
 from app.core.errors import NotFoundError
 from app.schemas.errors import ErrorResponse
+from app.schemas.explanations import ExplainRequest, ExplanationResponse
 from app.schemas.routes import RouteSearchRequest, RouteSearchResponse
 from app.schemas.suggestions import InvestigationView
 from app.services.suggestions.jobs import InvestigationRunner
@@ -42,7 +43,7 @@ async def search_routes(
             result.investigation = await resources.investigations.start(
                 outcome.cache_key, body, outcome.requested, baseline, result.graph_version
             )
-    await resources.search_results.save(result)
+    await resources.search_results.save(result, body)
     return result
 
 
@@ -93,3 +94,23 @@ def _runner(resources: Resources) -> InvestigationRunner:
     if resources.investigations is None:
         raise NotFoundError("Transfer suggestions are disabled")
     return resources.investigations
+
+
+@router.post(
+    "/explain",
+    dependencies=[Depends(rate_limit("explain", lambda s: s.rate_limit_explain_per_minute))],
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorResponse},
+    },
+)
+async def explain_route(
+    body: ExplainRequest, resources: Annotated[Resources, Depends(get_resources)]
+) -> ExplanationResponse:
+    """Explain a route from a recent search, citing the facts behind each sentence.
+
+    Accessibility is re-checked against current elevator data. Without a
+    language model, or when a model's wording does not match the facts, the
+    facts themselves are returned as the explanation.
+    """
+    return await resources.explanations.explain(body.search_id, body.route_id)

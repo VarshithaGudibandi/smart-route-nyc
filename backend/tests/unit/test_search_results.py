@@ -1,7 +1,7 @@
 from app.integrations.otp.mapper import to_route
 from app.schemas.routes import InvestigationRef, Route, RouteSearchResponse
 from app.services.search_results import SearchResults
-from tests.fakes import in_memory_redis, plan_fixture
+from tests.fakes import in_memory_redis, make_request, plan_fixture
 from tests.suggestion_fakes import EXPRESS, LOCAL, C, itinerary
 
 SEARCH_ID = "a" * 32
@@ -23,7 +23,7 @@ def response(investigation: InvestigationRef | None = None) -> RouteSearchRespon
 
 async def test_routes_of_a_stored_search_are_found_by_id() -> None:
     results = SearchResults(in_memory_redis(), ttl_s=60)
-    await results.save(response())
+    await results.save(response(), make_request())
     found = await results.route(SEARCH_ID, baseline().route_id)
     assert found is not None and found[1] == baseline()
     assert await results.route(SEARCH_ID, "f" * 16) is None
@@ -41,6 +41,8 @@ async def test_suggestion_routes_are_found_through_the_investigation() -> None:
         return [suggestion]
 
     results = SearchResults(in_memory_redis(), ttl_s=60, suggestions=suggestions)
-    await results.save(response(InvestigationRef(id="c" * 24, status="queued", poll_after_ms=1)))
+    await results.save(
+        response(InvestigationRef(id="c" * 24, status="queued", poll_after_ms=1)), make_request()
+    )
     found = await results.route(SEARCH_ID, suggestion.route_id)
     assert found is not None and found[1] == suggestion and asked == ["c" * 24]

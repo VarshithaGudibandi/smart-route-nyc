@@ -220,6 +220,55 @@ cd backend && uv run python -m evals.suggestions     # needs the running stack a
 
 The wins are the changes experienced riders make: from Bay Ridge, the R to 59 St and then the N express over the Manhattan Bridge arrives 13 minutes earlier than OTP's one-seat R ride, and still meets a step-free requirement; from Pelham Bay, the 6 express to 125 St and then the 4/5 express saves 5.5 minutes. Most proposals do not beat OTP, which is why each is verified and the rest discarded. Only single-transfer changes are considered.
 
+### Route explanations
+
+`POST /api/v1/routes/explain` explains a route from a recent search. The client sends only `search_id` and `route_id`: the server explains routes it returned, never a route a client describes. Search results are kept in Redis for 15 minutes for this purpose.
+
+```bash
+curl -s localhost:8000/api/v1/routes/explain -H 'Content-Type: application/json' \
+  -d '{"search_id": "<from the search>", "route_id": "<a route of it>"}'
+```
+
+The explanation is built from **facts** computed by code: the overall trip, every leg and transfer, every accessibility finding with its source and age, MTA alerts in effect while the rider is on each line, and what the data cannot say ("PATH does not publish elevator data", "times come from the published timetable"). Accessibility is re-assessed against current elevator data when the explanation is requested. Every sentence cites the facts it states.
+
+Without a language model, the facts are the explanation. With one, the model may only reword them, and its reply is discarded in favor of the facts unless every sentence passes these checks against the facts it cites:
+
+| Check | Rejects |
+|---|---|
+| Cited fact IDs exist | Invented sources |
+| Every number and clock time appears in the cited facts | "Arrives at 08:49" when the facts say 08:51 |
+| Every capitalized name appears in the cited facts | A station or line that is not on the route |
+| Accessibility and certainty words ("accessible", "elevator", "stairs", "guaranteed", "fastest", "delays") appear in the cited facts | "116 St is accessible" when MTA lists no ADA elevator there |
+| Every required fact (barriers, unconfirmed steps, alerts, stale data) is cited | An explanation that leaves out a barrier |
+
+#### Evaluation
+
+23 scripted model replies against one route ([`backend/evals/explanation_cases.jsonl`](backend/evals/explanation_cases.jsonl)), run in CI:
+
+```bash
+cd backend && uv run python -m evals.explanations
+```
+
+| Result | |
+|---|---|
+| Faithful wording accepted | 2 / 2 |
+| Unfaithful wording rejected, for the expected reason | 14 / 14 |
+| Malformed replies rejected | 4 / 4 |
+| Known gaps caught (reported, not gated) | 1 / 3 |
+
+The checks are lexical. Two known gaps pass them: advice that is not in the facts ("take a taxi if you are running late") and a number reused with a new meaning ("about 1 hour" when a cited fact says "1 transfer"). They are kept in the evaluation so the limits stay visible.
+
+### Feedback
+
+`POST /api/v1/feedback` rates a route from a recent search, 1 to 5 stars with an optional comment of up to 1000 characters. No account is needed.
+
+| Behavior | Detail |
+|---|---|
+| Stored | Stars, the cleaned comment, and an HMAC of the result reference. No locations, client address or time of travel |
+| Comments | Control characters removed; email addresses and phone numbers masked before storage; cleared after 12 months |
+| Duplicates | Rating the same result again replaces the earlier rating |
+| Abuse | Only results the server issued in the last 15 minutes can be rated (`404` otherwise); 5 per minute per client |
+
 ### Data ingestion
 
 The `worker` service (`python -m app.ingestion`) keeps transit and accessibility data current:
@@ -266,7 +315,7 @@ uv run alembic upgrade head      # apply migrations to the database in DATABASE_
 - [x] Accessibility assessment engine
 - [x] Natural-language preference interpretation (model provider pluggable; keyword baseline included)
 - [x] Asynchronous transfer investigation with routing-engine verification (rules generator; model generator ready for a provider)
-- [ ] Grounded route explanations and anonymous feedback
+- [x] Grounded route explanations and anonymous feedback
 - [ ] Web application
 - [ ] Load testing, dashboards, end-to-end tests and deployment
 

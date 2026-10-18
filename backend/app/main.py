@@ -24,6 +24,7 @@ from app.core.resilience import CircuitBreaker
 from app.db.session import create_engine
 from app.integrations.otp.client import OtpClient
 from app.services.accessibility.snapshot import SnapshotProvider
+from app.services.explanations.service import ExplanationService
 from app.services.feedback import FeedbackStore
 from app.services.route_search import RouteSearchService
 from app.services.search_results import SearchResults
@@ -73,6 +74,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         graph_version = GraphVersion(settings.otp_graph_version_file)
         accessibility = SnapshotProvider(db_engine, redis)
+        alerts = AlertsProvider(db_engine, redis)
         investigations = None
         if settings.suggestions_enabled:
             # No language model generates proposals yet: only "baseline" or
@@ -80,7 +82,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             suggestions = SuggestionService(
                 otp,
                 TransitKnowledge(otp, redis, graph_version),
-                AlertsProvider(db_engine, redis),
+                alerts,
                 accessibility,
             )
             investigations = InvestigationRunner(
@@ -94,6 +96,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 poll_after_ms=settings.investigation_poll_after_ms,
                 record_outcome=OutcomeRecorder(db_engine),
             )
+        search_results = SearchResults(
+            redis,
+            settings.search_result_ttl_s,
+            investigations.suggestion_routes if investigations else None,
+        )
         resources = Resources(
             settings=settings,
             db_engine=db_engine,
@@ -103,12 +110,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             route_search=RouteSearchService(otp, redis, graph_version, accessibility, settings),
             preferences=PreferenceInterpreter(llm, redis, secret, settings.preference_cache_ttl_s),
             investigations=investigations,
-            search_results=SearchResults(
-                redis,
-                settings.search_result_ttl_s,
-                investigations.suggestion_routes if investigations else None,
-            ),
+            search_results=search_results,
             feedback=FeedbackStore(db_engine, secret),
+            explanations=ExplanationService(
+                search_results,
+                accessibility,
+                alerts,
+                # No language model provider exists yet ("baseline" is keyword
+                # rules for preferences), so explanations are the facts.
+                None,
+                redis,
+                secret,
+                settings.explanation_cache_ttl_s,
+            ),
         )
         app.state.resources = resources
         logger.info("startup", env=settings.app_env)

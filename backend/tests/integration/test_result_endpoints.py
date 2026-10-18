@@ -148,3 +148,34 @@ def test_feedback_is_rate_limited(client: TestClient) -> None:
         for i in range(6)
     ]
     assert 429 in statuses and statuses[0] == 201
+
+
+def test_explanation_cites_server_side_facts(client: TestClient) -> None:
+    result = search(client)
+    route = result["routes"][0]
+    response = client.post(
+        "/api/v1/routes/explain",
+        json={"search_id": result["search_id"], "route_id": route["route_id"]},
+    )
+    assert response.status_code == 200
+    explanation = response.json()
+    assert explanation["source"] == "facts"
+    fact_ids = {f["id"] for f in explanation["facts"]}
+    assert {"summary", "accessibility"} <= fact_ids
+    assert all(set(s["fact_ids"]) <= fact_ids for s in explanation["sentences"])
+    # PATH publishes no elevator data: the explanation must say so.
+    assert any("PATH does not publish elevator data" in f["text"] for f in explanation["facts"])
+
+
+@pytest.mark.parametrize(
+    ("body", "code"),
+    [
+        ({"search_id": "0" * 32, "route_id": "0" * 16}, 404),
+        ({"search_id": "not-hex", "route_id": "0" * 16}, 422),
+        ({"route": {"legs": []}}, 422),  # routes cannot be supplied by the client
+    ],
+)
+def test_explanation_only_for_issued_results(
+    client: TestClient, body: dict[str, Any], code: int
+) -> None:
+    assert client.post("/api/v1/routes/explain", json=body).status_code == code
