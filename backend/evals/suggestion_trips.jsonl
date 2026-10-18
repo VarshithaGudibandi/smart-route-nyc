@@ -1,0 +1,30 @@
+{"id": "chambers_columbia", "origin": {"label": "Chambers St", "lat": 40.7155, "lon": -74.0092}, "destination": {"label": "Columbia University", "lat": 40.8075, "lon": -73.9645}}
+{"id": "jsq_columbia", "origin": {"label": "Journal Square PATH", "lat": 40.733, "lon": -74.0629}, "destination": {"label": "Columbia University", "lat": 40.8075, "lon": -73.9645}}
+{"id": "wall_st_135", "origin": {"label": "Wall St", "lat": 40.7066, "lon": -74.0092}, "destination": {"label": "135 St (Lenox Av)", "lat": 40.8141, "lon": -73.9409}}
+{"id": "city_hall_125_lex", "origin": {"label": "Brooklyn Bridge-City Hall", "lat": 40.7131, "lon": -74.0041}, "destination": {"label": "125 St (Lexington Av)", "lat": 40.8042, "lon": -73.9375}}
+{"id": "union_sq_ditmars", "origin": {"label": "Union Square", "lat": 40.7357, "lon": -73.9906}, "destination": {"label": "Astoria-Ditmars Blvd", "lat": 40.775, "lon": -73.912}}
+{"id": "atlantic_columbus", "origin": {"label": "Atlantic Av-Barclays Ctr", "lat": 40.6842, "lon": -73.9777}, "destination": {"label": "Columbus Circle", "lat": 40.7682, "lon": -73.9819}}
+{"id": "penn_brooklyn_college", "origin": {"label": "Penn Station", "lat": 40.7506, "lon": -73.9935}, "destination": {"label": "Brooklyn College", "lat": 40.6327, "lon": -73.9476}}
+{"id": "grand_central_yankees", "origin": {"label": "Grand Central", "lat": 40.7527, "lon": -73.9772}, "destination": {"label": "Yankee Stadium", "lat": 40.8279, "lon": -73.9258}}
+{"id": "hoboken_grand_central", "origin": {"label": "Hoboken Terminal", "lat": 40.7353, "lon": -74.0275}, "destination": {"label": "Grand Central", "lat": 40.7527, "lon": -73.9772}}
+{"id": "newark_times_sq", "origin": {"label": "Newark Penn Station", "lat": 40.7347, "lon": -74.164}, "destination": {"label": "Times Square", "lat": 40.758, "lon": -73.9855}}
+{"id": "times_sq_jamaica", "origin": {"label": "Times Square", "lat": 40.758, "lon": -73.9855}, "destination": {"label": "Jamaica Center", "lat": 40.7022, "lon": -73.8011}}
+{"id": "union_sq_coney", "origin": {"label": "Union Square", "lat": 40.7357, "lon": -73.9906}, "destination": {"label": "Coney Island", "lat": 40.5774, "lon": -73.9813}}
+{"id": "fulton_103", "origin": {"label": "Fulton St", "lat": 40.7101, "lon": -74.0076}, "destination": {"label": "103 St (Broadway)", "lat": 40.7995, "lon": -73.9682}}
+{"id": "bowling_green_hunts_point", "origin": {"label": "Bowling Green", "lat": 40.7046, "lon": -74.0141}, "destination": {"label": "Hunts Point Av", "lat": 40.8209, "lon": -73.8908}}
+{"id": "herald_sq_forest_hills", "origin": {"label": "Herald Square", "lat": 40.7496, "lon": -73.9877}, "destination": {"label": "Forest Hills-71 Av", "lat": 40.7216, "lon": -73.8443}}
+{"id": "jackson_hts_times_sq", "origin": {"label": "Jackson Heights-Roosevelt Av", "lat": 40.7466, "lon": -73.8913}, "destination": {"label": "Times Square", "lat": 40.758, "lon": -73.9855}}
+{"id": "court_sq_canal", "origin": {"label": "Court Square", "lat": 40.747, "lon": -73.9456}, "destination": {"label": "Canal St", "lat": 40.7188, "lon": -74.001}}
+{"id": "barclays_181", "origin": {"label": "Atlantic Av-Barclays Ctr", "lat": 40.6842, "lon": -73.9777}, "destination": {"label": "181 St (Washington Heights)", "lat": 40.8509, "lon": -73.9379}}
+{"id": "bedford_8_av", "origin": {"label": "Bedford Av", "lat": 40.7172, "lon": -73.9567}, "destination": {"label": "8 Av (14 St)", "lat": 40.7398, "lon": -74.0026}}
+{"id": "utica_wall_st", "origin": {"label": "Crown Heights-Utica Av", "lat": 40.6688, "lon": -73.9311}, "destination": {"label": "Wall St", "lat": 40.7066, "lon": -74.0092}}
+{"id": "inwood_jay_st", "origin": {"label": "Inwood-207 St", "lat": 40.8682, "lon": -73.9199}, "destination": {"label": "Jay St-MetroTech", "lat": 40.6923, "lon": -73.9874}}
+{"id": "bay_ridge_herald_sq", "origin": {"label": "Bay Ridge-95 St", "lat": 40.6168, "lon": -74.0308}, "destination": {"label": "Herald Square", "lat": 40.7496, "lon": -73.9877}}
+{"id": "flushing_grand_central", "origin": {"label": "Flushing-Main St", "lat": 40.7596, "lon": -73.8301}, "destination": {"label": "Grand Central", "lat": 40.7527, "lon": -73.9772}}
+{"id": "wtc_96_broadway", "origin": {"label": "World Trade Center PATH", "lat": 40.7116, "lon": -74.0118}, "destination": {"label": "96 St (Broadway)", "lat": 40.7939, "lon": -73.9724}}
+{"id": "pelham_bay_city_hall", "origin": {"label": "Pelham Bay Park", "lat": 40.8526, "lon": -73.8281}, "destination": {"label": "Brooklyn Bridge-City Hall", "lat": 40.7131, "lon": -74.0041}}
+{"id": "exchange_pl_columbia", "origin": {"label": "Exchange Place PATH", "lat": 40.7163, "lon": -74.0328}, "destination": {"label": "Columbia University", "lat": 40.8075, "lon": -73.9645}}
+{"id": "union_sq_242", "origin": {"label": "Union Square", "lat": 40.7357, "lon": -73.9906}, "destination": {"label": "Van Cortlandt Park-242 St", "lat": 40.8893, "lon": -73.8985}}
+{"id": "south_ferry_72", "origin": {"label": "South Ferry", "lat": 40.702, "lon": -74.013}, "destination": {"label": "72 St (Broadway)", "lat": 40.7785, "lon": -73.9819}}
+{"id": "harlem_125_delancey", "origin": {"label": "125 St (St Nicholas Av)", "lat": 40.8111, "lon": -73.9524}, "destination": {"label": "Delancey St", "lat": 40.7184, "lon": -73.9877}}
+{"id": "lefferts_columbus", "origin": {"label": "Ozone Park-Lefferts Blvd", "lat": 40.6858, "lon": -73.8253}, "destination": {"label": "Columbus Circle", "lat": 40.7682, "lon": -73.9819}}
