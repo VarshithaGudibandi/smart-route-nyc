@@ -22,16 +22,16 @@ Defined in [`sources.json`](sources.json). Downloaded files are written to `data
 | Bus: Bronx, Brooklyn, Manhattan, Queens, Staten Island | `MTABX` `MTABK` `MTAMN` `MTAQN` `MTASI` | MTA | MTA data terms |
 | MTA Bus Company | `MTABC` | MTA | MTA data terms |
 | PATH | `PATH` | Port Authority of NY & NJ | Check before redistribution |
-| Streets: New York + New Jersey extracts, clipped to the region | | OpenStreetMap via Geofabrik | ODbL, © OpenStreetMap contributors |
+| Streets: NYC metropolitan extract | | OpenStreetMap via [BBBike](https://download.bbbike.org/osm/bbbike/NewYork/) | ODbL, © OpenStreetMap contributors |
 
-The region is bounded by `-74.30, 40.49, -73.69, 40.92` (west, south, east, north). That covers the five boroughs plus Jersey City, Hoboken, Harrison and Newark.
+The street extract covers `-74.36, 40.48, -73.67, 40.96` (west, south, east, north): the five boroughs plus Jersey City, Hoboken, Harrison and Newark. Its MD5 is checked against the checksum BBBike publishes.
 
 ## Usage
 
-Prerequisites: Docker, Python 3.12 and [osmium-tool](https://osmcode.org/osmium-tool/).
+Prerequisites: Docker and Python 3.12.
 
 ```bash
-# 1. Download feeds, validate them, clip OSM to the region, write manifest.json
+# 1. Download and validate all inputs, write manifest.json
 python otp/scripts/fetch_inputs.py
 
 # 2. Build the graph (heap is configurable)

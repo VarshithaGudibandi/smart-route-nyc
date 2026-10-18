@@ -1,5 +1,4 @@
 {
-  "region_bbox": { "west": -74.30, "south": 40.49, "east": -73.69, "north": 40.92 },
   "gtfs": [
     { "file": "mta-subway-gtfs.zip", "feed_id": "MTASBWY", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_supplemented.zip", "description": "MTA NYC Transit subway, including planned service changes for the next 7 days" },
     { "file": "mta-bus-bronx-gtfs.zip", "feed_id": "MTABX", "url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_bx.zip", "description": "MTA NYC Transit bus, Bronx" },
@@ -11,8 +10,11 @@
     { "file": "path-gtfs.zip", "feed_id": "PATH", "url": "https://rapid.nationalrtap.org/GTFSFileManagement/UserUploadFiles/14843/PATHGTFS.zip", "description": "Port Authority Trans-Hudson (PATH)" }
   ],
   "osm": [
-    { "file": "new-york-latest.osm.pbf", "url": "https://download.geofabrik.de/north-america/us/new-york-latest.osm.pbf" },
-    { "file": "new-jersey-latest.osm.pbf", "url": "https://download.geofabrik.de/north-america/us/new-jersey-latest.osm.pbf" }
-  ],
-  "osm_output": "nyc-region.osm.pbf"
+    {
+      "file": "nyc-region.osm.pbf",
+      "url": "https://download.bbbike.org/osm/bbbike/NewYork/NewYork.osm.pbf",
+      "md5_url": "https://download.bbbike.org/osm/bbbike/NewYork/CHECKSUM.txt",
+      "description": "BBBike NewYork extract: five boroughs plus Jersey City, Hoboken, Harrison and Newark"
+    }
+  ]
 }

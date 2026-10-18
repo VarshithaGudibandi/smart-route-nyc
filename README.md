@@ -65,7 +65,7 @@ Directories are added as each component is implemented.
 
 ## Getting started
 
-Prerequisites: Docker with Compose, Python 3.12, Node.js 20, and Java 21 to build the OpenTripPlanner graph.
+Prerequisites: Docker with Compose, Python 3.12 and Node.js 20. OpenTripPlanner runs in Docker, so no local Java install is needed.
 
 ```bash
 git clone https://github.com/VarshithaGudibandi/smart-route-nyc.git

@@ -1,8 +1,8 @@
 """Download and validate the GTFS and OpenStreetMap inputs for the OTP graph.
 
 Reads ``otp/sources.json``, downloads every source into the graph directory,
-records a manifest (checksum, size, service dates) and clips the OSM extracts
-to the project region with osmium-tool.
+verifies published checksums where the provider offers them, and records a
+manifest (checksum, size, service dates) for every input.
 
 Usage:
     python otp/scripts/fetch_inputs.py [--graph-dir data/otp/graph] [--skip-osm]
@@ -17,7 +17,6 @@ import io
 import json
 import random
 import shutil
-import subprocess
 import sys
 import time
 import urllib.error
@@ -123,49 +122,50 @@ def inspect_gtfs(path: Path, result: SourceResult) -> None:
         )
 
 
+class ChecksumMismatchError(Exception):
+    pass
+
+
+def verify_published_md5(path: Path, published_name: str, checksum_url: str) -> None:
+    """Compare ``path`` with the MD5 a provider lists for ``published_name``."""
+    with urllib.request.urlopen(checksum_url, timeout=TIMEOUT_S) as resp:
+        listing = resp.read().decode()
+    expected = next(
+        (line.split()[0] for line in listing.splitlines() if line.endswith(published_name)), None
+    )
+    if expected is None:
+        raise ChecksumMismatchError(f"{published_name} is not listed in {checksum_url}")
+    digest = hashlib.md5(usedforsecurity=False)
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(chunk)
+    if digest.hexdigest() != expected:
+        raise ChecksumMismatchError(f"MD5 mismatch for {path.name}")
+
+
 def fetch_source(entry: dict[str, str], graph_dir: Path) -> SourceResult:
     result = SourceResult(file=entry["file"], url=entry["url"], ok=False)
     dest = graph_dir / entry["file"]
     print(f"Fetching {entry['file']}")
     try:
         download(entry["url"], dest)
+        if "md5_url" in entry:
+            published_name = entry["url"].rsplit("/", 1)[-1]
+            verify_published_md5(dest, published_name, entry["md5_url"])
         result.sha256 = sha256_of(dest)
         result.size_bytes = dest.stat().st_size
         if dest.suffix == ".zip":
             inspect_gtfs(dest, result)
         result.ok = True
-    except (urllib.error.URLError, TimeoutError, ConnectionError, zipfile.BadZipFile) as exc:
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        ConnectionError,
+        zipfile.BadZipFile,
+        ChecksumMismatchError,
+    ) as exc:
         result.error = f"{type(exc).__name__}: {exc}"
     return result
-
-
-def clip_osm(sources: list[Path], bbox: dict[str, float], output: Path) -> None:
-    """Merge state extracts and clip them to the project bounding box."""
-    if shutil.which("osmium") is None:
-        raise RuntimeError(
-            "osmium-tool is required to clip OSM data (apt/brew install osmium-tool)"
-        )
-    merged = output.with_name("merged.osm.pbf")
-    subprocess.run(
-        ["osmium", "merge", *map(str, sources), "-o", str(merged), "--overwrite"], check=True
-    )
-    box = f"{bbox['west']},{bbox['south']},{bbox['east']},{bbox['north']}"
-    subprocess.run(
-        [
-            "osmium",
-            "extract",
-            "--bbox",
-            box,
-            "--strategy",
-            "complete_ways",
-            str(merged),
-            "-o",
-            str(output),
-            "--overwrite",
-        ],
-        check=True,
-    )
-    merged.unlink()
 
 
 def main() -> int:
@@ -184,14 +184,7 @@ def main() -> int:
     results = [fetch_source(entry, graph_dir) for entry in sources["gtfs"]]
 
     if not args.skip_osm:
-        osm_dir = graph_dir / "osm-source"
-        osm_dir.mkdir(exist_ok=True)
-        osm_results = [fetch_source(entry, osm_dir) for entry in sources["osm"]]
-        results += osm_results
-        if all(r.ok for r in osm_results):
-            output = graph_dir / sources["osm_output"]
-            clip_osm([osm_dir / r.file for r in osm_results], sources["region_bbox"], output)
-            print(f"Clipped OSM extract written to {output}")
+        results += [fetch_source(entry, graph_dir) for entry in sources["osm"]]
 
     manifest = {
         "fetched_at": datetime.now(UTC).isoformat(timespec="seconds"),
