@@ -74,15 +74,50 @@ cp .env.example .env
 pip install pre-commit && pre-commit install
 ```
 
-**Routing engine.** Building and serving the OpenTripPlanner graph is described in [`otp/README.md`](otp/README.md).
+**1. Build the routing graph.** Follow [`otp/README.md`](otp/README.md) to download the transit and street data and build the OpenTripPlanner graph into `data/otp/graph/`.
 
-Setup for the remaining services will be documented here as they are added.
+**2. Start the stack.**
+
+```bash
+docker compose up -d --build
+```
+
+| Service | Address | Notes |
+|---|---|---|
+| API | http://localhost:8000 | Interactive docs at `/api/docs` |
+| OpenTripPlanner | http://localhost:8080 | Takes about a minute to load the graph |
+| PostgreSQL | localhost:5432 | Schema applied by the one-shot `migrate` service |
+| Redis | localhost:6379 | Cache only; no persistence |
+
+All ports are bound to `127.0.0.1`.
+
+**3. Check health.**
+
+```bash
+curl localhost:8000/api/v1/health/live    # process is running
+curl localhost:8000/api/v1/health/ready   # PostgreSQL, Redis and OpenTripPlanner are reachable
+```
+
+`/ready` returns `503` and names the failing dependency when any of them is down.
+
+### Backend development
+
+The backend uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
+```bash
+cd backend
+uv sync                          # install dependencies from uv.lock
+uv run pytest                    # unit + integration tests (integration tests start PostgreSQL and Redis via Docker)
+uv run pytest tests/unit         # unit tests only, no Docker needed
+uv run mypy app tests alembic    # strict type checking
+uv run alembic upgrade head      # apply migrations to the database in DATABASE_URL
+```
 
 ## Roadmap
 
 - [x] Repository foundation: tooling, CI, conventions
 - [x] Transit data pipeline and OpenTripPlanner graph for NYC + PATH
-- [ ] Backend foundation: API skeleton, PostgreSQL, Redis, observability
+- [x] Backend foundation: API skeleton, PostgreSQL, Redis, structured logging, CI
 - [ ] Route search with caching, deduplication and rate limiting
 - [ ] Feed ingestion: schedules, realtime updates, elevator outages
 - [ ] Accessibility assessment engine

@@ -3,3 +3,6 @@ line-length = 100
 
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+
+[lint.isort]
+known-first-party = ["app", "tests"]

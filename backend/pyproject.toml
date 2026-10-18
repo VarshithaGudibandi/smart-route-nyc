@@ -1,0 +1,46 @@
+[project]
+name = "smartroute-backend"
+version = "0.1.0"
+description = "SmartRouteNYC API: accessibility-aware journey planning for NYC subway, bus and PATH"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.143",
+  "uvicorn[standard]>=0.54",
+  "pydantic>=2.14",
+  "pydantic-settings>=2.16",
+  "sqlalchemy[asyncio]>=2.1",
+  "asyncpg>=0.32",
+  "alembic>=1.20",
+  "redis>=8.1",
+  "structlog>=26.1",
+  "httpx>=0.28",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.1",
+  "pytest-asyncio>=1.4",
+  "testcontainers[postgres,redis]>=4.15",
+  "mypy>=2.4",
+  "ruff>=0.17",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+markers = ["integration: needs Docker to start PostgreSQL and Redis containers"]
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+ignore_missing_imports = true
