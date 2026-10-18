@@ -73,6 +73,16 @@ MTA's subway GTFS leaves `wheelchair_boarding` empty, so OTP's wheelchair routin
 
 The router configuration then penalises inaccessible stops heavily for wheelchair requests, so routing steers toward accessible stations. Only the static inventory is used here; live outages are applied when each route is assessed. The source and counts are recorded under `derived` in `manifest.json`. PATH publishes no equivalent data, so PATH stops stay unknown. If the inventory cannot be fetched, the whole fetch fails and a refresh keeps the current graph.
 
+Measured effect (October 2026 data: 163 of 496 subway stations have an ADA elevator), comparing wheelchair-required searches for six cross-borough trips before and after the derivation:
+
+| | Before | After |
+|---|---|---|
+| Routes that violate the requirement | 25 of 30 | 10 of 30 |
+| Routes confirmed to meet it | 5 | 8 |
+| Subway station stops that violate it | 30 | 11 |
+
+The remaining unconfirmed routes mostly involve PATH (no data published) or stations where some elevators are out of service.
+
 ## Routing configuration
 
 [`config/router-config.json`](config/router-config.json) changes one OTP default. With wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.
