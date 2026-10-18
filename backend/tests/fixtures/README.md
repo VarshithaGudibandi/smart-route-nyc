@@ -22,3 +22,10 @@ scheduled), with each alert's affected-entity list shortened.
 
 `tests/suggestion_fakes.py` builds a small synthetic subway (lines X and L,
 stations A to E) for suggestion tests. It is DEMO DATA, not a real network.
+
+`otp_transit_places.json` is a real `TransitPlaces` response from the same
+graph, trimmed to seven subway station names and the PATH routes.
+
+`photon_search.json` is DEMO DATA: hand-written in Photon's documented
+GeoJSON response format (the public server is not reachable from the test
+environment), with one result outside the service area.

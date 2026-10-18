@@ -3,6 +3,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import httpx
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,9 @@ from app.integrations.otp.client import OtpClient
 from app.services.accessibility.snapshot import SnapshotProvider
 from app.services.explanations.service import ExplanationService
 from app.services.feedback import FeedbackStore
+from app.services.places.photon import PhotonGeocoder
+from app.services.places.service import PlaceSearch
+from app.services.places.stations import StationIndex
 from app.services.route_search import RouteSearchService
 from app.services.search_results import SearchResults
 from app.services.suggestions.jobs import InvestigationRunner
@@ -34,6 +38,7 @@ from app.services.suggestions.service import SuggestionService
 from app.services.transit.alerts import AlertsProvider
 from app.services.transit.knowledge import TransitKnowledge
 
+USER_AGENT = "SmartRouteNYC/0.1 (+https://github.com/VarshithaGudibandi/smart-route-nyc)"
 logger = structlog.get_logger(__name__)
 
 
@@ -96,6 +101,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 poll_after_ms=settings.investigation_poll_after_ms,
                 record_outcome=OutcomeRecorder(db_engine),
             )
+        geocoder = None
+        geocoder_http = None
+        if settings.photon_base_url:
+            geocoder_http = httpx.AsyncClient(
+                base_url=settings.photon_base_url,
+                timeout=httpx.Timeout(settings.photon_timeout_s),
+                headers={"User-Agent": USER_AGENT},
+            )
+            geocoder = PhotonGeocoder(
+                geocoder_http,
+                CircuitBreaker("geocoder", 3, 60),
+                redis,
+                secret,
+                settings.place_cache_ttl_s,
+            )
         search_results = SearchResults(
             redis,
             settings.search_result_ttl_s,
@@ -123,6 +143,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 secret,
                 settings.explanation_cache_ttl_s,
             ),
+            places=PlaceSearch(StationIndex(otp, graph_version), geocoder),
         )
         app.state.resources = resources
         logger.info("startup", env=settings.app_env)
@@ -132,6 +153,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if resources.investigations is not None:
                 await resources.investigations.close()
             await resources.otp.close()
+            if geocoder_http is not None:
+                await geocoder_http.aclose()
             await resources.redis.close()
             await resources.db_engine.dispose()
             logger.info("shutdown")

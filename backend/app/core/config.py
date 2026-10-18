@@ -52,7 +52,13 @@ class Settings(BaseSettings):
     rate_limit_interpret_per_minute: int = Field(default=10, ge=1)
     rate_limit_investigation_poll_per_minute: int = Field(default=120, ge=1)
     rate_limit_feedback_per_minute: int = Field(default=5, ge=1)
+    rate_limit_places_per_minute: int = Field(default=60, ge=1)
     rate_limit_explain_per_minute: int = Field(default=20, ge=1)
+
+    # Address search through Photon (OpenStreetMap). Empty URL: stations only.
+    photon_base_url: str = "https://photon.komoot.io"
+    photon_timeout_s: float = Field(default=2.5, gt=0)
+    place_cache_ttl_s: int = Field(default=86_400, gt=0)
 
     # How long a search's results can be explained or rated.
     search_result_ttl_s: int = Field(default=900, ge=60)

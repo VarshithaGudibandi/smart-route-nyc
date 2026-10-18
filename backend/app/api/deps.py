@@ -15,6 +15,7 @@ from app.core.rate_limit import RateLimiter
 from app.integrations.otp.client import OtpClient
 from app.services.explanations.service import ExplanationService
 from app.services.feedback import FeedbackStore
+from app.services.places.service import PlaceSearch
 from app.services.route_search import RouteSearchService
 from app.services.search_results import SearchResults
 from app.services.suggestions.jobs import InvestigationRunner
@@ -34,6 +35,7 @@ class Resources:
     search_results: SearchResults
     feedback: FeedbackStore
     explanations: ExplanationService
+    places: PlaceSearch
     # None when suggestions are disabled.
     investigations: InvestigationRunner | None = None
 

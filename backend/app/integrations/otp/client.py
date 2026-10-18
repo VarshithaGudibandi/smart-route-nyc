@@ -111,6 +111,16 @@ query StationDepartures($id: String!, $start: Long!, $range: Int!, $perPattern: 
 """
 
 
+# Every subway station with the lines at its platforms, and every PATH stop
+# (PATH platforms have no parent station, so they are reached through routes).
+TRANSIT_PLACES_QUERY = """
+{
+  stations { gtfsId name lat lon stops { routes { shortName } } }
+  routes(feeds: ["PATH"]) { gtfsId shortName longName patterns { stops { gtfsId name lat lon } } }
+}
+"""
+
+
 @dataclass(frozen=True)
 class PlanQuery:
     origin: tuple[float, float]
@@ -201,6 +211,9 @@ class OtpClient:
         )
         station: dict[str, Any] | None = data["station"] or data["stop"]
         return station
+
+    async def transit_places(self) -> dict[str, Any]:
+        return await self._execute(TRANSIT_PLACES_QUERY, {})
 
     async def is_ready(self, timeout_s: float) -> bool:
         """True if OTP answers a trivial query. Bypasses the breaker on purpose."""

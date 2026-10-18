@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-73.9626, 40.8075]},
+      "properties": {"osm_type": "W", "osm_id": 1001, "name": "Columbia University", "street": "Broadway", "city": "New York", "district": "Manhattan", "state": "New York"}
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-73.9877, 40.7496]},
+      "properties": {"osm_type": "N", "osm_id": 1002, "housenumber": "151", "street": "West 34th Street", "city": "New York", "district": "Manhattan", "state": "New York"}
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-76.4841, 42.4534]},
+      "properties": {"osm_type": "W", "osm_id": 1003, "name": "Columbia Street", "city": "Ithaca", "state": "New York"}
+    }
+  ]
+}
