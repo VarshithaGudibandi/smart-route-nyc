@@ -9,6 +9,7 @@ x-backend-env: &backend-env
   OTP_BASE_URL: http://otp:8080
   OTP_GRAPH_VERSION_FILE: /otp-data/graph/graph-version
   GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
+  SAME_PLATFORM_FILE: /otp-data/graph/same-platform-transfers.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
   # Any AI provider: see .env.example. Without a key the app runs on rules.
   LLM_PROVIDER: ${LLM_PROVIDER:-auto}

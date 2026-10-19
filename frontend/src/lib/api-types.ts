@@ -688,6 +688,8 @@ export interface components {
             duration_seconds: number;
             /** Legs */
             legs: components["schemas"]["Leg"][];
+            /** Notes */
+            notes?: components["schemas"]["Notice"][];
             /**
              * Origin Type
              * @default otp_baseline

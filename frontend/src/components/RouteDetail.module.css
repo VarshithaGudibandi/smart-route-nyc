@@ -51,6 +51,16 @@
   color: var(--ink-muted);
 }
 
+.notes {
+  list-style: none;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--line-strong);
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
 .alerts {
   list-style: none;
   margin: 0;

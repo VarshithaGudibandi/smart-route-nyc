@@ -40,6 +40,7 @@ from app.services.suggestions.context import (
 )
 from app.services.suggestions.verifier import VerificationInput, verify
 from app.services.transit.alerts import AlertSnapshot
+from app.services.transit.same_platform import SamePlatformChanges
 
 logger = structlog.get_logger(__name__)
 
@@ -66,8 +67,10 @@ class SuggestionService:
         alerts: AlertSource,
         accessibility: SnapshotProvider,
         model: ProposalGenerator | None = None,
+        same_platform: SamePlatformChanges | None = None,
     ) -> None:
         self._otp = otp
+        self._same_platform = same_platform or SamePlatformChanges(None)
         self._knowledge = knowledge
         self._alerts = alerts
         self._accessibility = accessibility
@@ -140,7 +143,11 @@ class SuggestionService:
                 return await verify(self._otp, proposal, source, data)
 
         outcomes = await asyncio.gather(*(bounded(p, s) for p, s in to_verify))
-        suggestions = [o for o in outcomes if isinstance(o, VerifiedSuggestion)]
+        suggestions = [
+            o.model_copy(update={"route": self._same_platform.label(o.route)})
+            for o in outcomes
+            if isinstance(o, VerifiedSuggestion)
+        ]
         rejected += [o for o in outcomes if isinstance(o, RejectedProposal)]
         suggestions.sort(key=lambda s: s.route.arrival)
         logger.info(

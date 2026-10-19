@@ -101,7 +101,7 @@ OpenTripPlanner ranks itineraries by a cost that penalizes transfers, so it ofte
 3. **Checks.** IDs must come from the facts, every ride must run between its stations, and no line may be suspended.
 4. **Verification.** One OTP query restricted to the plan's lines and forced through each transfer station in order, under the rider's settings. It must ride exactly those lines, arrive at least a minute earlier and meet any accessibility requirement.
 
-With **Fewer transfers** selected, no investigation runs. Timing follows MTA's published minimum transfer times (3 minutes at most stations), so a change only shows up when it still wins after them.
+With **Fewer transfers** selected, no investigation runs. A change between lines on the same platform takes 1 minute in the graph, where MTA's timetable allows 3 ([`otp/README.md`](../otp/README.md#same-platform-transfers)). Any route that relies on that, from a search or a suggestion, carries a `SAME_PLATFORM_CHANGE` note, shown as "1-min change assumed".
 
 The search response includes `{"investigation": {"id": "...", "poll_after_ms": 1500}}`; poll `GET /api/v1/routes/investigations/{id}`, cancel with `DELETE`. Identical searches share one investigation (Redis `SET NX`); at most 2 run and 16 wait per instance, each with a 20 s timeout. Each proposal's outcome is kept in `suggestion_outcomes` for 180 days, with lines and stations only.
 

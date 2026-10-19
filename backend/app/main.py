@@ -45,6 +45,7 @@ from app.services.suggestions.outcomes import OutcomeRecorder
 from app.services.suggestions.service import SuggestionService
 from app.services.transit.alerts import AlertsProvider
 from app.services.transit.knowledge import TransitKnowledge
+from app.services.transit.same_platform import SamePlatformChanges
 
 USER_AGENT = "SmartRouteNYC/0.1 (+https://github.com/VarshithaGudibandi/smart-route-nyc)"
 logger = structlog.get_logger(__name__)
@@ -94,6 +95,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             timeout_s=settings.llm_timeout_s,
         )
         graph_version = GraphVersion(settings.otp_graph_version_file)
+        same_platform = SamePlatformChanges(settings.same_platform_file)
         accessibility = SnapshotProvider(db_engine, redis)
         alerts = AlertsProvider(db_engine, redis)
         # Only a real model writes explanations and proposes transfers; the
@@ -107,6 +109,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 alerts,
                 accessibility,
                 ModelProposalGenerator(model_llm) if model_llm else None,
+                same_platform,
             )
             investigations = InvestigationRunner(
                 suggestions.investigate,
@@ -145,7 +148,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             redis=redis,
             otp=otp,
             rate_limiter=RateLimiter(redis, secret),
-            route_search=RouteSearchService(otp, redis, graph_version, accessibility, settings),
+            route_search=RouteSearchService(
+                otp, redis, graph_version, accessibility, settings, same_platform
+            ),
             preferences=PreferenceInterpreter(llm, redis, secret, settings.preference_cache_ttl_s),
             investigations=investigations,
             search_results=search_results,

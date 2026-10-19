@@ -77,6 +77,14 @@ export function RouteDetail({ route, searchId, freshness, notices, suggestion, a
           )}
         </div>
 
+        {(route.notes ?? []).length > 0 && (
+          <ul className={styles.notes} aria-label="Assumptions">
+            {(route.notes ?? []).map((note, index) => (
+              <li key={index}>{note.message}</li>
+            ))}
+          </ul>
+        )}
+
         {notices.length > 0 && (
           <ul className={styles.alerts} aria-label="Service alerts">
             {notices.map((notice, index) => (

@@ -98,6 +98,8 @@ class Settings(BaseSettings):
     mta_bus_gtfs_rt_url: str = "https://gtfsrt.prod.obanyc.com/vehiclePositions"
     # manifest.json written by otp/scripts/fetch_inputs.py next to the graph.
     gtfs_manifest_file: Path | None = None
+    # Stations where the graph allows a 1-minute same-platform change.
+    same_platform_file: Path | None = None
 
     ingest_elevators_interval_s: int = Field(default=120, ge=10)
     ingest_realtime_interval_s: int = Field(default=60, ge=10)

@@ -102,6 +102,16 @@
   text-transform: uppercase;
 }
 
+.assumed {
+  align-self: center;
+  border: 1.5px dashed var(--ink-muted);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
 .counts {
   align-self: center;
   display: flex;

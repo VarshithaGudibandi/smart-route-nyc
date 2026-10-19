@@ -3,6 +3,7 @@
 Reads ``otp/sources.json``, downloads every source into the graph directory,
 verifies published checksums where the provider offers them, derives subway
 station accessibility from MTA's elevator inventory (see gtfs_accessibility.py),
+shortens transfers between lines that share a platform (see same_platform.py),
 and records a manifest (checksum, size, service dates) for every input.
 
 Usage:
@@ -30,6 +31,7 @@ from pathlib import Path
 
 # Sibling module; the script's directory is on sys.path when run directly.
 from gtfs_accessibility import enrich_wheelchair_boarding
+from same_platform import CHANGE_SECONDS, shorten_same_platform_transfers
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_FILE = REPO_ROOT / "otp" / "sources.json"
@@ -312,6 +314,32 @@ def enrich_accessibility(
     }
 
 
+def shorten_transfers(
+    config: dict[str, str] | None, graph_dir: Path, results: list[SourceResult]
+) -> dict[str, object]:
+    """Let changes between lines on the same platform take one minute."""
+    feed = next((r for r in results if config and r.file == config["feed_file"]), None)
+    if feed is None or not feed.ok:
+        return {}
+    print("Shortening transfers between lines that share a platform")
+    try:
+        stats = shorten_same_platform_transfers(graph_dir / feed.file, graph_dir)
+    except (zipfile.BadZipFile, KeyError, ValueError) as exc:
+        feed.ok = False
+        feed.error = f"same-platform transfers failed: {type(exc).__name__}: {exc}"
+        return {}
+    feed.sha256 = sha256_of(graph_dir / feed.file)
+    print(f"  {stats.shortened} of {stats.stations} shared-platform stations shortened")
+    return {
+        "same_platform_transfers": {
+            "feed": feed.file,
+            "change_seconds": CHANGE_SECONDS,
+            "stations": stats.stations,
+            "shortened": stats.shortened,
+        }
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
@@ -328,6 +356,7 @@ def main() -> int:
 
     results = [fetch_source(entry, graph_dir) for entry in sources["gtfs"]]
     derived = enrich_accessibility(sources.get("accessibility"), graph_dir, results)
+    derived |= shorten_transfers(sources.get("accessibility"), graph_dir, results)
 
     if not args.skip_osm:
         results += [fetch_source(entry, graph_dir) for entry in sources["osm"]]

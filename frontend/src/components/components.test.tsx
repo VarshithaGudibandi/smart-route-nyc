@@ -38,6 +38,19 @@ describe("RouteCard", () => {
     expect(screen.getByText(/Change at 59 St/)).toBeInTheDocument();
   });
 
+  it("labels a route that relies on a quick same-platform change", () => {
+    const note = { code: "SAME_PLATFORM_CHANGE", message: "Assumes a 1-minute change across the platform at 59 St." };
+    render(
+      <RouteCard
+        route={{ ...suggestion.route, notes: [note] }}
+        selected={false}
+        onSelect={() => undefined}
+        accessibilityRequired={false}
+      />,
+    );
+    expect(screen.getByText("1-min change assumed")).toBeInTheDocument();
+  });
+
   it("counts barriers and unconfirmed stops in words, not only color", () => {
     render(<RouteCard route={review} selected={false} onSelect={() => undefined} accessibilityRequired />);
     expect(screen.getByText(/1 barrier/)).toBeInTheDocument();

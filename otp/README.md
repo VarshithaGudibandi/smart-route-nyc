@@ -70,9 +70,17 @@ Measured effect (October 2026 data: 163 of 496 subway stations have an ADA eleva
 
 The remaining unconfirmed routes mostly involve PATH (no data published) or stations where some elevators are out of service.
 
+## Same-platform transfers
+
+MTA's subway GTFS gives most stations a 3-minute minimum transfer to themselves, whether the change is a walk between levels or a step across an island platform from the local to the express. `fetch_inputs.py` finds stations where two or more lines stop at the same platform in the same direction (the same GTFS child stop, such as `137N` for the 1, 2 and 3 at Chambers St) and removes that minimum there ([`scripts/same_platform.py`](scripts/same_platform.py)). With OTP's transfer slack set to 1 minute (below), a change at those stations takes 1 minute.
+
+This is our estimate, not MTA data. A few stations stack express and local tracks on different levels under one stop ID, where the change takes longer. The affected stations are written to `same-platform-transfers.json`, and the API labels every route that changes faster than MTA's minimum at one of them.
+
 ## Routing configuration
 
-[`config/router-config.json`](config/router-config.json) changes one OTP default. With wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.
+[`config/router-config.json`](config/router-config.json) changes two OTP defaults. `transferSlack` is 1 minute instead of 2. It is added to every change on top of MTA's minimum transfer times and walking time, so changes elsewhere also get 1 minute less buffer; PATH and bus changes, which have no minimum in their feeds, get 1 minute in all.
+
+Second, with wheelchair routing enabled, OTP normally **excludes** stops and trips whose accessibility is unknown. None of the NYC or PATH feeds publish that information, so every stop is unknown and wheelchair searches would return nothing. The configuration penalises unknown stops and trips instead of excluding them. Street routing still strongly avoids stairs. The application then classifies each route's accessibility from separate evidence, so the penalty never stands in for a verdict.
 
 ## Graph versioning
 

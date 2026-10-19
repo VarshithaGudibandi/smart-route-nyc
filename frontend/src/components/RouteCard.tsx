@@ -22,6 +22,7 @@ export function RouteCard({ route, selected, onSelect, savesSeconds, fastest = f
   const hasFindings = (route.accessibility_findings ?? []).length > 0;
   const saved = savesSeconds ? Math.floor(savesSeconds / 60) : 0;
   const showAccess = hasFindings && (accessibilityRequired || route.accessibility_status !== "meets");
+  const quickChange = (route.notes ?? []).some((n) => n.code === "SAME_PLATFORM_CHANGE");
 
   return (
     <button
@@ -58,10 +59,11 @@ export function RouteCard({ route, selected, onSelect, savesSeconds, fastest = f
         </span>
       </span>
 
-      {(saved > 0 || fastest || showAccess) && (
+      {(saved > 0 || fastest || showAccess || quickChange) && (
         <span className={styles.badges}>
           {saved > 0 && <span className={styles.faster}>{saved} MIN FASTER</span>}
           {fastest && <span className={styles.fastest}>Fastest</span>}
+          {quickChange && <span className={styles.assumed}>1-min change assumed</span>}
           {showAccess && route.accessibility_status === "meets" && <StatusChip status="meets" subject="Step-free" />}
           {showAccess && route.accessibility_status !== "meets" && (
             <span className={styles.counts}>

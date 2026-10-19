@@ -41,6 +41,7 @@ from app.schemas.routes import (
 from app.services.accessibility.assessor import assess_route
 from app.services.accessibility.snapshot import ELEVATOR_SOURCE, SnapshotProvider
 from app.services.cache_keys import departure_bucket, route_search_key
+from app.services.transit.same_platform import SamePlatformChanges
 
 logger = structlog.get_logger(__name__)
 
@@ -113,8 +114,10 @@ class RouteSearchService:
         graph_version: GraphVersion,
         accessibility: SnapshotProvider,
         settings: Settings,
+        same_platform: SamePlatformChanges | None = None,
     ) -> None:
         self._otp = otp
+        self._same_platform = same_platform or SamePlatformChanges(None)
         self._redis = redis
         self._graph_version = graph_version
         self._accessibility = accessibility
@@ -137,7 +140,10 @@ class RouteSearchService:
         # carries forward an accessibility verdict from when it was computed.
         snapshot = await self._accessibility.current()
         wheelchair = request.accessibility.wheelchair_required
-        routes = [assess_route(route, snapshot, wheelchair, now) for route in routes]
+        routes = [
+            self._same_platform.label(assess_route(route, snapshot, wheelchair, now))
+            for route in routes
+        ]
         review_only: list[Route] = []
         if request.accessibility.needs_accessible_routing:
             routes, review_only = (

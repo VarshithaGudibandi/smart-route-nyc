@@ -135,6 +135,11 @@ class AccessibilityFinding(BaseModel):
     equipment: list[EquipmentNote] = Field(default_factory=list)
 
 
+class Notice(BaseModel):
+    code: str
+    message: str
+
+
 class Route(BaseModel):
     route_id: str
     # How the journey was found. Suggestions are always full OTP itineraries;
@@ -150,11 +155,8 @@ class Route(BaseModel):
     accessibility_status: AccessibilityStatus = "unknown"
     accessibility_findings: list[AccessibilityFinding] = Field(default_factory=list)
     legs: list[Leg]
-
-
-class Notice(BaseModel):
-    code: str
-    message: str
+    # Assumptions this route relies on, such as a quick same-platform change.
+    notes: list[Notice] = Field(default_factory=list)
 
 
 class DataFreshness(BaseModel):

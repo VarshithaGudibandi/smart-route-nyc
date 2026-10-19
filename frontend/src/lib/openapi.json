@@ -1263,6 +1263,13 @@
             "title": "Legs",
             "type": "array"
           },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/Notice"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
           "origin_type": {
             "default": "otp_baseline",
             "enum": [
