@@ -12,6 +12,7 @@ from anthropic.types.beta import BetaMessageParam, BetaOutputConfigParam
 
 from app.ai.guard import TransientLlmError
 from app.ai.provider import LlmResponse, LlmUnavailableError
+from app.ai.text import strip_fence
 
 # If a request is declined by the safety classifiers, the API reruns it on a
 # fallback model chosen for the decline's category.
@@ -68,17 +69,8 @@ class AnthropicProvider:
             raise LlmUnavailableError("The language model's reply was cut off", "ai_truncated")
         text = "".join(block.text for block in response.content if block.type == "text")
         return LlmResponse(
-            text=_strip_fence(text),
+            text=strip_fence(text),
             model=response.model,
             input_tokens=response.usage.input_tokens,
             output_tokens=response.usage.output_tokens,
         )
-
-
-def _strip_fence(text: str) -> str:
-    """Accept JSON wrapped in a Markdown code fence; the JSON is validated afterwards."""
-    stripped = text.strip()
-    if stripped.startswith("```") and stripped.endswith("```"):
-        stripped = stripped[3:-3]
-        stripped = stripped.removeprefix("json")
-    return stripped.strip()

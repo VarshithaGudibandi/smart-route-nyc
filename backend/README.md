@@ -36,18 +36,20 @@ evals/             offline evaluations with labelled cases
 tests/             unit and integration tests (fixtures recorded from live sources)
 ```
 
-## Claude
+## AI model
 
-`app/ai/anthropic_provider.py` calls Claude through the Anthropic SDK. Set `ANTHROPIC_API_KEY` to enable it; `LLM_PROVIDER=auto` (the default) uses Claude when a key is set and the rule-based baselines otherwise.
+Any provider works. `app/ai/anthropic_provider.py` calls Claude through Anthropic's SDK; `app/ai/openai_compatible.py` calls any service with the OpenAI-compatible chat API (OpenAI, Gemini, Groq, Mistral, OpenRouter, Ollama). With `LLM_PROVIDER=auto` (the default), a key starting `sk-ant-` uses Claude, any other key the OpenAI-compatible API, and no key the rule-based baselines.
 
 | Setting | Default | |
 |---|---|---|
-| `LLM_MODEL` | `claude-opus-5-5` | |
-| `LLM_EFFORT` | `low` | Short, structured tasks; raise it to trade latency for more careful answers |
+| `LLM_API_KEY` | none | The provider's API key |
+| `LLM_MODEL` | `claude-opus-5-5` for Claude keys | Required for other providers |
+| `LLM_BASE_URL` | `https://api.openai.com/v1` | The provider's OpenAI-compatible endpoint |
+| `LLM_EFFORT` | `low` | Claude only; short, structured tasks |
 | `LLM_TIMEOUT_S` | `20` | Per call; one retry for rate limits, server errors and network failures |
 | `LLM_DAILY_CALL_LIMIT` | `2000` | Shared across instances through Redis |
 
-Requests declined by the safety classifiers are rerun on the API's fallback model. A reply that is refused, cut off or fails validation is discarded and the rule-based result is used. Each call is logged with its task, latency and token counts, never the prompt.
+A reply that is refused, cut off or fails validation is discarded and the rule-based result is used. Each call is logged with its task, model, latency and token counts, never the prompt.
 
 ## Route search
 
@@ -95,7 +97,7 @@ A route `violates` if any finding does, `meets` only if all do, and is `unknown`
 OpenTripPlanner ranks itineraries by a cost that penalizes transfers, so it often prefers a one-seat ride over a faster trip with a change. After each search a background investigation looks for those:
 
 1. **Facts.** For the fastest route's subway segment, every station ahead is checked for lines the rider could change to, with stop counts, headways and current MTA alerts.
-2. **Proposals.** A rules generator proposes express/local and line-to-line changes. With an API key, Claude (`app/ai/suggestions.py`) proposes from the same facts as well.
+2. **Proposals.** A rules generator proposes express/local and line-to-line changes. With an API key, the model (`app/ai/suggestions.py`) proposes from the same facts as well.
 3. **Checks.** IDs must come from the facts, the lines must run between the stations, and no line may be suspended.
 4. **Verification.** One OTP query restricted to the proposed lines and forced through the transfer station, under the rider's settings. It must ride those lines, arrive at least a minute earlier and meet any accessibility requirement.
 
@@ -137,12 +139,12 @@ Runs are recorded in `feed_sync_runs`; unchanged payloads are skipped by checksu
 
 The first two run in CI and fail it on regressions in critical recall, false positives, injection safety or grounding.
 
-To measure Claude on the same cases (needs `ANTHROPIC_API_KEY`; each run makes real API calls):
+To measure the configured model on the same cases (needs `LLM_API_KEY`; each run makes real API calls):
 
 ```bash
-uv run python -m evals.preferences --provider anthropic
-uv run python -m evals.explanations --live 10        # score 10 of Claude's explanations
-uv run python -m evals.suggestions --generator model # Claude proposes alongside the rules
+uv run python -m evals.preferences --provider model
+uv run python -m evals.explanations --live 10        # score 10 of the model's explanations
+uv run python -m evals.suggestions --generator model # the model proposes alongside the rules
 ```
 
 ## Observability

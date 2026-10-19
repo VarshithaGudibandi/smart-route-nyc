@@ -10,11 +10,11 @@ x-backend-env: &backend-env
   OTP_GRAPH_VERSION_FILE: /otp-data/graph/graph-version
   GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
-  # Claude powers typed preferences, explanations and transfer ideas when a
-  # key is set; without one the app runs on deterministic rules.
+  # Any AI provider: see .env.example. Without a key the app runs on rules.
   LLM_PROVIDER: ${LLM_PROVIDER:-auto}
-  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-  LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
+  LLM_API_KEY: ${LLM_API_KEY:-}
+  LLM_MODEL: ${LLM_MODEL:-}
+  LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
   # Prometheus metrics, reachable only on the Compose network.
   METRICS_PORT: "9100"
 
@@ -69,6 +69,9 @@ services:
   backend:
     build: ./backend
     environment: *backend-env
+    # Lets LLM_BASE_URL reach a model served on this machine (e.g. Ollama) on Linux too.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # The parent directory, so a rebuilt graph/ is seen without recreating
       # the container.

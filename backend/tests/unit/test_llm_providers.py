@@ -88,12 +88,25 @@ async def test_a_rejected_key_is_not_retried() -> None:
     assert raised.value.code == "ai_rejected"
 
 
-def test_auto_uses_claude_only_when_a_key_is_set() -> None:
+def test_auto_picks_the_provider_from_the_key() -> None:
     assert Settings(_env_file=None).resolved_llm_provider == "baseline"
-    with_key = Settings(_env_file=None, anthropic_api_key="sk-ant-test")
-    assert with_key.resolved_llm_provider == "anthropic"
+    claude = Settings(_env_file=None, llm_api_key="sk-ant-test")
+    assert (claude.resolved_llm_provider, claude.resolved_llm_model) == (
+        "anthropic",
+        "claude-opus-5-5",
+    )
+    other = Settings(_env_file=None, llm_api_key="sk-other", llm_model="gpt-5-mini")
+    assert (other.resolved_llm_provider, other.resolved_llm_model) == ("openai", "gpt-5-mini")
 
 
-def test_claude_without_a_key_is_a_configuration_error() -> None:
-    with pytest.raises(ValueError, match="ANTHROPIC_API_KEY"):
+def test_model_settings_must_be_complete() -> None:
+    with pytest.raises(ValueError, match="LLM_API_KEY"):
         Settings(_env_file=None, llm_provider="anthropic")
+    with pytest.raises(ValueError, match="LLM_MODEL"):
+        Settings(_env_file=None, llm_api_key="sk-other")
+
+
+def test_an_empty_key_means_no_model() -> None:
+    assert (
+        Settings(_env_file=None, llm_api_key="", llm_model="").resolved_llm_provider == "baseline"
+    )

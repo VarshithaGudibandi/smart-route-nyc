@@ -45,7 +45,7 @@ from app.services.route_search import RouteSearchService
 from app.services.suggestions.service import SuggestionService
 from app.services.transit.alerts import AlertsProvider
 from app.services.transit.knowledge import TransitKnowledge
-from evals.model import claude_llm
+from evals.model import model_llm
 
 TRIPS_FILE = Path(__file__).with_name("suggestion_trips.jsonl")
 
@@ -115,7 +115,7 @@ async def evaluate(trips: list[dict[str, Any]], generator: str) -> Report:
     graph = GraphVersion(settings.otp_graph_version_file)
     accessibility = SnapshotProvider(engine, redis)
     search = RouteSearchService(otp, redis, graph, accessibility, settings)
-    model = ModelProposalGenerator(claude_llm()) if generator == "model" else None
+    model = ModelProposalGenerator(model_llm()) if generator == "model" else None
     suggestions = SuggestionService(
         otp,
         TransitKnowledge(otp, redis, graph),
@@ -228,7 +228,7 @@ def main() -> int:
         "--generator",
         choices=["rules", "model"],
         default="rules",
-        help="model: Claude proposes as well as the rules (needs ANTHROPIC_API_KEY)",
+        help="model: the configured model proposes as well as the rules (needs LLM_API_KEY)",
     )
     args = parser.parse_args()
     configure_logging("WARNING")

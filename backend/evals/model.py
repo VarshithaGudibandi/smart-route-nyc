@@ -1,21 +1,22 @@
-"""Claude for the evaluations, configured from the same settings as the API."""
+"""The configured language model for the evaluations, from the same settings as the API."""
 
-from app.ai.anthropic_provider import AnthropicProvider
 from app.ai.guard import GuardedLlm, UnlimitedBudget
+from app.ai.provider import LlmProvider
 from app.core.config import get_settings
 from app.core.resilience import CircuitBreaker
+from app.main import build_provider
 
 
-def claude_provider() -> AnthropicProvider:
+def model_provider() -> LlmProvider:
     settings = get_settings()
-    if settings.anthropic_api_key is None:
-        raise SystemExit("Set ANTHROPIC_API_KEY to evaluate Claude.")
-    return AnthropicProvider.create(
-        settings.anthropic_api_key.get_secret_value(), settings.llm_model, settings.llm_effort
-    )
+    if not settings.uses_model:
+        raise SystemExit(
+            "Set LLM_API_KEY (and LLM_MODEL, LLM_BASE_URL if needed) to evaluate a model."
+        )
+    return build_provider(settings)
 
 
-def claude_llm() -> GuardedLlm:
+def model_llm() -> GuardedLlm:
     return GuardedLlm(
-        claude_provider(), UnlimitedBudget(), CircuitBreaker("eval", 1000, 1), timeout_s=60
+        model_provider(), UnlimitedBudget(), CircuitBreaker("eval", 1000, 1), timeout_s=60
     )

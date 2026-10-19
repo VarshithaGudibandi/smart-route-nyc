@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.ai.anthropic_provider import AnthropicProvider
 from app.ai.baseline import KeywordBaselineProvider
 from app.ai.guard import DailyCallBudget, GuardedLlm
+from app.ai.openai_compatible import OpenAICompatibleProvider
 from app.ai.preferences import PreferenceInterpreter
 from app.ai.provider import DisabledProvider, LlmProvider
 from app.ai.suggestions import ModelProposalGenerator
@@ -51,9 +52,12 @@ logger = structlog.get_logger(__name__)
 
 def build_provider(settings: Settings) -> LlmProvider:
     provider = settings.resolved_llm_provider
-    if provider == "anthropic" and settings.anthropic_api_key:
-        return AnthropicProvider.create(
-            settings.anthropic_api_key.get_secret_value(), settings.llm_model, settings.llm_effort
+    key = settings.llm_api_key.get_secret_value() if settings.llm_api_key else ""
+    if provider == "anthropic":
+        return AnthropicProvider.create(key, settings.resolved_llm_model, settings.llm_effort)
+    if provider == "openai":
+        return OpenAICompatibleProvider.create(
+            settings.llm_base_url, key, settings.resolved_llm_model
         )
     if provider == "baseline":
         return KeywordBaselineProvider()
@@ -94,7 +98,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         alerts = AlertsProvider(db_engine, redis)
         # Only a real model writes explanations and proposes transfers; the
         # keyword baseline handles typed preferences alone.
-        model_llm = llm if settings.resolved_llm_provider == "anthropic" else None
+        model_llm = llm if settings.uses_model else None
         investigations = None
         if settings.suggestions_enabled:
             suggestions = SuggestionService(

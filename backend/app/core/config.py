@@ -7,6 +7,8 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, PostgresDsn, RedisDsn, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
+DEFAULT_CLAUDE_MODEL = "claude-opus-5-5"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -73,12 +75,16 @@ class Settings(BaseSettings):
     investigation_ttl_s: int = Field(default=900, ge=60)
     investigation_poll_after_ms: int = Field(default=1500, ge=100)
 
-    # Language model. "anthropic" is Claude; "baseline" is keyword rules, not a
-    # model; "auto" picks Claude when an API key is set and baseline otherwise.
-    llm_provider: Literal["auto", "anthropic", "baseline", "disabled"] = "auto"
-    anthropic_api_key: SecretStr | None = None
-    llm_model: str = "claude-opus-5-5"
-    # These are short, structured tasks; low effort keeps them quick.
+    # Language model, from any provider. "openai" means any service with the
+    # OpenAI-compatible chat API (OpenAI, Gemini, Groq, Mistral, OpenRouter,
+    # Ollama) at LLM_BASE_URL; "anthropic" is Claude through Anthropic's SDK.
+    # "auto" picks from the key: Anthropic keys start with "sk-ant-". Without a
+    # key, "baseline" keyword rules answer typed preferences.
+    llm_provider: Literal["auto", "anthropic", "openai", "baseline", "disabled"] = "auto"
+    llm_api_key: SecretStr | None = None
+    llm_model: str | None = None
+    llm_base_url: str = "https://api.openai.com/v1"
+    # Claude only: these are short, structured tasks; low effort keeps them quick.
     llm_effort: Literal["low", "medium", "high"] = "low"
     llm_timeout_s: float = Field(default=20.0, gt=0)
     llm_daily_call_limit: int = Field(default=2000, ge=1)
@@ -118,7 +124,7 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
-    @field_validator("anthropic_api_key", mode="before")
+    @field_validator("llm_api_key", "llm_model", mode="before")
     @classmethod
     def empty_key_is_no_key(cls, value: object) -> object:
         """Compose passes an unset variable as an empty string."""
@@ -142,15 +148,30 @@ class Settings(BaseSettings):
         return self
 
     @property
-    def resolved_llm_provider(self) -> Literal["anthropic", "baseline", "disabled"]:
-        if self.llm_provider == "auto":
-            return "anthropic" if self.anthropic_api_key else "baseline"
-        return self.llm_provider
+    def resolved_llm_provider(self) -> Literal["anthropic", "openai", "baseline", "disabled"]:
+        if self.llm_provider != "auto":
+            return self.llm_provider
+        if self.llm_api_key is None:
+            return "baseline"
+        key = self.llm_api_key.get_secret_value()
+        return "anthropic" if key.startswith("sk-ant-") else "openai"
+
+    @property
+    def uses_model(self) -> bool:
+        return self.resolved_llm_provider in ("anthropic", "openai")
+
+    @property
+    def resolved_llm_model(self) -> str:
+        if self.llm_model:
+            return self.llm_model
+        return DEFAULT_CLAUDE_MODEL if self.resolved_llm_provider == "anthropic" else ""
 
     @model_validator(mode="after")
-    def require_key_for_claude(self) -> Self:
-        if self.llm_provider == "anthropic" and not self.anthropic_api_key:
-            raise ValueError("LLM_PROVIDER=anthropic needs ANTHROPIC_API_KEY")
+    def check_model_settings(self) -> Self:
+        if self.uses_model and self.llm_api_key is None:
+            raise ValueError(f"LLM_PROVIDER={self.llm_provider} needs LLM_API_KEY")
+        if self.resolved_llm_provider == "openai" and not self.llm_model:
+            raise ValueError("Set LLM_MODEL to the model to call, for example gpt-5-mini")
         return self
 
 

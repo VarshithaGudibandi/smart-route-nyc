@@ -107,8 +107,10 @@ ensure_env() {
   cat > .env <<EOF
 # Created by start.sh. Settings for the local Docker stack; never commit this file.
 KEY_HASHING_SECRET=$secret
-# Optional: Claude for typed preferences, explanations and transfer ideas.
-ANTHROPIC_API_KEY=
+# Optional AI model, from any provider (examples in .env.example).
+LLM_API_KEY=
+LLM_MODEL=
+LLM_BASE_URL=https://api.openai.com/v1
 EOF
   note "Created .env with a random key-hashing secret"
 }
@@ -212,10 +214,10 @@ echo "    API docs:   http://localhost:8000/api/docs"
 if $dashboards; then
   echo "    Dashboards: http://localhost:3001 (Grafana; metrics from Prometheus at http://localhost:9090)"
 fi
-if [[ -n "${ANTHROPIC_API_KEY:-}" ]] || grep -qE '^ANTHROPIC_API_KEY=.+' .env; then
-  echo "    AI:         Claude"
+if [[ -n "${LLM_API_KEY:-}" ]] || grep -qE '^LLM_API_KEY=.+' .env; then
+  echo "    AI model:   on"
 else
-  echo "    AI:         off; add ANTHROPIC_API_KEY to .env and run ./start.sh again to use Claude"
+  echo "    AI model:   off; set LLM_API_KEY in .env and run ./start.sh again"
 fi
 echo "    Logs:       docker compose logs -f backend worker"
 echo "    Stop with:  ./start.sh --stop"

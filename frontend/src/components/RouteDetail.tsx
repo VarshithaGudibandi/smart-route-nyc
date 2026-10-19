@@ -70,7 +70,7 @@ export function RouteDetail({ route, searchId, freshness, notices, accessibility
           </p>
           {route.origin_type !== "otp_baseline" && (
             <p className={styles.origin}>
-              {route.origin_type === "model_suggestion" ? "Suggested by Claude: a" : "A"} transfer the planner did not
+              {route.origin_type === "model_suggestion" ? "Suggested by AI: a" : "A"} transfer the planner did not
               pick by default, checked against the timetable.
             </p>
           )}

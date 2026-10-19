@@ -1,19 +1,16 @@
 # SmartRouteNYC
 
-[![CI](https://github.com/VarshithaGudibandi/smart-route-nyc/actions/workflows/ci.yml/badge.svg)](https://github.com/VarshithaGudibandi/smart-route-nyc/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
 Accessibility-aware journey planning for New York City subway, bus and PATH.
 
-Riders say what they need, such as step-free access, a wheelchair, less walking or fewer transfers. [OpenTripPlanner](https://www.opentripplanner.org/) computes the routes, and [Claude](https://www.anthropic.com/claude) builds on them: it reads needs written in plain words, looks for faster transfers the routing engine skipped, and explains each route. Every station and walk is checked against live elevator data, and whatever Claude proposes is verified against the timetable and route data before it is shown.
+Riders say what they need, such as step-free access, a wheelchair, less walking or fewer transfers. [OpenTripPlanner](https://www.opentripplanner.org/) computes the routes, and an AI model builds on them: it reads needs written in plain words, looks for faster transfers the routing engine skipped, and explains each route. Every station and walk is checked against live elevator data, and whatever the model proposes is verified against the timetable and route data before it is shown.
 
-Runs locally in Docker on open transit data. The AI features use your own Anthropic API key; without one, they fall back to deterministic rules and everything else works the same.
+Runs locally in Docker on open transit data. The AI features work with an API key from any provider (Claude, OpenAI, Gemini, Groq, OpenRouter, or a local Ollama model); without one, they fall back to deterministic rules.
 
 ## What you get
 
 - **Routing on real data.** Journeys come from OpenTripPlanner 2 over the official MTA and PATH timetables and the OpenStreetMap street network.
-- **AI that builds on the routes.** Claude turns "I use a wheelchair and hate changing trains" into search settings, proposes faster transfers (say, switching to the express for part of the trip), and explains routes in plain language.
-- **Checked before it is shown.** Claude's transfer ideas are timed by OpenTripPlanner and kept only if they arrive earlier; its explanations are kept only if every sentence matches the route data.
+- **AI that builds on the routes.** The model turns "I use a wheelchair and hate changing trains" into search settings, proposes faster transfers (say, switching to the express for part of the trip), and explains routes in plain language.
+- **Checked before it is shown.** The model's transfer ideas are timed by OpenTripPlanner and kept only if they arrive earlier; its explanations are kept only if every sentence matches the route data.
 - **Clear accessibility.** Each station and walk is marked *meets*, *violates* or *unknown*, with the data's source and age. Routes that cannot be confirmed are listed under "Needs review" with each barrier named.
 - **Private.** No accounts, no stored locations or route history; feedback is anonymous.
 - **Accessible web app.** Keyboard and screen-reader support, status shown by shape and words as well as colour, and automated accessibility checks on every screen.
@@ -28,7 +25,7 @@ flowchart LR
   API <--> R[(Redis)]
   API --> PG[(PostgreSQL)]
   API --> G[Photon geocoder]
-  API --> C[Claude API]
+  API --> C[AI model API]
   W[Ingestion worker] --> PG
   F[MTA · PATH · OpenStreetMap] --> W
   F -->|graph build| OTP
@@ -39,19 +36,19 @@ A search, end to end:
 1. The web app sends origin, destination, time and the rider's needs to `POST /api/v1/routes/search`.
 2. The API asks OpenTripPlanner for itineraries, caching results in Redis and sharing one computation between identical concurrent searches.
 3. Every station and walk is assessed against the latest elevator status and OpenStreetMap; routes that miss a requirement move to "Needs review".
-4. Routes return immediately. In the background, Claude and a set of rules propose faster transfers; OpenTripPlanner times each one, and the web app shows those that arrive earlier.
-5. On request, Claude explains a route from facts the API computes (legs, transfers, elevator status, alerts), and each sentence is checked against them.
+4. Routes return immediately. In the background, the model and a set of rules propose faster transfers; OpenTripPlanner times each one, and the web app shows those that arrive earlier.
+5. On request, the model explains a route from facts the API computes (legs, transfers, elevator status, alerts), and each sentence is checked against them.
 6. The worker refreshes elevator outages and service alerts every two minutes.
 
 ### Where AI is used
 
-| Feature | What Claude does | How it is checked | Without an API key |
+| Feature | What the model does | How it is checked | Without an API key |
 |---|---|---|---|
 | Typed needs | Turns a rider's words into search settings for them to confirm | Strict schema; text can add a requirement but never remove one the rider set | Keyword rules |
 | Faster transfers | Proposes transfers from the timetable facts of the trip | IDs must exist, lines must run there, and OpenTripPlanner must confirm an earlier arrival | Rule-based proposals only |
 | Route explanations | Words an explanation of the route | Every number, name and accessibility claim must appear in the cited facts | The facts themselves, as sentences |
 
-Calls go to `claude-opus-5-5` at low effort, with a timeout, one retry, a circuit breaker and a daily call limit (`LLM_DAILY_CALL_LIMIT`). The code is in [`backend/app/ai/`](backend/app/ai).
+Every call has a timeout, one retry, a circuit breaker and a daily call limit (`LLM_DAILY_CALL_LIMIT`). The code is in [`backend/app/ai/`](backend/app/ai): Claude goes through Anthropic's SDK, and every other provider through the OpenAI-compatible chat API they all offer.
 
 ## Stack
 
@@ -73,10 +70,12 @@ cd smart-route-nyc
 
 Then open **http://localhost:3000**.
 
-**To turn on the AI features**, put your [Anthropic API key](https://console.anthropic.com/) in the `.env` file that the first run creates, then run `./start.sh` again:
+**To turn on the AI features**, add a key to the `.env` file the first run creates, then run `./start.sh` again:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
+LLM_API_KEY=sk-...          # any provider's key
+LLM_MODEL=gpt-5-mini        # the model to call (Claude keys default to claude-opus-5-5)
+LLM_BASE_URL=https://api.openai.com/v1   # only for non-Claude providers; examples in .env.example
 ```
 
 The first run takes 10 to 15 minutes: it downloads the current timetables and street map (about 220 MB), builds the routing graph, starts every service and waits for live elevator data. Later starts take about a minute.
@@ -93,21 +92,10 @@ Interactive API docs are at http://localhost:8000/api/docs. The graph covers the
 
 | What | Where |
 |---|---|
-| Each request, its timing and cache result, and every Claude call with its latency and token counts | `docker compose logs -f backend` |
+| Each request, its timing and cache result, and every AI call with its model, latency and token counts | `docker compose logs -f backend` |
 | Elevator, alert and feed updates | `docker compose logs -f worker` |
 | What the background transfer search found, and how many ideas were rejected for each reason | `GET /api/v1/routes/investigations/{id}` (the id comes with each search response); every idea's outcome is also stored in the `suggestion_outcomes` table |
 | Charts of traffic, latency, cache, OpenTripPlanner and data age | `./start.sh --with-dashboards`, then http://localhost:3001 |
-
-### Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| "Docker has N GB of memory" | Raise Docker's memory to 8 GB and restart Docker |
-| "Port … is already in use" | Stop the program using it (often a local PostgreSQL or Redis); `lsof -i :5432` shows which |
-| A download fails | Downloads retry for about ten minutes and resume. The street map mirror is volunteer-run and sometimes briefly unreachable; run `./start.sh` again later, and verified files are reused |
-| Graph build exits with code 137 | Docker ran out of memory; raise its limit |
-| "The API did not become ready" | `docker compose logs --tail 50 otp backend` |
-| Start over | `./start.sh --stop`, delete `data/otp/graph`, run `./start.sh` |
 
 ## API
 
@@ -132,7 +120,7 @@ Behaviour, limits and the accessibility rules are documented in [`backend/README
 | Explanation grounding (23 scripted model replies) | All 18 unfaithful or malformed replies rejected; 2 known gaps documented |
 | Transfer suggestions (240 live searches, rule-based proposals) | Verified faster route for 6.6% of applicable searches, saving up to 13 minutes |
 
-Each evaluation also runs against Claude with an API key set (`--provider anthropic`, `--live N`, `--generator model`), to compare it with the rules. Cases, metrics and commands are in [`backend/README.md`](backend/README.md#evaluations). The first two run in CI.
+Each evaluation also runs against the configured model (`--provider model`, `--live N`, `--generator model`), to compare it with the rules. Cases, metrics and commands are in [`backend/README.md`](backend/README.md#evaluations). The first two run in CI.
 
 ## Development
 
