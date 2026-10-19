@@ -7,6 +7,7 @@ import { useInvestigation } from "@/hooks/useInvestigation";
 import { useRouteSearch } from "@/hooks/useRouteSearch";
 import { describeError } from "@/lib/api";
 import { clockWithPeriod, dayAndTime } from "@/lib/format";
+import { sortRoutes } from "@/lib/route";
 import { parseTrip, searchKey, tripParams, type Endpoint, type Needs, type Trip } from "@/lib/trip";
 import type { Notice, Route, SearchResponse } from "@/lib/types";
 
@@ -163,10 +164,10 @@ type ListProps = {
 };
 
 function ResultsList({ response, trip, suggestions, investigating, selectedId, onSelect, accessibilityRequired }: ListProps) {
-  // Soonest arrival first: for a rider leaving now, that is the fastest way there.
-  const routes = [...response.routes].sort(byArrival);
-  const review = [...(response.review_only_routes ?? [])].sort(byArrival);
-  const fastestId = routes[0]?.route_id;
+  // Soonest arrival first, or fewest changes first when the rider asked for that.
+  const routes = sortRoutes(response.routes, trip.needs.fewerTransfers);
+  const review = sortRoutes(response.review_only_routes ?? [], trip.needs.fewerTransfers);
+  const firstId = sortRoutes(routes, false)[0]?.route_id;
   const elevators = (response.data_freshness ?? []).find((f) => f.source === "mta_elevators");
   const notices = response.notices.filter((n) => n.code !== "NO_CONFIRMED_ACCESSIBLE_ROUTE");
   const noConfirmed = response.notices.some((n) => n.code === "NO_CONFIRMED_ACCESSIBLE_ROUTE");
@@ -215,7 +216,7 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
             <RouteCard
               key={route.route_id}
               route={route}
-              fastest={route.route_id === fastestId && routes.length > 1 && !suggestions.length}
+              arrivesFirst={route.route_id === firstId && routes.length > 1 && !suggestions.length}
               selected={route.route_id === selectedId}
               onSelect={() => onSelect(route.route_id)}
               accessibilityRequired={accessibilityRequired}
@@ -255,9 +256,6 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
     </div>
   );
 }
-
-const byArrival = (a: Route, b: Route) =>
-  Date.parse(a.arrival) - Date.parse(b.arrival) || a.duration_seconds - b.duration_seconds;
 
 function Section({ title, hideTitle = false, children }: { title: string; hideTitle?: boolean; children: React.ReactNode }) {
   return (

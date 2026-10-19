@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { clock, distance, duration, findingPlace, friendlyText, newYorkLocalToIso, isoToNewYorkLocal } from "./format";
 import { lineName, lineStyle } from "./lines";
 import { decodePolyline } from "./polyline";
+import { sortRoutes } from "./route";
+import type { Route } from "./types";
 import { parseTrip, searchKey, searchRequest, tripParams } from "./trip";
 
 describe("trip URL state", () => {
@@ -88,5 +90,20 @@ describe("findingPlace", () => {
     expect(findingPlace("Walk from Origin to Grove Street")).toBe("Walk to Grove Street");
     expect(findingPlace("Walk from WTC Cortlandt to Destination")).toBe("Walk to your destination");
     expect(findingPlace("59 St")).toBe("59 St");
+  });
+});
+
+describe("sortRoutes", () => {
+  const route = (id: string, arrival: string, transfers: number) =>
+    ({ route_id: id, arrival: `2026-10-19T${arrival}:00-04:00`, transfers, duration_seconds: 0 }) as Route;
+  // As in the Canal St to 110 St search: A to B arrives first, the C has no transfer.
+  const routes = [route("C", "14:18", 0), route("AB", "14:16", 1), route("1", "14:26", 0)];
+
+  it("puts the soonest arrival first", () => {
+    expect(sortRoutes(routes, false).map((r) => r.route_id)).toEqual(["AB", "C", "1"]);
+  });
+
+  it("puts fewer changes first when the rider asks for that", () => {
+    expect(sortRoutes(routes, true).map((r) => r.route_id)).toEqual(["C", "1", "AB"]);
   });
 });

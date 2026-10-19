@@ -11,11 +11,12 @@ type Props = {
   selected: boolean;
   onSelect: () => void;
   savesSeconds?: number;
-  fastest?: boolean;
+  // The route that gets the rider there soonest, which is not always the shortest ride.
+  arrivesFirst?: boolean;
   accessibilityRequired: boolean;
 };
 
-export function RouteCard({ route, selected, onSelect, savesSeconds, fastest = false, accessibilityRequired }: Props) {
+export function RouteCard({ route, selected, onSelect, savesSeconds, arrivesFirst = false, accessibilityRequired }: Props) {
   const legs = transitLegs(route);
   const changes = transferPlaces(route);
   const counts = findingCounts(route);
@@ -59,10 +60,10 @@ export function RouteCard({ route, selected, onSelect, savesSeconds, fastest = f
         </span>
       </span>
 
-      {(saved > 0 || fastest || showAccess || quickChange) && (
+      {(saved > 0 || arrivesFirst || showAccess || quickChange) && (
         <span className={styles.badges}>
           {saved > 0 && <span className={styles.faster}>{saved} MIN FASTER</span>}
-          {fastest && <span className={styles.fastest}>Fastest</span>}
+          {arrivesFirst && <span className={styles.fastest}>Arrives first</span>}
           {quickChange && <span className={styles.assumed}>1-min change assumed</span>}
           {showAccess && route.accessibility_status === "meets" && <StatusChip status="meets" subject="Step-free" />}
           {showAccess && route.accessibility_status !== "meets" && (

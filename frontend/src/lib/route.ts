@@ -20,3 +20,13 @@ export function findingCounts(route: Route): Record<AccessibilityStatus, number>
 export function stationFinding(route: Route, name: string | null | undefined): Finding | undefined {
   return (route.accessibility_findings ?? []).find((f) => f.kind === "station" && f.location === name);
 }
+
+const byArrival = (a: Route, b: Route) =>
+  Date.parse(a.arrival) - Date.parse(b.arrival) || a.duration_seconds - b.duration_seconds;
+
+/** Soonest arrival first; with "Fewer transfers", fewest changes first, then soonest. */
+export function sortRoutes(routes: Route[], fewerTransfers: boolean): Route[] {
+  return [...routes].sort(
+    fewerTransfers ? (a, b) => a.transfers - b.transfers || byArrival(a, b) : byArrival,
+  );
+}
