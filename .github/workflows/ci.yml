@@ -116,6 +116,9 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: smartroute-${{ matrix.context }}:ci
+          # Vulnerabilities only: gitleaks checks the source for secrets, and
+          # Trivy's secret rules match example JSON in third-party docstrings.
+          scanners: vuln
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
