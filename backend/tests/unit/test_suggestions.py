@@ -298,6 +298,21 @@ def test_follows_every_ride_of_a_chain() -> None:
     assert not follows(to_route(skipped), THERE_AND_BACK)
 
 
+async def test_a_route_that_reaches_the_first_transfer_another_way_counts() -> None:
+    # OTP may skip the plan's first ride when another allowed line (PATH) gets
+    # the rider to the first transfer station: that is still the shortcut.
+    shortcut = itinerary([(TWO, P2, P6, 4, 9), (ONE, P6, P7, 11, 13)])
+    otp = OtpPlans(shortcut)
+    found = subway_segment(detour_baseline())
+    assert found is not None
+    outcome = await verify(fake_otp(otp.handler), THERE_AND_BACK, "rules", verification(found, 23))
+    assert isinstance(outcome, VerifiedSuggestion)
+    assert outcome.proposal.stations == [P6]
+    assert outcome.proposal.rides == [[TWO], [ONE]]
+    # The fake itinerary names each place by its station ID.
+    assert outcome.proposal.reason == f"Ride the 2 from {P2} to {P6}, then the 1 to {P7}."
+
+
 async def test_a_chain_is_verified_through_every_transfer_station() -> None:
     detour = itinerary([(ONE, P1, P2, 1, 3), (TWO, P2, P6, 4, 9), (ONE, P6, P7, 11, 13)])
     otp = OtpPlans(detour)

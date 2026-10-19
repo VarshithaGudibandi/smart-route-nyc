@@ -66,3 +66,20 @@ async def test_unusable_replies_are_unavailable(response: httpx.Response, code: 
     with pytest.raises(LlmUnavailableError) as raised:
         await provider.complete_json("sys", "usr", 400)
     assert raised.value.code == code
+
+
+async def test_no_credit_is_reported_rather_than_retried() -> None:
+    # OpenAI's reply when the account has no credit.
+    body = {"error": {"message": "You exceeded your current quota", "code": "insufficient_quota"}}
+    provider = _provider(httpx.MockTransport(lambda _: httpx.Response(429, json=body)))
+    with pytest.raises(LlmUnavailableError) as raised:
+        await provider.complete_json("sys", "usr", 400)
+    assert raised.value.code == "ai_no_credit"
+
+
+async def test_errors_name_the_status_and_code_but_not_the_message() -> None:
+    body = {"error": {"message": "secret details", "code": "rate_limit_exceeded"}}
+    provider = _provider(httpx.MockTransport(lambda _: httpx.Response(429, json=body)))
+    with pytest.raises(TransientLlmError) as raised:
+        await provider.complete_json("sys", "usr", 400)
+    assert str(raised.value) == "HTTP 429 rate_limit_exceeded"

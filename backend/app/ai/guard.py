@@ -83,10 +83,20 @@ class GuardedLlm:
                 response = await asyncio.wait_for(
                     self.provider.complete_json(system, user, max_tokens), self._timeout_s
                 )
+            except LlmUnavailableError as exc:
+                # Not worth a retry (a bad key, no credit), but worth saying why.
+                logger.warning(
+                    "llm_call_rejected", task=task, reason=exc.code, detail=str(exc)[:200]
+                )
+                raise
             except (TimeoutError, TransientLlmError) as exc:
                 self._breaker.record_failure()
                 logger.warning(
-                    "llm_call_failed", task=task, attempt=attempt, error_type=type(exc).__name__
+                    "llm_call_failed",
+                    task=task,
+                    attempt=attempt,
+                    error_type=type(exc).__name__,
+                    detail=str(exc)[:200],
                 )
                 if attempt == 2:
                     raise LlmUnavailableError("The language model did not respond") from exc

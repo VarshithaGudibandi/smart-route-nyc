@@ -23,7 +23,7 @@ from itertools import pairwise
 
 from app.integrations.otp.client import OtpClient
 from app.integrations.otp.mapper import to_route
-from app.schemas.routes import Notice, Route, RouteSearchRequest
+from app.schemas.routes import Leg, Notice, Route, RouteSearchRequest
 from app.schemas.suggestions import (
     ProposalSource,
     RejectedProposal,
@@ -54,16 +54,48 @@ class VerificationInput:
 
 def follows(route: Route, proposal: TransferProposal) -> bool:
     """True if consecutive transit legs ride exactly the proposed chain."""
+    return _matched(route, proposal.rides, proposal.stations) is not None
+
+
+def _matched(route: Route, rides: list[list[str]], stations: list[str]) -> list[Leg] | None:
     transit = [leg for leg in route.legs if leg.route_id]
-    rides, stations = proposal.rides, proposal.stations
     for start in range(len(transit) - len(rides) + 1):
         legs = transit[start : start + len(rides)]
         if all(leg.route_id in ride for leg, ride in zip(legs, rides, strict=True)) and all(
             into.destination.station_id == station and out_of.origin.station_id == station
             for (into, out_of), station in zip(pairwise(legs), stations, strict=True)
         ):
-            return True
-    return False
+            return legs
+    return None
+
+
+def boarded_later(route: Route, proposal: TransferProposal) -> TransferProposal | None:
+    """The plan from its first transfer station on, if the route rides that.
+
+    Allowed the journey's other lines, OTP often reaches the first transfer
+    station without the plan's first ride (PATH to 33rd St, a short walk,
+    then the express from 34 St-Penn). That is still the plan's shortcut, so
+    it counts, described by what the route actually rides.
+    """
+    if len(proposal.rides) < 3:
+        return None  # what remains would be a single ride, not a transfer
+    rides, stations = proposal.rides[1:], proposal.stations[1:]
+    legs = _matched(route, rides, stations)
+    if legs is None or legs[0].origin.station_id != proposal.stations[0]:
+        return None
+    reason = "Ride " + ", then ".join(
+        f"the {leg.route or leg.route_id} from {leg.origin.name} to {leg.destination.name}"
+        if i == 0
+        else f"the {leg.route or leg.route_id} to {leg.destination.name}"
+        for i, leg in enumerate(legs)
+    )
+    return TransferProposal(
+        first_routes=rides[0],
+        transfer_station=stations[0],
+        second_routes=rides[1],
+        then=proposal.then[1:],
+        reason=(reason + ".")[:200],
+    )
 
 
 async def verify(
@@ -86,18 +118,19 @@ async def verify(
     )
     plan = await otp.plan(query)
     earliest = data.requested - timedelta(minutes=1)
-    matching = [
-        route
-        for route in (to_route(it) for it in plan.itineraries)
-        if route.departure >= earliest and follows(route, proposal)
-    ]
     max_walk = data.request.accessibility.max_walk_meters
-    if max_walk is not None:
-        matching = [r for r in matching if r.walk_meters <= max_walk]
+    matching: list[tuple[Route, TransferProposal]] = []
+    for route in (to_route(it) for it in plan.itineraries):
+        if route.departure < earliest or (max_walk is not None and route.walk_meters > max_walk):
+            continue
+        if follows(route, proposal):
+            matching.append((route, proposal))
+        elif (later := boarded_later(route, proposal)) is not None:
+            matching.append((route, later))
     if not matching:
         return reject("no_itinerary", "OTP found no itinerary that makes this transfer")
 
-    best = min(matching, key=lambda r: r.arrival)
+    best, followed = min(matching, key=lambda m: m[0].arrival)
     saving = data.baseline_arrival - best.arrival
     if saving < MIN_SAVING:
         return reject("not_faster", _shortfall(saving))
@@ -122,7 +155,7 @@ async def verify(
         Notice(code="SERVICE_ALERT", message=alert.header[:300]) for alert in alerts.values()
     ]
     return VerifiedSuggestion(
-        proposal=proposal,
+        proposal=followed,
         source=source,
         route=assessed.model_copy(
             update={"origin_type": "model_suggestion" if source == "model" else "rules_suggestion"}

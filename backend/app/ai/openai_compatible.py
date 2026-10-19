@@ -48,12 +48,19 @@ class OpenAICompatibleProvider:
             response = await self._http.post("/chat/completions", json=payload)
         except httpx.TransportError as exc:
             raise TransientLlmError(type(exc).__name__) from exc
-        if response.status_code in RETRYABLE_STATUS:
-            raise TransientLlmError(f"HTTP {response.status_code}")
         if response.status_code >= 400:
+            code = _error_code(response)
+            if code == "insufficient_quota":
+                # OpenAI answers 429 when the account has no credit; waiting cannot help.
+                raise LlmUnavailableError(
+                    "The provider account has no credit (insufficient_quota)", "ai_no_credit"
+                )
+            status = " ".join(filter(None, [str(response.status_code), code]))
+            if response.status_code in RETRYABLE_STATUS:
+                raise TransientLlmError(f"HTTP {status}")
             # Bad key, unknown model, malformed request: retrying cannot help.
             raise LlmUnavailableError(
-                f"The language model rejected the request ({response.status_code})", "ai_rejected"
+                f"The language model rejected the request ({status})", "ai_rejected"
             )
         try:
             body = response.json()
@@ -75,3 +82,17 @@ class OpenAICompatibleProvider:
 
     async def close(self) -> None:
         await self._http.aclose()
+
+
+def _error_code(response: httpx.Response) -> str:
+    """The provider's error code or type, such as ``insufficient_quota``; never its message."""
+    try:
+        error = response.json().get("error") or {}
+    except ValueError:
+        return ""
+    if isinstance(error, list):  # Gemini wraps errors in a list
+        error = error[0] if error else {}
+    if not isinstance(error, dict):
+        return ""
+    value = error.get("code") or error.get("type") or error.get("status") or ""
+    return str(value)[:64]
