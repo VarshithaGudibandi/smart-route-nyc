@@ -6,10 +6,10 @@
 }
 
 .body {
-  padding: 24px 28px 28px;
+  padding: 20px 24px 24px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
 }
 
 .back {
@@ -41,6 +41,16 @@
   color: var(--ink-muted);
 }
 
+.muted {
+  color: var(--ink-muted);
+}
+
+.sub {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
 .alerts {
   list-style: none;
   margin: 0;
@@ -64,8 +74,8 @@
 
 .step {
   display: grid;
-  grid-template-columns: 52px 28px 1fr;
-  gap: 4px 12px;
+  grid-template-columns: 48px 28px 1fr;
+  gap: 10px 12px;
   align-items: start;
   padding: 10px 0;
   border-top: 1px solid var(--line);
@@ -108,16 +118,41 @@
 }
 
 .check {
-  border-top: 2px solid var(--black);
-  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.checkSummary {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.checkSummary::-webkit-details-marker {
+  display: none;
+}
+
+.checkSummary::after {
+  content: "▾";
+  margin-left: auto;
+  color: var(--ink-muted);
+}
+
+.check[open] .checkSummary::after {
+  content: "▴";
+}
+
+.checkCounts {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-muted);
 }
 
 .findings {
   list-style: none;
-  margin: 0;
+  margin: 12px 0 8px;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -128,7 +163,7 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .small {

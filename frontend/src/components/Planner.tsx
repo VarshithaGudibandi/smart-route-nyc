@@ -98,10 +98,7 @@ export function Planner() {
           </section>
         )}
       </div>
-      <footer className={styles.footer}>
-        Timetables: MTA and PATH GTFS. Elevator status: MTA. Maps and places © OpenStreetMap contributors,
-        tiles by OpenFreeMap. No account, no saved locations.
-      </footer>
+      <footer className={styles.footer}>Data: MTA, PATH, © OpenStreetMap contributors. Tiles: OpenFreeMap.</footer>
     </div>
   );
 }
@@ -127,20 +124,17 @@ function Status({ message }: { message: string }) {
 function Welcome() {
   return (
     <div className={styles.welcome}>
-      <h1 className={styles.welcomeTitle}>Subway, bus and PATH trips that respect your needs</h1>
-      <p>
-        Choose where you’re starting and where you’re going. Turn on <strong>Step-free</strong> or{" "}
-        <strong>Wheelchair</strong> to see only routes we can confirm, with every barrier and unknown listed for the rest.
-      </p>
+      <h1 className={styles.welcomeTitle}>Subway, bus and PATH trips that fit your needs</h1>
+      <p>Choose a start and a destination. Turn on Step-free or Wheelchair to see only routes that work for you.</p>
       <ul className={styles.legend}>
         <li>
-          <StatusMark status="meets" /> Confirmed by MTA elevator status or OpenStreetMap
+          <StatusMark status="meets" /> Step-free
         </li>
         <li>
-          <StatusMark status="violates" /> A known barrier, such as no elevator
+          <StatusMark status="violates" /> Barrier
         </li>
         <li>
-          <StatusMark status="unknown" /> Not confirmed: no data is published
+          <StatusMark status="unknown" /> Not confirmed
         </li>
       </ul>
     </div>
@@ -168,10 +162,10 @@ type ListProps = {
 };
 
 function ResultsList({ response, trip, suggestions, investigating, selectedId, onSelect, accessibilityRequired }: ListProps) {
-  const routes = response.routes;
-  const review = response.review_only_routes ?? [];
-  const noTransfer = routes.filter((r) => r.transfers === 0);
-  const withTransfer = routes.filter((r) => r.transfers > 0);
+  // Soonest arrival first: for a rider leaving now, that is the fastest way there.
+  const routes = [...response.routes].sort(byArrival);
+  const review = [...(response.review_only_routes ?? [])].sort(byArrival);
+  const fastestId = routes[0]?.route_id;
   const elevators = (response.data_freshness ?? []).find((f) => f.source === "mta_elevators");
   const notices = response.notices.filter((n) => n.code !== "NO_CONFIRMED_ACCESSIBLE_ROUTE");
   const noConfirmed = response.notices.some((n) => n.code === "NO_CONFIRMED_ACCESSIBLE_ROUTE");
@@ -182,9 +176,9 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
     <div className={styles.list}>
       <div className={styles.listHead}>
         <h1 className={styles.count}>
-          {total} {noun} {total === 1 ? "route" : "routes"}
+          {total === 0 ? "No" : total} {noun} {total === 1 ? "route" : "routes"}
         </h1>
-        {elevators?.as_of && <span className={styles.meta}>Elevators checked {clockWithPeriod(elevators.as_of)}</span>}
+        {elevators?.as_of && <span className={styles.meta}>Elevators as of {clockWithPeriod(elevators.as_of)}</span>}
       </div>
 
       {notices.map((notice) => (
@@ -214,27 +208,13 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
         </Section>
       )}
 
-      {noTransfer.length > 0 && (
-        <Section title="No transfer">
-          {noTransfer.map((route) => (
+      {routes.length > 0 && (
+        <Section title={suggestions.length ? "Other routes" : "Routes"} hideTitle={!suggestions.length}>
+          {routes.map((route) => (
             <RouteCard
               key={route.route_id}
               route={route}
-              compact
-              selected={route.route_id === selectedId}
-              onSelect={() => onSelect(route.route_id)}
-              accessibilityRequired={accessibilityRequired}
-            />
-          ))}
-        </Section>
-      )}
-
-      {withTransfer.length > 0 && (
-        <Section title="With transfers">
-          {withTransfer.map((route) => (
-            <RouteCard
-              key={route.route_id}
-              route={route}
+              fastest={route.route_id === fastestId && routes.length > 1 && !suggestions.length}
               selected={route.route_id === selectedId}
               onSelect={() => onSelect(route.route_id)}
               accessibilityRequired={accessibilityRequired}
@@ -249,8 +229,8 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
             <div className={styles.reviewNotice} role="status">
               <StatusMark status="violates" />
               <div>
-                <p className={styles.reviewTitle}>We couldn’t confirm a {noun || "step-free"} route</p>
-                <p>Here’s what we know about each option, so you can decide.</p>
+                <p className={styles.reviewTitle}>No confirmed {noun || "step-free"} route</p>
+                <p>These options have a barrier or a station we couldn’t check.</p>
               </div>
             </div>
           )}
@@ -275,10 +255,13 @@ function ResultsList({ response, trip, suggestions, investigating, selectedId, o
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+const byArrival = (a: Route, b: Route) =>
+  Date.parse(a.arrival) - Date.parse(b.arrival) || a.duration_seconds - b.duration_seconds;
+
+function Section({ title, hideTitle = false, children }: { title: string; hideTitle?: boolean; children: React.ReactNode }) {
   return (
     <section className={styles.section} aria-label={title}>
-      <h2 className="label-caps">{title}</h2>
+      <h2 className={hideTitle ? "visually-hidden" : "label-caps"}>{title}</h2>
       <ul className={styles.cards}>
         {Array.isArray(children)
           ? children.map((child, index) => <li key={index}>{child}</li>)

@@ -10,8 +10,8 @@ Evidence:
   need an ADA-accessible elevator; step-free travel (strollers, luggage) can
   use any working elevator. Escalators are never step-free access.
 * Walking legs: stairs and entrance tags in OpenStreetMap, as reported by
-  OTP. Absence of mapped stairs is accepted as "no stairs found in
-  OpenStreetMap", which is how findings word it; OSM can be incomplete.
+  OTP. Absence of mapped stairs is accepted as "no stairs mapped", which is
+  how findings word it; OSM can be incomplete.
 * Bus stops and PATH stations: no equipment data is published, so they are
   always ``unknown``.
 """
@@ -31,9 +31,9 @@ from app.services.accessibility.snapshot import AccessibilitySnapshot, Elevator
 
 SUBWAY_FEED = "MTASBWY"
 NO_DATA_DESCRIPTIONS = {
-    "PATH": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+    "PATH": "PATH publishes no elevator data.",
 }
-BUS_DESCRIPTION = "No accessibility data is published for bus stops."
+BUS_DESCRIPTION = "No accessibility data for bus stops."
 
 
 def assess_route(
@@ -74,15 +74,16 @@ def _walk_finding(index: int, leg: Leg) -> AccessibilityFinding:
     if stairs or blocked:
         parts = []
         if stairs:
-            parts.append(f"{len(stairs)} flight{'s' if len(stairs) > 1 else ''} of stairs")
+            parts.append(f"{len(stairs)} flight{'s' if len(stairs) > 1 else ''} of stairs mapped")
         if blocked:
             names = ", ".join(sorted({f.name or "an entrance" for f in blocked}))
             parts.append(f"entrance not wheelchair accessible ({names})")
         status: AccessibilityStatus = "violates"
-        description = "OpenStreetMap shows " + " and ".join(parts) + " on this walk."
+        text = " and ".join(parts)
+        description = text[0].upper() + text[1:] + "."
     else:
         status = "meets"
-        description = "No stairs found in OpenStreetMap along this walk."
+        description = "No stairs mapped."
     return AccessibilityFinding(
         kind="street",
         location=location,
@@ -126,36 +127,35 @@ def _station_finding(
         )
 
     if not snapshot.loaded:
-        return finding("unknown", "Elevator data is not available right now.", [])
+        return finding("unknown", "Elevator status unavailable.", [])
 
     kind = "ADA-accessible elevator" if wheelchair else "elevator"
     usable = [
         e for e in snapshot.elevators_by_stop.get(stop_id, []) if e.ada_accessible or not wheelchair
     ]
     if not usable:
-        return finding("violates", f"MTA lists no {kind} at this station.", [])
+        return finding("violates", f"No {kind}.", [])
 
     freshness = classify(SourceKind.ACCESSIBILITY_STATUS, snapshot.observed_at, None, now)
     if freshness is not Freshness.FRESH:
         return finding(
             "unknown",
-            f"Elevator status is {freshness.value}; it cannot be confirmed as working.",
+            f"Elevator status is {freshness.value}.",
             usable,
         )
 
     out = [e for e in usable if not e.in_service]
     if len(out) == len(usable):
-        plural = "s are" if len(usable) > 1 else " is"
-        return finding("violates", f"The station's {kind}{plural} out of service.", usable)
+        every = f"All {len(usable)} {kind}s" if len(usable) > 1 else kind.capitalize()
+        return finding("violates", f"{every} out of service.", usable)
     if out:
         return finding(
             "unknown",
-            f"{len(out)} of {len(usable)} {kind}s are out of service; "
-            "the one you need may be affected.",
+            f"{len(out)} of {len(usable)} {kind}s out of service.",
             usable,
         )
     plural = "s" if len(usable) > 1 else ""
-    return finding("meets", f"{len(usable)} {kind}{plural} in service.", usable)
+    return finding("meets", f"{len(usable)} {kind}{plural} working.", usable)
 
 
 def _note(elevator: Elevator) -> EquipmentNote:

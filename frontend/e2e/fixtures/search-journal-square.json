@@ -19,7 +19,7 @@
      "location": "Walk from Origin to Grove Street",
      "leg_index": 0,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -29,7 +29,7 @@
      "location": "Grove Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -39,7 +39,7 @@
      "location": "World Trade Center",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -49,7 +49,7 @@
      "location": "Walk from World Trade Center to WTC Cortlandt",
      "leg_index": 2,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -59,7 +59,7 @@
      "location": "WTC Cortlandt",
      "leg_index": 3,
      "status": "meets",
-     "description": "7 elevators in service.",
+     "description": "7 elevators working.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": [
@@ -126,7 +126,7 @@
      "location": "116 St-Columbia University",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -136,7 +136,7 @@
      "location": "Walk from 116 St-Columbia University to Destination",
      "leg_index": 4,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -301,7 +301,7 @@
      "location": "Walk from Origin to Grove Street",
      "leg_index": 0,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -311,7 +311,7 @@
      "location": "Grove Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -321,7 +321,7 @@
      "location": "23rd Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -331,7 +331,7 @@
      "location": "Walk from 23rd Street to 23 St",
      "leg_index": 2,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -341,7 +341,7 @@
      "location": "23 St",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -351,7 +351,7 @@
      "location": "116 St-Columbia University",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -361,7 +361,7 @@
      "location": "Walk from 116 St-Columbia University to Destination",
      "leg_index": 4,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -526,7 +526,7 @@
      "location": "Walk from Origin to Grove Street",
      "leg_index": 0,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -536,7 +536,7 @@
      "location": "Grove Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -546,7 +546,7 @@
      "location": "World Trade Center",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -556,7 +556,7 @@
      "location": "Walk from World Trade Center to WTC Cortlandt",
      "leg_index": 2,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -566,7 +566,7 @@
      "location": "WTC Cortlandt",
      "leg_index": 3,
      "status": "meets",
-     "description": "7 elevators in service.",
+     "description": "7 elevators working.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": [
@@ -633,7 +633,7 @@
      "location": "116 St-Columbia University",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -643,7 +643,7 @@
      "location": "Walk from 116 St-Columbia University to Destination",
      "leg_index": 4,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -808,7 +808,7 @@
      "location": "Walk from Origin to Grove Street",
      "leg_index": 0,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -818,7 +818,7 @@
      "location": "Grove Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -828,7 +828,7 @@
      "location": "World Trade Center",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -838,7 +838,7 @@
      "location": "Walk from World Trade Center to WTC Cortlandt",
      "leg_index": 2,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -848,7 +848,7 @@
      "location": "WTC Cortlandt",
      "leg_index": 3,
      "status": "meets",
-     "description": "7 elevators in service.",
+     "description": "7 elevators working.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": [
@@ -915,7 +915,7 @@
      "location": "116 St-Columbia University",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -925,7 +925,7 @@
      "location": "Walk from 116 St-Columbia University to Destination",
      "leg_index": 4,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -1090,7 +1090,7 @@
      "location": "Walk from Origin to Grove Street",
      "leg_index": 0,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -1100,7 +1100,7 @@
      "location": "Grove Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -1110,7 +1110,7 @@
      "location": "23rd Street",
      "leg_index": 1,
      "status": "unknown",
-     "description": "PATH does not publish elevator data, so step-free access cannot be confirmed.",
+     "description": "PATH publishes no elevator data.",
      "source": "none",
      "data_as_of": null,
      "equipment": []
@@ -1120,7 +1120,7 @@
      "location": "Walk from 23rd Street to 23 St",
      "leg_index": 2,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []
@@ -1130,7 +1130,7 @@
      "location": "23 St",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -1140,7 +1140,7 @@
      "location": "116 St-Columbia University",
      "leg_index": 3,
      "status": "violates",
-     "description": "MTA lists no elevator at this station.",
+     "description": "No elevator.",
      "source": "mta_elevators",
      "data_as_of": "2026-10-18T17:42:17.325905Z",
      "equipment": []
@@ -1150,7 +1150,7 @@
      "location": "Walk from 116 St-Columbia University to Destination",
      "leg_index": 4,
      "status": "meets",
-     "description": "No stairs found in OpenStreetMap along this walk.",
+     "description": "No stairs mapped.",
      "source": "openstreetmap",
      "data_as_of": null,
      "equipment": []

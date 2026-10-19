@@ -8,7 +8,7 @@ import type { Explanation as ExplanationData } from "@/lib/types";
 
 import styles from "./Explanation.module.css";
 
-/** "Explain this route": sentences built from, and citing, the route's facts. */
+/** A short summary built from, and checked against, the route's facts. */
 export function Explanation({ searchId, routeId }: { searchId: string; routeId: string }) {
   const [data, setData] = useState<ExplanationData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,12 +35,9 @@ export function Explanation({ searchId, routeId }: { searchId: string; routeId: 
   if (!data) {
     return (
       <div className={styles.start}>
-        <button type="button" className={styles.button} onClick={load} disabled={busy} aria-describedby="explain-help">
-          {busy ? "Explaining…" : "Explain this route"}
+        <button type="button" className={styles.button} onClick={load} disabled={busy}>
+          {busy ? "Summarizing…" : "Summarize this route"}
         </button>
-        <span id="explain-help" className={styles.help}>
-          Every step, barrier and unknown in plain sentences.
-        </span>
         {error && (
           <p className={styles.error} role="alert">
             {error}
@@ -53,19 +50,11 @@ export function Explanation({ searchId, routeId }: { searchId: string; routeId: 
   return (
     <section className={styles.panel} aria-labelledby="explain-title" aria-live="polite">
       <h3 id="explain-title" className="label-caps">
-        About this route
+        Summary
+        {data.source === "model" && <span className={styles.tag}>AI · {providerName(data.provider)}</span>}
       </h3>
-      <ul className={styles.sentences}>
-        {data.sentences.map((sentence, index) => (
-          <li key={index}>{sentence.text}</li>
-        ))}
-      </ul>
+      <p className={styles.text}>{data.sentences.map((sentence) => sentence.text).join(" ")}</p>
       {data.notice && <p className={styles.note}>{data.notice}</p>}
-      <p className={styles.note}>
-        {data.source === "model"
-          ? `Worded by ${providerName(data.provider)}, and checked sentence by sentence against the route data.`
-          : "Built directly from the route data."}
-      </p>
     </section>
   );
 }

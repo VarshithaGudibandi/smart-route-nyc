@@ -62,7 +62,7 @@ export function NeedsDialog({ open, needs, onClose, onApply }: Props) {
     } catch (caught) {
       setResult(null);
       if (caught instanceof ApiError && caught.status === 503) {
-        setError("Typed needs aren’t available right now. Use the options on the page instead.");
+        setError("Typed needs are turned off. Use the options on the page.");
       } else if (caught instanceof ApiError && caught.status === 502) {
         setError("We couldn’t read that. Try different words, or use the options on the page.");
       } else {
@@ -117,7 +117,7 @@ export function NeedsDialog({ open, needs, onClose, onApply }: Props) {
           <section className={styles.result} aria-live="polite">
             <h3 className="label-caps">Suggested changes</h3>
             {result.changes.length === 0 ? (
-              <p>No changes to your current settings.</p>
+              <p>Your settings already cover this. Routes are listed fastest first.</p>
             ) : (
               <ul className={styles.list}>
                 {result.changes.map((change) => (
@@ -143,7 +143,7 @@ export function NeedsDialog({ open, needs, onClose, onApply }: Props) {
               <p className={styles.note}>Can’t plan for: {result.unsupported_requests.join(", ")}.</p>
             )}
             <p className={styles.source}>
-              {byRules ? "Read with simple keyword rules; no AI model is connected." : `Read by ${providerName(result.source.provider)}.`}
+              {byRules ? "Read with keyword rules." : `Read by ${providerName(result.source.provider)}.`}
             </p>
             <div className={styles.actions}>
               <button

@@ -30,6 +30,9 @@ export function RouteMap({ route, label }: { route: Route; label: string }) {
       try {
         const maplibre = await import("maplibre-gl");
         if (cancelled) return;
+        // MapLibre looks for its worker next to its own bundle, which Next.js
+        // does not emit; the build copies it into public/ (see package.json).
+        maplibre.setWorkerUrl("/maplibre-gl-worker.mjs");
         map = new maplibre.Map({
           container: element,
           style: MAP_STYLE_URL,
@@ -37,7 +40,17 @@ export function RouteMap({ route, label }: { route: Route; label: string }) {
           attributionControl: { compact: true },
           cooperativeGestures: true,
         });
-        map.on("error", () => undefined);
+        // A blocked style or tiles would leave an empty grey box; say so instead.
+        let styleLoaded = false;
+        let tilesShown = false;
+        let tileErrors = 0;
+        map.on("error", (event) => {
+          const tile = "tile" in event && event.tile;
+          if (!styleLoaded || (tile && ++tileErrors >= 4 && !tilesShown)) setFailed(true);
+        });
+        map.on("data", (event) => {
+          if (event.dataType === "source" && "tile" in event && event.tile) tilesShown = true;
+        });
         const coordinates: [number, number][] = [];
         const features = route.legs.map((leg, index) => {
           const line = leg.geometry
@@ -68,6 +81,7 @@ export function RouteMap({ route, label }: { route: Route; label: string }) {
           }));
 
         map.on("load", () => {
+          styleLoaded = true;
           if (!map) return;
           map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features } });
           map.addSource("stops", { type: "geojson", data: { type: "FeatureCollection", features: stops } });
@@ -124,7 +138,7 @@ export function RouteMap({ route, label }: { route: Route; label: string }) {
   if (failed) {
     return (
       <div className={`${styles.map} ${styles.fallback}`}>
-        <p>The map can’t be shown on this device. Every step is listed below.</p>
+        <p>Map unavailable. Every step is listed below.</p>
       </div>
     );
   }

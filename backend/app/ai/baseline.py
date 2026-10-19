@@ -25,7 +25,10 @@ _LESS_WALKING = re.compile(
     r"\b(less|minimal|least|little|minimum) walking\b|\bwalk (less|as little)\b|"
     r"\bcan'?t walk (far|much|long)\b"
 )
-_FASTEST = re.compile(r"\b(fastest|quickest|asap|in a hurry|running late)\b")
+_FASTEST = re.compile(
+    r"\b(fast(er|est)?|quick(er|est|ly)?|asap|as soon as possible|hurry|running late|"
+    r"rush(ing)?|shortest time|least time|earliest)\b"
+)
 _WALK_LIMIT = re.compile(
     r"\b(\d{1,4}) ?(m|meters?|metres?|blocks?|minutes?|mins?|miles?)\b(?=[^.]*\bwalk)|"
     r"\bwalk[^.]*?\b(\d{1,4}) ?(m|meters?|metres?|blocks?|minutes?|mins?|miles?)\b"

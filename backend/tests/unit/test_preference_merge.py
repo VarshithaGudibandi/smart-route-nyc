@@ -1,7 +1,17 @@
 import pytest
 
-from app.ai.preferences import InvalidModelOutputError, clean_text, merge, parse_model_output
+from app.ai.guard import GuardedLlm, UnlimitedBudget
+from app.ai.preferences import (
+    InvalidModelOutputError,
+    PreferenceInterpreter,
+    clean_text,
+    merge,
+    parse_model_output,
+)
+from app.ai.provider import DisabledProvider, LlmUnavailableError
+from app.core.resilience import CircuitBreaker
 from app.schemas.preferences import InterpretationSource, ModelOutput, PreferenceState
+from tests.unit.test_llm_guard import ScriptedProvider
 
 SOURCE = InterpretationSource(provider="test", model="m", prompt_version="v", cached=False)
 
@@ -74,3 +84,23 @@ def test_rejects_anything_outside_the_schema(reply: str) -> None:
 
 def test_clean_text_strips_control_characters() -> None:
     assert clean_text("  no\x00 stairs\n\tplease  ") == "no stairs please"
+
+
+async def test_a_failing_model_falls_back_to_keyword_rules() -> None:
+    llm = GuardedLlm(
+        ScriptedProvider(LlmUnavailableError("rejected (401)", "ai_rejected")),
+        UnlimitedBudget(),
+        CircuitBreaker("llm", 5, 60),
+        timeout_s=1,
+    )
+    result = await PreferenceInterpreter(llm, None, b"s", 60).interpret(
+        "I need to get there fast", PreferenceState()
+    )
+    assert result.source.provider == "baseline"
+    assert result.proposed.optimization.primary == "FASTEST"
+
+
+async def test_disabled_typed_needs_stay_disabled() -> None:
+    llm = GuardedLlm(DisabledProvider(), UnlimitedBudget(), CircuitBreaker("llm", 5, 60), 1)
+    with pytest.raises(LlmUnavailableError):
+        await PreferenceInterpreter(llm, None, b"s", 60).interpret("fast", PreferenceState())

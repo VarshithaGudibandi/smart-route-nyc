@@ -13,99 +13,15 @@
    ]
   },
   {
-   "text": "Walk 2406 m (about 33 min) from your starting point to Grove Street.",
-   "fact_ids": [
-    "leg0"
-   ]
-  },
-  {
-   "text": "Take the RED (PATH) toward Newark - World Trade Center from Grove Street at 09:03 to World Trade Center, arriving at 09:11.",
-   "fact_ids": [
-    "leg1"
-   ]
-  },
-  {
-   "text": "Walk 67 m (about 5 min) from World Trade Center to WTC Cortlandt.",
-   "fact_ids": [
-    "leg2"
-   ]
-  },
-  {
-   "text": "Take the 1 (MTA New York City Transit) toward 215 St from WTC Cortlandt at 09:18 to 116 St-Columbia University, arriving at 09:48.",
-   "fact_ids": [
-    "leg3"
-   ]
-  },
-  {
-   "text": "Walk 83 m (about 4 min) from 116 St-Columbia University to your destination.",
-   "fact_ids": [
-    "leg4"
-   ]
-  },
-  {
    "text": "Change from the RED at World Trade Center to the 1 at WTC Cortlandt, with 8 min between trains.",
    "fact_ids": [
     "transfer3"
    ]
   },
   {
-   "text": "This route has at least one known barrier, listed below.",
+   "text": "This route has at least one known barrier.",
    "fact_ids": [
     "accessibility"
-   ]
-  },
-  {
-   "text": "Walk from your starting point to Grove Street: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
-   "fact_ids": [
-    "finding0"
-   ]
-  },
-  {
-   "text": "Grove Street: not confirmed. PATH does not publish elevator data, so step-free access cannot be confirmed.",
-   "fact_ids": [
-    "finding1"
-   ]
-  },
-  {
-   "text": "World Trade Center: not confirmed. PATH does not publish elevator data, so step-free access cannot be confirmed.",
-   "fact_ids": [
-    "finding2"
-   ]
-  },
-  {
-   "text": "Walk from World Trade Center to WTC Cortlandt: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
-   "fact_ids": [
-    "finding3"
-   ]
-  },
-  {
-   "text": "WTC Cortlandt: meets the requirement. 7 elevators in service. (MTA elevator status as of 13:42)",
-   "fact_ids": [
-    "finding4"
-   ]
-  },
-  {
-   "text": "116 St-Columbia University: barrier. MTA lists no elevator at this station. (MTA elevator status as of 13:42)",
-   "fact_ids": [
-    "finding5"
-   ]
-  },
-  {
-   "text": "Walk from 116 St-Columbia University to your destination: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
-   "fact_ids": [
-    "finding6"
-   ]
-  },
-  {
-   "text": "Elevator status is as it is now; it can change before you travel at 08:30.",
-   "fact_ids": [
-    "status_now"
-   ]
-  },
-  {
-   "text": "Times come from the published timetable, not live train positions.",
-   "fact_ids": [
-    "schedule"
    ]
   }
  ],
@@ -155,49 +71,49 @@
   {
    "id": "accessibility",
    "kind": "accessibility",
-   "text": "This route has at least one known barrier, listed below.",
+   "text": "This route has at least one known barrier.",
    "required": true
   },
   {
    "id": "finding0",
    "kind": "finding",
-   "text": "Walk from your starting point to Grove Street: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "text": "Walk from your starting point to Grove Street: meets the requirement. No stairs mapped.",
    "required": false
   },
   {
    "id": "finding1",
    "kind": "finding",
-   "text": "Grove Street: not confirmed. PATH does not publish elevator data, so step-free access cannot be confirmed.",
+   "text": "Grove Street: step-free access not confirmed. PATH publishes no elevator data.",
    "required": true
   },
   {
    "id": "finding2",
    "kind": "finding",
-   "text": "World Trade Center: not confirmed. PATH does not publish elevator data, so step-free access cannot be confirmed.",
+   "text": "World Trade Center: step-free access not confirmed. PATH publishes no elevator data.",
    "required": true
   },
   {
    "id": "finding3",
    "kind": "finding",
-   "text": "Walk from World Trade Center to WTC Cortlandt: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "text": "Walk from World Trade Center to WTC Cortlandt: meets the requirement. No stairs mapped.",
    "required": false
   },
   {
    "id": "finding4",
    "kind": "finding",
-   "text": "WTC Cortlandt: meets the requirement. 7 elevators in service. (MTA elevator status as of 13:42)",
+   "text": "WTC Cortlandt: meets the requirement. 7 elevators working.",
    "required": false
   },
   {
    "id": "finding5",
    "kind": "finding",
-   "text": "116 St-Columbia University: barrier. MTA lists no elevator at this station. (MTA elevator status as of 13:42)",
+   "text": "116 St-Columbia University: barrier. No elevator.",
    "required": true
   },
   {
    "id": "finding6",
    "kind": "finding",
-   "text": "Walk from 116 St-Columbia University to your destination: meets the requirement. No stairs found in OpenStreetMap along this walk. (source: OpenStreetMap)",
+   "text": "Walk from 116 St-Columbia University to your destination: meets the requirement. No stairs mapped.",
    "required": false
   },
   {

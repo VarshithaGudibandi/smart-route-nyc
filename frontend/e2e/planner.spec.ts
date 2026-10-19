@@ -11,8 +11,8 @@ async function expectAccessible(page: Page) {
 test("first visit explains the states and passes accessibility checks", async ({ page }) => {
   await mockApi(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /trips that respect your needs/ })).toBeVisible();
-  await expect(page.getByText("A known barrier, such as no elevator")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /trips that fit your needs/ })).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Barrier" })).toBeVisible();
   await expectAccessible(page);
 });
 
@@ -23,14 +23,17 @@ test("plans a trip from typed places and shows a verified faster transfer", asyn
   await page.getByRole("listbox").getByRole("option", { name: /Bay Ridge-95 St/ }).click();
   await page.getByRole("combobox", { name: "To" }).fill("herald sq");
   await page.getByRole("listbox").getByRole("option", { name: /34 St-Herald Sq/ }).click();
-  await page.getByLabel("Leave").fill("2026-10-19T08:30");
+  await page.getByLabel("Leave").selectOption("at");
+  await page.getByLabel("Date (New York)").fill("2026-10-19");
+  await page.getByLabel("Time (New York)").fill("08:30");
   await page.getByRole("button", { name: "Step-free", pressed: false }).click();
   await page.getByRole("button", { name: "Search", exact: true }).click();
 
   await expect(page.getByRole("heading", { level: 1, name: /step-free routes/ })).toBeVisible();
   await expect(page.getByText("13 MIN FASTER")).toBeVisible();
-  await expect(page.getByRole("region", { name: "No transfer" }).getByRole("listitem")).toHaveCount(5);
+  await expect(page.getByRole("region", { name: "Other routes" }).getByRole("listitem")).toHaveCount(5);
   expect(page.url()).toContain("sf=1");
+  expect(decodeURIComponent(page.url())).toContain("at=2026-10-19T12:30:00.000Z");
   // The departure was sent as New York time.
   expect(calls.some((c) => c.startsWith("POST /api/v1/routes/search"))).toBe(true);
   await expectAccessible(page);
@@ -43,12 +46,14 @@ test("route detail shows every step, explains the route and takes a rating", asy
   const detail = page.getByRole("article");
   await expect(detail.getByRole("heading", { level: 2, name: "8:34 – 9:18" })).toBeVisible();
   await expect(detail.getByText("Change at 59 St")).toBeVisible();
-  await expect(detail.getByText("Step-free check · confirmed")).toBeVisible();
+  await expect(detail.getByText("Every station and walk checked")).toBeVisible();
   if (isMobile) await expect(page.getByRole("heading", { level: 1 })).toBeHidden();
 
-  await detail.getByRole("button", { name: "Explain this route" }).click();
-  await expect(detail.getByRole("heading", { name: "About this route" })).toBeVisible();
-  await expect(detail.getByText(/Built directly from the route data/)).toBeVisible();
+  await detail.getByRole("button", { name: "Summarize this route" }).click();
+  await expect(detail.getByRole("heading", { name: "Summary" })).toBeVisible();
+  await expect(detail.getByText(/with 2 min between trains/)).toBeVisible();
+  // Without a model, the summary is the key facts, not a retelling of every step.
+  await expect(detail.getByText(/Take the R/)).toHaveCount(0);
 
   await detail.getByText("★").nth(3).click();
   await detail.getByRole("button", { name: "Send rating" }).click();
@@ -59,7 +64,7 @@ test("route detail shows every step, explains the route and takes a rating", asy
 test("when nothing can be confirmed, routes are listed for review with each barrier", async ({ page }) => {
   await mockApi(page);
   await page.goto(JOURNAL_SQUARE);
-  await expect(page.getByText("We couldn’t confirm a step-free route")).toBeVisible();
+  await expect(page.getByText("No confirmed step-free route")).toBeVisible();
   const review = page.getByRole("region", { name: "Needs review" });
   await expect(review.getByRole("listitem")).toHaveCount(5);
   await expect(review.getByText("1 barrier").first()).toBeVisible();
@@ -100,8 +105,9 @@ test("a denied location permission leaves search working", async ({ page }) => {
   });
   await mockApi(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Use my current location" }).click();
-  await expect(page.getByText(/Search for a station or address instead/)).toBeVisible();
+  await page.getByRole("combobox", { name: "From" }).click();
+  await page.getByRole("option", { name: "Your location" }).click();
+  await expect(page.getByText(/Search for a place instead/)).toBeVisible();
   await expect(page.getByRole("combobox", { name: "From" })).toBeEnabled();
 });
 
@@ -111,7 +117,7 @@ test("typed needs are proposed, labelled honestly and applied on request", async
   await page.getByRole("button", { name: "Describe your needs…" }).click();
   await page.getByRole("dialog").getByRole("textbox").fill("I use a wheelchair");
   await page.getByRole("button", { name: "Suggest settings" }).click();
-  await expect(page.getByText(/no AI model is connected/)).toBeVisible();
+  await expect(page.getByText(/Read with keyword rules/)).toBeVisible();
   await page.getByRole("button", { name: "Apply these settings" }).click();
   await expect(page.getByRole("button", { name: "Wheelchair", pressed: true })).toBeVisible();
   expect(page.url()).toContain("wc=1");
@@ -126,7 +132,7 @@ test("pages are served with security headers and nothing breaks the content poli
   const response = await page.goto(BAY_RIDGE);
   const headers = response?.headers() ?? {};
   expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
-  expect(headers["referrer-policy"]).toBe("no-referrer");
+  expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-powered-by"]).toBeUndefined();
 

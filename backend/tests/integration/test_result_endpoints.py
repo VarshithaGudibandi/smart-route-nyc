@@ -164,7 +164,7 @@ def test_explanation_cites_server_side_facts(client: TestClient) -> None:
     assert {"summary", "accessibility"} <= fact_ids
     assert all(set(s["fact_ids"]) <= fact_ids for s in explanation["sentences"])
     # PATH publishes no elevator data: the explanation must say so.
-    assert any("PATH does not publish elevator data" in f["text"] for f in explanation["facts"])
+    assert any("PATH publishes no elevator data" in f["text"] for f in explanation["facts"])
 
 
 @pytest.mark.parametrize(

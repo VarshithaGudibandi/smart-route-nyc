@@ -78,7 +78,7 @@ def test_meets_when_every_station_has_a_working_elevator() -> None:
 def test_station_without_elevator_violates() -> None:
     result = assess_route(subway_route("A", "B"), snapshot(A=[elevator("EL1")]), True, NOW)
     assert result.accessibility_status == "violates"
-    assert "no ADA-accessible elevator" in result.accessibility_findings[2].description
+    assert "No ADA-accessible elevator" in result.accessibility_findings[2].description
 
 
 def test_wheelchair_needs_ada_elevator_but_step_free_does_not() -> None:

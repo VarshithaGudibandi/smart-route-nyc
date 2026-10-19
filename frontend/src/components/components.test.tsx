@@ -35,7 +35,7 @@ describe("RouteCard", () => {
     expect(screen.getByText("13 MIN FASTER")).toBeInTheDocument();
     expect(screen.getByText("Step-free confirmed")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "R train" })).toBeInTheDocument();
-    expect(screen.getByText(/change at 59 St/)).toBeInTheDocument();
+    expect(screen.getByText(/Change at 59 St/)).toBeInTheDocument();
   });
 
   it("counts barriers and unconfirmed stops in words, not only color", () => {
@@ -57,11 +57,12 @@ describe("RouteDetail", () => {
         accessibilityRequired
       />,
     );
-    expect(screen.getByText("Step-free check · barrier found")).toBeInTheDocument();
-    expect(screen.getByText(/MTA lists no elevator at this station/)).toBeInTheDocument();
+    expect(screen.getByText("Step-free access")).toBeInTheDocument();
+    expect(screen.getByText("1 barrier · 2 not confirmed")).toBeInTheDocument();
+    expect(screen.getAllByText(/No elevator\./).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Not confirmed:/).length).toBe(2);
-    expect(screen.getByText(/Walk from your starting point to Grove Street/)).toBeInTheDocument();
-    expect(screen.getByText("MTA elevator status is not available right now.", { exact: false })).toBeInTheDocument();
+    expect(screen.getByText("Walk to Grove Street")).toBeInTheDocument();
+    expect(screen.getByText("Elevator status unavailable.")).toBeInTheDocument();
   });
 });
 
@@ -74,7 +75,7 @@ describe("PlaceField", () => {
     await userEvent.type(input, "bay ridge");
     expect(await screen.findByRole("option", { name: /Bay Ridge-95 St/ })).toBeInTheDocument();
     expect(screen.getByText("Address search is unavailable right now; stations still work.")).toBeInTheDocument();
-    await userEvent.keyboard("{ArrowDown}{Enter}");
+    await userEvent.keyboard("{ArrowDown}{ArrowDown}{Enter}");
     expect(onChange).toHaveBeenLastCalledWith({ lat: 40.616622, lon: -74.030876, label: "Bay Ridge-95 St" });
     expect(input).toHaveAttribute("aria-expanded", "false");
   });
@@ -87,9 +88,10 @@ describe("PlaceField", () => {
           fail({ code: 1, PERMISSION_DENIED: 1 }),
       },
     });
-    render(<PlaceField label="From" value={null} onChange={() => undefined} allowCurrentLocation />);
-    await userEvent.click(screen.getByRole("button", { name: "Use my current location" }));
-    expect(screen.getByRole("status")).toHaveTextContent("Location permission was not given");
+    render(<PlaceField label="From" value={null} onChange={() => undefined} />);
+    await userEvent.click(screen.getByRole("combobox", { name: "From" }));
+    await userEvent.click(screen.getByRole("option", { name: "Your location" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Location access is off");
     expect(screen.getByRole("combobox", { name: "From" })).toBeEnabled();
   });
 });
@@ -102,7 +104,7 @@ describe("NeedsDialog", () => {
     await userEvent.type(screen.getByRole("textbox"), "I use a wheelchair");
     await userEvent.click(screen.getByRole("button", { name: "Suggest settings" }));
     expect(await screen.findByText(/Wheelchair access/)).toBeInTheDocument();
-    expect(screen.getByText(/no AI model is connected/)).toBeInTheDocument();
+    expect(screen.getByText(/Read with keyword rules/)).toBeInTheDocument();
     expect(onApply).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole("button", { name: "Apply these settings" }));
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ wheelchair: true, stepFree: true }));
@@ -113,7 +115,7 @@ describe("NeedsDialog", () => {
     render(<NeedsDialog open needs={NO_NEEDS} onClose={() => undefined} onApply={() => undefined} />);
     await userEvent.type(screen.getByRole("textbox"), "stroller");
     await userEvent.click(screen.getByRole("button", { name: "Suggest settings" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Use the options on the page instead");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Use the options on the page");
   });
 });
 

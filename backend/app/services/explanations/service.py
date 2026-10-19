@@ -4,7 +4,7 @@
    server returned can be explained.
 2. Re-assess its accessibility with current elevator data, as every search
    response does, so an explanation never repeats an older verdict.
-3. Build the facts. Without a model, the explanation is the facts.
+3. Build the facts. Without a model, the explanation is the key facts.
 4. With a model: ask it to word the facts, then check every sentence
    against them (``app.ai.explanations``). A reply that fails any check is
    discarded and the facts are shown, with a notice saying so.
@@ -50,6 +50,13 @@ from app.services.suggestions.service import AlertSource
 logger = structlog.get_logger(__name__)
 
 MAX_OUTPUT_TOKENS = 900
+# The page already lists every leg and every accessibility finding, so
+# without a model the explanation is only what those lists do not say.
+KEY_KINDS = {"summary", "origin", "transfer", "accessibility", "alert"}
+
+
+def _key(fact: Fact) -> bool:
+    return fact.kind in KEY_KINDS or (fact.required and fact.kind != "finding")
 
 
 class ExplanationService:
@@ -87,7 +94,7 @@ class ExplanationService:
             search_id=search_id,
             route_id=route_id,
             source="facts",
-            sentences=[ExplanationSentence(text=f.text, fact_ids=[f.id]) for f in facts],
+            sentences=[ExplanationSentence(text=f.text, fact_ids=[f.id]) for f in facts if _key(f)],
             facts=[ExplanationFact(**f.model_dump()) for f in facts],
         )
         if self._llm is None:
@@ -99,8 +106,8 @@ class ExplanationService:
             logger.warning("explanation_rejected", problems=str(exc)[:500])
             return response.model_copy(
                 update={
-                    "notice": "The generated wording did not match the route facts, "
-                    "so the facts are shown as they are."
+                    "notice": "The AI summary did not match the route data, "
+                    "so the key facts are shown."
                 }
             )
         except (LlmUnavailableError, AppError) as exc:

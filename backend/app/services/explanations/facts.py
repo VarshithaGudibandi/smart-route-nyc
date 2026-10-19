@@ -28,12 +28,11 @@ FactKind = Literal[
 
 ACCESSIBILITY_SUMMARY = {
     "meets": "Every station and walk on this route was checked and meets the requirement.",
-    "violates": "This route has at least one known barrier, listed below.",
-    "unknown": "Some stations or walks on this route could not be confirmed, listed below.",
+    "violates": "This route has at least one known barrier.",
+    "unknown": "Some stations or walks on this route could not be confirmed.",
 }
 # Beyond this, current elevator status may not hold when the rider travels.
 FUTURE_TRIP = timedelta(hours=1)
-SOURCE_NAMES = {"mta_elevators": "MTA elevator status", "openstreetmap": "OpenStreetMap"}
 
 
 class Fact(BaseModel):
@@ -170,22 +169,28 @@ def route_facts(
 
 
 def _finding_text(finding: AccessibilityFinding) -> str:
-    label = {"meets": "meets the requirement", "violates": "barrier", "unknown": "not confirmed"}
+    label = {
+        "meets": "meets the requirement",
+        "violates": "barrier",
+        "unknown": "step-free access not confirmed",
+    }
     location = finding.location
     for raw, friendly in ENDPOINT_NAMES.items():
         location = location.replace(f" {raw}", f" {friendly}")
-    text = f"{location}: {label[finding.status]}. {finding.description}"
-    source = SOURCE_NAMES.get(finding.source)
-    if source and finding.data_as_of:
-        text += f" ({source} as of {_clock(finding.data_as_of)})"
-    elif source:
-        text += f" (source: {source})"
-    return text
+    return f"{location}: {label[finding.status]}. {finding.description}"
 
 
 def _data_facts(route: Route, accessibility: AccessibilitySnapshot, now: datetime) -> list[Fact]:
     facts = []
     uses_elevator_data = any(f.source == "mta_elevators" for f in route.accessibility_findings)
+    if uses_elevator_data and accessibility.observed_at:
+        facts.append(
+            Fact(
+                id="elevator_time",
+                kind="data",
+                text=f"Elevator status as of {_clock(accessibility.observed_at)}.",
+            )
+        )
     if uses_elevator_data and route.departure - now > FUTURE_TRIP:
         facts.append(
             Fact(

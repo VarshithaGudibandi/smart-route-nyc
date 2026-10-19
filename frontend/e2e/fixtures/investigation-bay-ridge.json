@@ -33,7 +33,7 @@
       "location": "Walk from Origin to Bay Ridge-95 St",
       "leg_index": 0,
       "status": "meets",
-      "description": "No stairs found in OpenStreetMap along this walk.",
+      "description": "No stairs mapped.",
       "source": "openstreetmap",
       "data_as_of": null,
       "equipment": []
@@ -43,7 +43,7 @@
       "location": "Bay Ridge-95 St",
       "leg_index": 1,
       "status": "meets",
-      "description": "2 elevators in service.",
+      "description": "2 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -70,7 +70,7 @@
       "location": "59 St",
       "leg_index": 1,
       "status": "meets",
-      "description": "3 elevators in service.",
+      "description": "3 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -105,7 +105,7 @@
       "location": "34 St-Herald Sq",
       "leg_index": 2,
       "status": "meets",
-      "description": "6 elevators in service.",
+      "description": "6 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -164,7 +164,7 @@
       "location": "Walk from 34 St-Herald Sq to Destination",
       "leg_index": 3,
       "status": "meets",
-      "description": "No stairs found in OpenStreetMap along this walk.",
+      "description": "No stairs mapped.",
       "source": "openstreetmap",
       "data_as_of": null,
       "equipment": []
@@ -316,7 +316,7 @@
       "location": "Walk from Origin to Bay Ridge-95 St",
       "leg_index": 0,
       "status": "meets",
-      "description": "No stairs found in OpenStreetMap along this walk.",
+      "description": "No stairs mapped.",
       "source": "openstreetmap",
       "data_as_of": null,
       "equipment": []
@@ -326,7 +326,7 @@
       "location": "Bay Ridge-95 St",
       "leg_index": 1,
       "status": "meets",
-      "description": "2 elevators in service.",
+      "description": "2 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -353,7 +353,7 @@
       "location": "Atlantic Av-Barclays Ctr",
       "leg_index": 1,
       "status": "meets",
-      "description": "8 elevators in service.",
+      "description": "8 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -428,7 +428,7 @@
       "location": "34 St-Herald Sq",
       "leg_index": 2,
       "status": "meets",
-      "description": "6 elevators in service.",
+      "description": "6 elevators working.",
       "source": "mta_elevators",
       "data_as_of": "2026-10-18T17:42:17.325905Z",
       "equipment": [
@@ -487,7 +487,7 @@
       "location": "Walk from 34 St-Herald Sq to Destination",
       "leg_index": 3,
       "status": "meets",
-      "description": "No stairs found in OpenStreetMap along this walk.",
+      "description": "No stairs mapped.",
       "source": "openstreetmap",
       "data_as_of": null,
       "equipment": []

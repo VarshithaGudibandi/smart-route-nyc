@@ -28,8 +28,9 @@ const contentSecurityPolicy = [
 const securityHeaders = [
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Content-Type-Options", value: "nosniff" },
-  // Trip coordinates live in the page URL; never send them to tile servers.
-  { key: "Referrer-Policy", value: "no-referrer" },
+  // Trip coordinates live in the page URL: other sites get the origin only,
+  // which map tile servers may require.
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "geolocation=(self), camera=(), microphone=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];

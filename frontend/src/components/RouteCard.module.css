@@ -29,21 +29,6 @@
   }
 }
 
-.compact {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 18px;
-}
-
-.compactLeft,
-.compactRight {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .top {
   display: flex;
   justify-content: space-between;
@@ -60,10 +45,6 @@
 
 .featured .times {
   font-size: 27px;
-}
-
-.compact .times {
-  font-size: 18px;
 }
 
 .duration {
@@ -111,7 +92,18 @@
   letter-spacing: 0.04em;
 }
 
+.fastest {
+  border: 1.5px solid var(--black);
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .counts {
+  align-self: center;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -125,7 +117,3 @@
   gap: 6px;
 }
 
-.note {
-  font-size: 13px;
-  color: var(--ink-muted);
-}

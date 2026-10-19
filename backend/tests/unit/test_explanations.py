@@ -49,7 +49,9 @@ def test_facts_cover_every_leg_transfer_and_finding() -> None:
         "finding5",
         "alert0",
     }
-    assert "MTA elevator status as of 8:20 AM" in facts["finding5"].text
+    barrier = "116 St-Columbia University: barrier. No ADA-accessible elevator."
+    assert facts["finding5"].text == barrier
+    assert facts["elevator_time"].text == "Elevator status as of 8:20 AM."
 
 
 def test_stale_elevator_data_is_a_required_fact() -> None:
@@ -129,17 +131,20 @@ async def service(
     )
 
 
-async def test_without_a_model_the_facts_are_the_explanation() -> None:
+async def test_without_a_model_the_key_facts_are_the_explanation() -> None:
     explanation = await (await service()).explain(SEARCH_ID, fixture_route().route_id)
     assert explanation.source == "facts" and explanation.notice is None
-    assert [s.fact_ids for s in explanation.sentences] == [[f.id] for f in explanation.facts]
+    shown = [s.fact_ids for s in explanation.sentences]
+    # The overall verdict, but not the legs and findings the page already lists.
+    assert ["accessibility"] in shown
+    assert not any(f.kind in ("leg", "finding") and [f.id] in shown for f in explanation.facts)
 
 
 async def test_route_is_reassessed_with_current_data() -> None:
     explanation = await (await service()).explain(SEARCH_ID, fixture_route().route_id)
     texts = " ".join(f.text for f in explanation.facts)
     # The stored route had no findings; the explanation assessed it now.
-    assert "Elevator data is not available right now." in texts
+    assert "Elevator status unavailable." in texts
 
 
 async def test_unknown_route_or_search_is_not_found() -> None:

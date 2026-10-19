@@ -76,7 +76,7 @@ def test_no_model_configured_returns_503(redis_url: str) -> None:
         assert response.json()["details"] == {"reason": "ai_not_configured"}
 
 
-def test_malformed_model_reply_returns_502(client: TestClient) -> None:
+def test_malformed_model_reply_falls_back_to_keyword_rules(client: TestClient) -> None:
     app = client.app
     resources = app.state.resources  # type: ignore[attr-defined]
     llm = GuardedLlm(
@@ -89,8 +89,9 @@ def test_malformed_model_reply_returns_502(client: TestClient) -> None:
     app.state.resources = dataclasses.replace(resources, preferences=interpreter)  # type: ignore[attr-defined]
 
     response = interpret(client, "I use a wheelchair")
-    assert response.status_code == 502
-    assert response.json()["code"] == "ai_invalid_response"
+    assert response.status_code == 200
+    assert response.json()["source"]["provider"] == "baseline"
+    assert response.json()["proposed"]["accessibility"]["wheelchair_required"] is True
 
 
 def test_rate_limited(client: TestClient) -> None:

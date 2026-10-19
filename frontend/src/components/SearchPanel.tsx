@@ -63,7 +63,7 @@ export function SearchPanel({ from, to, departAt, needs, onSearch, onNeedsChange
       <div className={styles.top}>
         <Logo />
         <form className={styles.form} onSubmit={submit} aria-label="Plan a trip" noValidate>
-          <PlaceField label="From" value={origin} onChange={setOrigin} allowCurrentLocation />
+          <PlaceField label="From" value={origin} onChange={setOrigin} />
           <button
             type="button"
             className={styles.swap}
@@ -77,20 +77,38 @@ export function SearchPanel({ from, to, departAt, needs, onSearch, onNeedsChange
           </button>
           <PlaceField label="To" value={destination} onChange={setDestination} />
           <div className={styles.when}>
-            <label htmlFor="depart-at" className="label-caps">
+            <label htmlFor="depart-mode" className="label-caps">
               Leave
             </label>
-            <input
-              id="depart-at"
-              type="datetime-local"
-              className={styles.time}
-              value={when}
-              onChange={(event) => setWhen(event.target.value)}
-              aria-describedby="depart-help"
-            />
-            <span id="depart-help" className={styles.help}>
-              {when ? "New York time" : "Leave now if empty"}
-            </span>
+            <div className={styles.whenRow}>
+              <select
+                id="depart-mode"
+                className={styles.time}
+                value={when ? "at" : "now"}
+                onChange={(event) => setWhen(event.target.value === "at" ? isoToNewYorkLocal(new Date().toISOString()) : "")}
+              >
+                <option value="now">Now</option>
+                <option value="at">At a time</option>
+              </select>
+              {when && (
+                <>
+                  <input
+                    type="date"
+                    aria-label="Date (New York)"
+                    className={styles.time}
+                    value={when.slice(0, 10)}
+                    onChange={(event) => event.target.value && setWhen(`${event.target.value}T${when.slice(11)}`)}
+                  />
+                  <input
+                    type="time"
+                    aria-label="Time (New York)"
+                    className={styles.time}
+                    value={when.slice(11, 16)}
+                    onChange={(event) => event.target.value && setWhen(`${when.slice(0, 10)}T${event.target.value}`)}
+                  />
+                </>
+              )}
+            </div>
           </div>
           <button type="submit" className={styles.search}>
             Search

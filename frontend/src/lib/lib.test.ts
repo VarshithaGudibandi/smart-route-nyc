@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { clock, distance, duration, friendlyText, newYorkLocalToIso, isoToNewYorkLocal } from "./format";
+import { clock, distance, duration, findingPlace, friendlyText, newYorkLocalToIso, isoToNewYorkLocal } from "./format";
 import { lineName, lineStyle } from "./lines";
 import { decodePolyline } from "./polyline";
 import { parseTrip, searchKey, searchRequest, tripParams } from "./trip";
@@ -80,5 +80,13 @@ describe("polyline", () => {
       [-120.95, 40.7],
       [-126.453, 43.252],
     ]);
+  });
+});
+
+describe("findingPlace", () => {
+  it("names a walk by where it goes", () => {
+    expect(findingPlace("Walk from Origin to Grove Street")).toBe("Walk to Grove Street");
+    expect(findingPlace("Walk from WTC Cortlandt to Destination")).toBe("Walk to your destination");
+    expect(findingPlace("59 St")).toBe("59 St");
   });
 });

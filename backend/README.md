@@ -78,7 +78,7 @@ Every route is assessed on every response, including cached ones, so verdicts us
 | Place | `meets` | `violates` | `unknown` |
 |---|---|---|---|
 | Subway station | A usable elevator, none out of service, data fresh | No usable elevator, or all out of service | Some elevators out, or elevator data stale |
-| Walking leg | No stairs found in OpenStreetMap | Stairs mapped, or an entrance tagged not wheelchair accessible | |
+| Walking leg | No stairs mapped in OpenStreetMap | Stairs mapped, or an entrance tagged not wheelchair accessible | |
 | PATH station, bus stop | | | Always: no equipment data is published |
 
 A route `violates` if any finding does, `meets` only if all do, and is `unknown` otherwise. Wheelchair users need an ADA-accessible elevator; step-free travel can use any working one. When a requirement is set, only complying routes are returned in `routes`; everything else goes to `review_only_routes` with each barrier and unconfirmed step listed. Walking findings rely on OpenStreetMap and say "no stairs found" rather than guaranteeing a step-free walk.
@@ -90,7 +90,7 @@ A route `violates` if any finding does, `meets` only if all do, and is `unknown`
 - The model only proposes; code decides. Replies must match a strict schema or are discarded (`502`).
 - Text can add requirements but never remove one the rider selected; such attempts are reported as conflicts.
 - The rider's text is sent as delimited data. Calls have a timeout, one retry, a circuit breaker and a daily budget shared through Redis.
-- Without an API key, keyword rules answer instead, reported as `provider: "baseline"`.
+- Without an API key, or when the model call fails (a bad key, no credit, an outage, an unusable reply), keyword rules answer instead, reported as `provider: "baseline"`; the failure is logged as `preferences_model_failed`.
 
 ## Transfer suggestions
 
@@ -105,7 +105,7 @@ The search response includes `{"investigation": {"id": "...", "poll_after_ms": 1
 
 ## Route explanations
 
-`POST /api/v1/routes/explain` takes a `search_id` and `route_id` from a recent search, so the server only explains routes it returned. The explanation is built from facts computed by code: every leg and transfer, every accessibility finding with its source and age, alerts in effect while the rider is on each line, and what the data cannot say. Without a model, the facts are the explanation. A model may only reword them, and its reply is replaced by the facts unless every sentence cites real facts, uses only numbers, names and accessibility words found in them, and every required fact (barriers, unconfirmed steps, alerts, stale data) is cited.
+`POST /api/v1/routes/explain` takes a `search_id` and `route_id` from a recent search, so the server only explains routes it returned. The explanation is built from facts computed by code: every leg and transfer, every accessibility finding with its source and age, alerts in effect while the rider is on each line, and what the data cannot say. Without a model, the explanation is the key facts the page does not already list (the overall trip, transfers, the accessibility verdict, alerts, stale data). A model writes a short summary of 2 to 5 sentences instead, and its reply is replaced by those facts unless every sentence cites real facts, uses only numbers, names and accessibility words found in them, and every required fact (barriers, unconfirmed steps, alerts, stale data) is cited.
 
 ## Feedback
 

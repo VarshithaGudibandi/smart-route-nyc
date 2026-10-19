@@ -12,6 +12,10 @@ The model only proposes values; this module decides what is applied:
    applied. Wheelchair use implies step-free travel.
 4. The rider reviews the result before anything is used for a search.
 
+If the model fails (no credit, bad key, outage, an unusable reply), the
+keyword baseline answers instead and the response says so, so typing a need
+never dead-ends.
+
 Validated model answers are cached in Redis by an HMAC of the cleaned text,
 so repeated phrasings do not spend tokens.
 """
@@ -25,12 +29,14 @@ from typing import Any
 import structlog
 from pydantic import ValidationError
 
+from app.ai.baseline import KeywordBaselineProvider
 from app.ai.guard import GuardedLlm
 from app.ai.prompts import (
     PREFERENCES_PROMPT_VERSION,
     PREFERENCES_SYSTEM,
     preferences_user_message,
 )
+from app.ai.provider import DisabledProvider, LlmUnavailableError
 from app.cache.redis import ResilientRedis
 from app.schemas.preferences import (
     Conflict,
@@ -80,22 +86,35 @@ class PreferenceInterpreter:
     async def interpret(self, text: str, current: PreferenceState) -> InterpretResponse:
         cleaned = clean_text(text)
         key = self._cache_key(cleaned)
+        provider = self._llm.provider.name
         cached = await self._read_cache(key)
         if cached is not None:
             output, model = cached
         else:
-            response = await self._llm.complete_json(
-                "preferences",
-                PREFERENCES_SYSTEM,
-                preferences_user_message(cleaned),
-                MAX_OUTPUT_TOKENS,
-            )
-            output = parse_model_output(response.text)
-            model = response.model
-            await self._write_cache(key, output, model)
+            try:
+                response = await self._llm.complete_json(
+                    "preferences",
+                    PREFERENCES_SYSTEM,
+                    preferences_user_message(cleaned),
+                    MAX_OUTPUT_TOKENS,
+                )
+                output = parse_model_output(response.text)
+                model = response.model
+                await self._write_cache(key, output, model)
+            except (LlmUnavailableError, InvalidModelOutputError) as exc:
+                # A deployment that turned typed needs off keeps them off.
+                if provider in (KeywordBaselineProvider.name, DisabledProvider.name):
+                    raise
+                logger.warning(
+                    "preferences_model_failed",
+                    error=type(exc).__name__,
+                    reason=getattr(exc, "code", None),
+                )
+                output, model = await _baseline(cleaned)
+                provider = KeywordBaselineProvider.name
 
         source = InterpretationSource(
-            provider=self._llm.provider.name,
+            provider=provider,
             model=model,
             prompt_version=PREFERENCES_PROMPT_VERSION,
             cached=cached is not None,
@@ -124,6 +143,14 @@ class PreferenceInterpreter:
             return
         payload = {"output": output.model_dump(), "model": model}
         await self._cache.set(key, json.dumps(payload).encode(), ttl_s=self._cache_ttl_s)
+
+
+async def _baseline(cleaned: str) -> tuple[ModelOutput, str]:
+    baseline = KeywordBaselineProvider()
+    reply = await baseline.complete_json(
+        PREFERENCES_SYSTEM, preferences_user_message(cleaned), MAX_OUTPUT_TOKENS
+    )
+    return parse_model_output(reply.text), baseline.model
 
 
 def parse_model_output(text: str) -> ModelOutput:

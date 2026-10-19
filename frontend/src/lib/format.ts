@@ -113,3 +113,8 @@ export function providerName(provider: string | null | undefined): string {
 export function friendlyText(text: string): string {
   return text.replace(/\bOrigin\b/g, "your starting point").replace(/\bDestination\b/g, "your destination");
 }
+
+/** "Walk from Grove Street to WTC Cortlandt" → "Walk to WTC Cortlandt"; the step list shows where it starts. */
+export function findingPlace(location: string): string {
+  return friendlyText(location).replace(/^Walk from .+? to /, "Walk to ");
+}

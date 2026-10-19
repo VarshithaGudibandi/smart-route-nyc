@@ -33,20 +33,6 @@
   font-weight: 500;
 }
 
-.locate {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 0;
-  background: var(--surface-muted);
-  color: var(--ink);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
 .hint {
   margin: 4px 0 0;
   font-size: 13px;
@@ -86,10 +72,22 @@
   background: var(--surface-muted);
 }
 
+.here {
+  color: var(--ok);
+}
+
+.here .name {
+  color: inherit;
+}
+
 .kind {
   flex: none;
   margin-top: 2px;
   color: var(--ink-soft);
+}
+
+.here .kind {
+  color: inherit;
 }
 
 .name {

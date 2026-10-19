@@ -43,3 +43,6 @@ next-env.d.ts
 # test output
 /test-results/
 /playwright-report/
+
+# copied from maplibre-gl on every build
+/public/maplibre-gl-worker.mjs
