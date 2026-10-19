@@ -11,7 +11,12 @@ from app.ai.suggestions import ModelProposalGenerator, facts_document
 from app.core.resilience import CircuitBreaker
 from app.integrations.otp.mapper import to_route
 from app.schemas.routes import AccessibilityRequirements, Route
-from app.schemas.suggestions import RejectedProposal, TransferProposal, VerifiedSuggestion
+from app.schemas.suggestions import (
+    LaterTransfer,
+    RejectedProposal,
+    TransferProposal,
+    VerifiedSuggestion,
+)
 from app.services.accessibility.snapshot import AccessibilitySnapshot
 from app.services.suggestions import rules
 from app.services.suggestions.context import (
@@ -27,7 +32,14 @@ from tests.fakes import StaticSnapshots, fake_otp, make_request, plan_fixture
 from tests.suggestion_fakes import (
     EXPRESS,
     LOCAL,
+    ONE,
+    P1,
+    P2,
+    P4,
+    P6,
+    P7,
     T0,
+    TWO,
     A,
     B,
     C,
@@ -40,6 +52,12 @@ from tests.suggestion_fakes import (
 
 EXPRESS_THEN_LOCAL = TransferProposal(
     first_routes=[EXPRESS], transfer_station=C, second_routes=[LOCAL]
+)
+THERE_AND_BACK = TransferProposal(
+    first_routes=[ONE],
+    transfer_station=P2,
+    second_routes=[TWO],
+    then=[LaterTransfer(station=P6, routes=[ONE])],
 )
 
 
@@ -110,23 +128,39 @@ def test_no_segment_without_subway_or_with_a_gap() -> None:
     assert subway_segment(split) is None
 
 
-async def test_facts_keep_only_transfers_that_add_a_line() -> None:
+def detour_baseline() -> Route:
+    return to_route(itinerary([(ONE, P1, P7, 2, 20)]))
+
+
+async def test_facts_keep_only_stations_where_lines_meet() -> None:
     facts = await facts_for(baseline())
-    # B adds nothing (only the local), E is past D and needs riding back.
-    assert [o.station_id for o in facts.options] == [C]
-    option = facts.options[0]
-    assert [line.route_id for line in option.to_transfer] == [EXPRESS, LOCAL]
-    assert option.to_transfer[0].stops == 1 and option.to_transfer[1].stops == 2
-    assert [line.route_id for line in option.to_destination] == [LOCAL]
-    assert option.to_destination[0].headway_s == 360
+    # B is served by the local only; E is past D.
+    assert facts.interchanges == (C,)
+    to_c = facts.lines(A, C)
+    assert [line.route_id for line in to_c] == [EXPRESS, LOCAL]
+    assert to_c[0].stops == 1 and to_c[1].stops == 2
+    assert [line.route_id for line in facts.lines(C, D)] == [LOCAL]
+    assert facts.lines(C, D)[0].headway_s == 360
     assert [line.route_id for line in facts.direct] == [LOCAL]
+
+
+async def test_facts_include_where_an_express_meets_the_local_again() -> None:
+    facts = await facts_for(detour_baseline())
+    # P4 is an express stop too; P6 is the last before the express leaves.
+    assert facts.interchanges == (P2, P4, P6)
+    assert [line.route_id for line in facts.lines(P2, P6)] == [TWO, ONE]
+    assert facts.lines(P2, P6)[0].stops == 2
+    assert TWO not in {line.route_id for line in facts.lines(P2, P7)}  # the express leaves first
+    assert [line.route_id for line in facts.lines(P6, P7)] == [ONE]
 
 
 async def test_fact_document_exposes_only_timetable_ids() -> None:
     document = facts_document(await facts_for(baseline()))
     text = json.dumps(document)
     assert document["board"] == {"station_id": A, "name": "A St"}
-    assert document["candidates"][0]["to_destination"][0]["minutes_between_trains"] == 6.0
+    assert [s["station_id"] for s in document["stations"]] == [A, C, D]
+    ride = next(r for r in document["rides"] if (r["from"], r["to"]) == (C, D))
+    assert ride["lines"][0]["minutes_between_trains"] == 6.0
     assert "lat" not in text and "Destination" not in text
 
 
@@ -135,18 +169,28 @@ async def test_fact_document_exposes_only_timetable_ids() -> None:
 
 async def test_rules_propose_express_then_local() -> None:
     proposals = rules.propose(await facts_for(baseline()))
-    assert proposals == [
-        EXPRESS_THEN_LOCAL.model_copy(
-            update={"reason": "Ride the X to C St, then change to the L for D St."}
-        )
-    ]
+    assert proposals[0] == EXPRESS_THEN_LOCAL.model_copy(
+        update={"reason": "Ride the X to C St, then the L to D St."}
+    )
+
+
+async def test_rules_propose_a_change_to_the_express_and_back() -> None:
+    proposals = rules.propose(await facts_for(detour_baseline()), limit=10)
+    assert THERE_AND_BACK.signature() in {p.signature() for p in proposals}
+    plan = next(p for p in proposals if p.signature() == THERE_AND_BACK.signature())
+    assert plan.reason == "Ride the 1 to P2 St, then the 2 to P6 St, then the 1 to P7 St."
+
+
+async def test_rules_respect_the_transfer_limit() -> None:
+    proposals = rules.propose(await facts_for(detour_baseline()), limit=10, max_transfers=1)
+    assert proposals == []  # the express never reaches P7, so one change is not enough
 
 
 @pytest.mark.parametrize(
     ("first", "station", "second", "code"),
     [
         ([EXPRESS], B, [LOCAL], "unknown_id"),
-        (["MTASBWY:Z"], C, [LOCAL], "not_served"),
+        (["MTASBWY:Q"], C, [LOCAL], "not_served"),
         ([EXPRESS], C, [EXPRESS], "not_served"),
         ([LOCAL], C, [LOCAL], "not_served"),
     ],
@@ -159,6 +203,38 @@ async def test_check_rejects_impossible_proposals(
     assert problem is not None and problem[0] == code
 
 
+@pytest.mark.parametrize(
+    ("proposal", "code"),
+    [
+        # Back to the 1 before changing to the 2: stations out of riding order.
+        (
+            THERE_AND_BACK.model_copy(
+                update={"transfer_station": P6, "then": [LaterTransfer(station=P2, routes=[ONE])]}
+            ),
+            "not_served",
+        ),
+        # The express does not reach P7, so the plan must change back.
+        (
+            TransferProposal(first_routes=[ONE], transfer_station=P2, second_routes=[TWO]),
+            "not_served",
+        ),
+        (
+            THERE_AND_BACK.model_copy(update={"then": [LaterTransfer(station=P7, routes=[ONE])]}),
+            "unknown_id",
+        ),
+    ],
+)
+async def test_check_rejects_impossible_chains(proposal: TransferProposal, code: str) -> None:
+    problem = rules.check(proposal, await facts_for(detour_baseline()))
+    assert problem is not None and problem[0] == code
+
+
+async def test_check_accepts_a_chain_the_timetable_allows() -> None:
+    assert rules.check(THERE_AND_BACK, await facts_for(detour_baseline())) is None
+    via_p4 = THERE_AND_BACK.model_copy(update={"then": [LaterTransfer(station=P4, routes=[ONE])]})
+    assert rules.check(via_p4, await facts_for(detour_baseline())) is None
+
+
 async def test_check_rejects_the_baseline_transfer() -> None:
     route = to_route(itinerary([(EXPRESS, A, C, 1, 5), (LOCAL, C, D, 7, 10)]))
     facts = await facts_for(baseline())
@@ -169,7 +245,9 @@ async def test_check_rejects_the_baseline_transfer() -> None:
         board_name=facts.board_name,
         alight_name=facts.alight_name,
         direct=facts.direct,
-        options=facts.options,
+        interchanges=facts.interchanges,
+        names=facts.names,
+        rides=facts.rides,
     )
     assert rules.check(EXPRESS_THEN_LOCAL, same) == (
         "same_as_baseline",
@@ -210,6 +288,31 @@ def test_follows_needs_the_named_lines_in_and_out_of_the_station() -> None:
     # Changing between two trains of the same line is not the proposal either.
     same_line = itinerary([(LOCAL, A, C, 1, 6), (LOCAL, C, D, 7, 10)])
     assert not follows(to_route(same_line), EXPRESS_THEN_LOCAL)
+
+
+def test_follows_every_ride_of_a_chain() -> None:
+    detour = itinerary([(ONE, P1, P2, 1, 3), (TWO, P2, P6, 4, 9), (ONE, P6, P7, 11, 13)])
+    assert follows(to_route(detour), THERE_AND_BACK)
+    # Staying on the express past P6 is not the plan.
+    skipped = itinerary([(ONE, P1, P2, 1, 3), (TWO, P2, P6, 4, 9)])
+    assert not follows(to_route(skipped), THERE_AND_BACK)
+
+
+async def test_a_chain_is_verified_through_every_transfer_station() -> None:
+    detour = itinerary([(ONE, P1, P2, 1, 3), (TWO, P2, P6, 4, 9), (ONE, P6, P7, 11, 13)])
+    otp = OtpPlans(detour)
+    found = subway_segment(detour_baseline())
+    assert found is not None
+    outcome = await verify(fake_otp(otp.handler), THERE_AND_BACK, "model", verification(found, 23))
+    assert isinstance(outcome, VerifiedSuggestion)
+    assert outcome.saves_seconds == 420
+    assert otp.variables[0]["via"] == [
+        {"visit": {"stopLocationIds": [P2]}},
+        {"visit": {"stopLocationIds": [P6]}},
+    ]
+    assert otp.variables[0]["preferences"]["transit"]["filters"] == [
+        {"include": [{"routes": [ONE, TWO]}]}
+    ]
 
 
 async def test_verified_suggestion_is_a_complete_otp_itinerary() -> None:
@@ -363,6 +466,20 @@ async def test_invalid_model_reply_falls_back_to_rules(reply: str) -> None:
         make_request(depart_at=T0), [baseline()]
     )
     assert [s.source for s in result.suggestions] == ["rules"]
+
+
+async def test_fewer_transfers_skips_the_investigation() -> None:
+    otp = OtpPlans(faster())
+    request = make_request(depart_at=T0).model_copy(
+        update={
+            "optimization": make_request().optimization.model_copy(
+                update={"prefer_fewer_transfers": True}
+            )
+        }
+    )
+    result = await service(otp).investigate(request, [baseline()])
+    assert not result.applicable and result.reason == "Fewer transfers is selected."
+    assert otp.variables == []
 
 
 async def test_not_applicable_without_a_subway_segment() -> None:

@@ -5,12 +5,13 @@ is one door-to-door query that
 
 * allows only the proposed lines plus the journey's non-subway lines
   (PATH, buses), so the rest of the trip can still be planned, and
-* must visit the transfer station,
+* must visit every transfer station of the plan, in order,
 
 under the rider's own settings. A returned itinerary counts only if it
-really rides one of ``first_routes`` into the transfer station and one of
-``second_routes`` out of it: a "visit" is also satisfied by simply ending
-a ride there, or by changing between two trains of the same line.
+really rides the plan: one of the first ride's lines into the first
+transfer station, one of the next ride's lines out of it, and so on to the
+end. A "visit" is also satisfied by simply passing through a station, or by
+changing between two trains of the same line.
 
 Timing, including the feed's minimum transfer times, is OTP's. Stitching
 separately planned pieces together would skip those and overstate savings.
@@ -52,13 +53,14 @@ class VerificationInput:
 
 
 def follows(route: Route, proposal: TransferProposal) -> bool:
+    """True if consecutive transit legs ride exactly the proposed chain."""
     transit = [leg for leg in route.legs if leg.route_id]
-    for into, out_of in pairwise(transit):
-        if (
-            into.route_id in proposal.first_routes
-            and into.destination.station_id == proposal.transfer_station
-            and out_of.route_id in proposal.second_routes
-            and out_of.origin.station_id == proposal.transfer_station
+    rides, stations = proposal.rides, proposal.stations
+    for start in range(len(transit) - len(rides) + 1):
+        legs = transit[start : start + len(rides)]
+        if all(leg.route_id in ride for leg, ride in zip(legs, rides, strict=True)) and all(
+            into.destination.station_id == station and out_of.origin.station_id == station
+            for (into, out_of), station in zip(pairwise(legs), stations, strict=True)
         ):
             return True
     return False
@@ -70,7 +72,7 @@ async def verify(
     def reject(code: RejectionCode, detail: str) -> RejectedProposal:
         return RejectedProposal(proposal=proposal, source=source, code=code, detail=detail)
 
-    lines = [*proposal.first_routes, *proposal.second_routes]
+    lines = list(dict.fromkeys(route for ride in proposal.rides for route in ride))
     for route_id in lines:
         if suspended := [
             a for a in data.alerts.for_route(route_id, data.requested) if a.suspends_service
@@ -80,7 +82,7 @@ async def verify(
     query = dataclasses.replace(
         plan_query(data.request, data.requested, VERIFY_ITINERARIES),
         include_routes=tuple(dict.fromkeys([*data.segment.other_route_ids, *lines])),
-        via_stations=(proposal.transfer_station,),
+        via_stations=tuple(proposal.stations),
     )
     plan = await otp.plan(query)
     earliest = data.requested - timedelta(minutes=1)

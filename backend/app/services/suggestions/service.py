@@ -43,8 +43,8 @@ from app.services.transit.alerts import AlertSnapshot
 
 logger = structlog.get_logger(__name__)
 
-MAX_VERIFICATIONS = 4
-CONCURRENT_VERIFICATIONS = 2
+MAX_VERIFICATIONS = 6
+CONCURRENT_VERIFICATIONS = 3
 
 
 class AlertSource(Protocol):
@@ -85,6 +85,9 @@ class SuggestionService:
 
         if not baseline:
             return not_applicable("There is no baseline route to improve on.")
+        optimization = request.optimization
+        if optimization.prefer_fewer_transfers or optimization.primary == "FEWEST_TRANSFERS":
+            return not_applicable("Fewer transfers is selected.")
         fastest = min(baseline, key=lambda r: r.arrival)
         segment = subway_segment(fastest)
         if segment is None:
@@ -92,7 +95,7 @@ class SuggestionService:
 
         alerts = await self._alerts.current()
         facts = await build_facts(segment, self._knowledge, alerts)
-        if facts is None or not facts.options:
+        if facts is None or not facts.interchanges:
             return not_applicable("No transfer stations were found on this subway segment.")
 
         proposals: list[tuple[TransferProposal, ProposalSource]] = []
@@ -105,7 +108,7 @@ class SuggestionService:
 
         rejected: list[RejectedProposal] = []
         to_verify: list[tuple[TransferProposal, ProposalSource]] = []
-        seen: set[tuple[frozenset[str], str, frozenset[str]]] = set()
+        seen: set[object] = set()
         for proposal, source in proposals:
             if proposal.signature() in seen:
                 continue

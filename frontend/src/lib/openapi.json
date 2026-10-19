@@ -807,6 +807,32 @@
         "title": "InvestigationView",
         "type": "object"
       },
+      "LaterTransfer": {
+        "additionalProperties": false,
+        "description": "Ride on to ``station`` and change there to one of ``routes``.",
+        "properties": {
+          "routes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Routes",
+            "type": "array"
+          },
+          "station": {
+            "maxLength": 64,
+            "title": "Station",
+            "type": "string"
+          }
+        },
+        "required": [
+          "station",
+          "routes"
+        ],
+        "title": "LaterTransfer",
+        "type": "object"
+      },
       "Leg": {
         "properties": {
           "agency": {
@@ -1523,6 +1549,14 @@
             "maxItems": 4,
             "minItems": 1,
             "title": "Second Routes",
+            "type": "array"
+          },
+          "then": {
+            "items": {
+              "$ref": "#/components/schemas/LaterTransfer"
+            },
+            "maxItems": 2,
+            "title": "Then",
             "type": "array"
           },
           "transfer_station": {

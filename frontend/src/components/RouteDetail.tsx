@@ -19,6 +19,8 @@ type Props = {
   searchId: string;
   freshness: DataFreshness[];
   notices: Notice[];
+  // Why a suggested route changes where it does, in the planner's words.
+  suggestion?: string;
   accessibilityRequired: boolean;
   onBack?: () => void;
 };
@@ -27,7 +29,7 @@ type Props = {
 // time matters, the distance does not.
 const SHORT_WALK_M = 50;
 
-export function RouteDetail({ route, searchId, freshness, notices, accessibilityRequired, onBack }: Props) {
+export function RouteDetail({ route, searchId, freshness, notices, suggestion, accessibilityRequired, onBack }: Props) {
   const title = useRef<HTMLHeadingElement>(null);
 
   // A route the rider chose gets focus, so keyboard and screen-reader users
@@ -69,8 +71,8 @@ export function RouteDetail({ route, searchId, freshness, notices, accessibility
           </p>
           {route.origin_type !== "otp_baseline" && (
             <p className={styles.origin}>
-              {route.origin_type === "model_suggestion" ? "AI-suggested transfer" : "Suggested transfer"}, checked against
-              the timetable
+              <strong>{route.origin_type === "model_suggestion" ? "AI plan" : "Faster plan"}:</strong>{" "}
+              {suggestion || "a transfer the planner skipped"} Timed against the schedule.
             </p>
           )}
         </div>

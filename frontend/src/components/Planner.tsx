@@ -41,8 +41,8 @@ export function Planner() {
     ...(response?.review_only_routes ?? []),
   ];
   const selected = allRoutes.find((r) => r.route_id === trip.routeId) ?? allRoutes[0] ?? null;
-  const selectedNotices: Notice[] =
-    suggestions.find((s) => s.route.route_id === selected?.route_id)?.notices ?? [];
+  const selectedSuggestion = suggestions.find((s) => s.route.route_id === selected?.route_id);
+  const selectedNotices: Notice[] = selectedSuggestion?.notices ?? [];
   const accessibilityRequired = trip.needs.stepFree || trip.needs.wheelchair;
 
   return (
@@ -92,6 +92,7 @@ export function Planner() {
               searchId={response.search_id}
               freshness={response.data_freshness ?? []}
               notices={selectedNotices}
+              suggestion={selectedSuggestion?.proposal.reason}
               accessibilityRequired={accessibilityRequired}
               onBack={trip.routeId ? () => navigate({ ...trip, routeId: null }, "replace") : undefined}
             />

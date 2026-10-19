@@ -1,79 +1,165 @@
-"""Deterministic transfer proposals, and checks every proposal must pass.
+"""Deterministic transfer plans, and checks every proposal must pass.
 
-The rules generator proposes, for each candidate station, the transfer
-between the lines that meet there, in two shapes:
+The rules generator walks the corridor map in the facts (see
+``context.py``): from the boarding station, ride to an interchange, change
+to a different line, and so on until the alighting station, with up to
+``MAX_RULE_TRANSFERS`` changes. That finds express-then-local, local-then-
+express and local-express-local plans alike.
 
-* express then local: lines that reach the transfer station but not the
-  destination, then the lines that continue to it;
-* local then express: the lines that reach the transfer station, then lines
-  from there that the rider could not have boarded at the start.
-
-Proposals are ranked by estimated stops ridden plus a transfer penalty, a
-rough proxy only: OTP's timetable decides whether one is actually faster.
-``check`` applies the same ID and service rules to proposals from any
-source, including a model.
+Plans are ranked by an estimate in minutes: stops ridden, plus for every
+change a walk between platforms and half the scheduled time between trains
+of the line changed to. It is a rough proxy only; OTP's timetable decides
+whether a plan is actually faster. ``check`` applies the same ID and
+service rules to proposals from any source, including a model.
 """
 
-from app.schemas.suggestions import MAX_PROPOSALS, RejectionCode, TransferProposal
-from app.services.suggestions.context import TransferFacts
+from dataclasses import dataclass
+from itertools import pairwise
 
-# A transfer costs roughly this many stops of riding (walk plus wait).
-TRANSFER_PENALTY_STOPS = 3
+from app.schemas.suggestions import (
+    MAX_LATER_TRANSFERS,
+    MAX_PROPOSALS,
+    LaterTransfer,
+    RejectionCode,
+    TransferProposal,
+)
+from app.services.suggestions.context import LineOption, TransferFacts
+
+MAX_RULE_TRANSFERS = 2
+# Rough averages for ranking only.
+MINUTES_PER_STOP = 1.5
+TRANSFER_WALK_MINUTES = 2.0
+UNKNOWN_HEADWAY_MINUTES = 10.0
 
 
-def propose(facts: TransferFacts, limit: int = MAX_PROPOSALS) -> list[TransferProposal]:
-    scored: dict[tuple[frozenset[str], str, frozenset[str]], tuple[int, TransferProposal]] = {}
-    for option in facts.options:
-        reach = {line.route_id: line.stops for line in option.to_transfer}
-        onward = {line.route_id: line.stops for line in option.to_destination}
-        shapes = (
-            ({r for r in reach if r not in onward}, set(onward)),
-            (set(reach), {r for r in onward if r not in reach}),
-        )
-        for first, second in shapes:
-            if not first or not second:
-                continue
-            proposal = TransferProposal(
-                first_routes=sorted(first),
-                transfer_station=option.station_id,
-                second_routes=sorted(second),
-                reason=(
-                    f"Ride the {_names(facts, first, option.station_id, True)} to "
-                    f"{option.name}, then change to the "
-                    f"{_names(facts, second, option.station_id, False)} for {facts.alight_name}."
-                )[:200],
+_Rides = tuple[tuple[str, ...], ...]
+
+
+@dataclass(frozen=True)
+class _Plan:
+    stations: tuple[str, ...]
+    rides: _Rides
+    minutes: float
+
+
+def propose(
+    facts: TransferFacts, limit: int = MAX_PROPOSALS, max_transfers: int = MAX_RULE_TRANSFERS
+) -> list[TransferProposal]:
+    order = {station: i for i, station in enumerate(facts.stations)}
+    alight = facts.segment.alight_station
+    plans: list[_Plan] = []
+
+    def walk(at: str, stations: tuple[str, ...], rides: _Rides, minutes: float) -> None:
+        for nxt in facts.stations[order[at] + 1 :]:
+            for line in facts.lines(at, nxt):
+                if rides and line.route_id in rides[-1]:
+                    continue
+                cost = minutes + line.stops * MINUTES_PER_STOP
+                if rides:
+                    cost += TRANSFER_WALK_MINUTES + _wait(line)
+                ride = (line.route_id,)
+                if nxt == alight:
+                    if rides:
+                        plans.append(_Plan(stations, (*rides, ride), cost))
+                elif len(stations) < max_transfers:
+                    walk(nxt, (*stations, nxt), (*rides, ride), cost)
+
+    walk(facts.segment.board_station, (), (), 0.0)
+
+    proposals: dict[object, TransferProposal] = {}
+    for plan in sorted(plans, key=lambda p: (p.minutes, len(p.stations), p.stations)):
+        proposal = _proposal(facts, _widened(facts, plan))
+        if check(proposal, facts) is None:
+            proposals.setdefault(proposal.signature(), proposal)
+        if len(proposals) == limit:
+            break
+    return list(proposals.values())
+
+
+def _wait(line: LineOption) -> float:
+    """Expected wait for a line: half its scheduled headway."""
+    return (line.headway_s / 60 if line.headway_s else UNKNOWN_HEADWAY_MINUTES) / 2
+
+
+def _widened(facts: TransferFacts, plan: _Plan) -> _Plan:
+    """Let each ride use any line making the same number of stops (the 2 or
+    the 3), unless that line is the ride before or after it."""
+    stops = [facts.segment.board_station, *plan.stations, facts.segment.alight_station]
+    rides = []
+    for i, (ride, (start, end)) in enumerate(zip(plan.rides, pairwise(stops), strict=True)):
+        lines = facts.lines(start, end)
+        chosen = next(line for line in lines if line.route_id == ride[0])
+        neighbours = {
+            *(plan.rides[i - 1] if i else ()),
+            *(plan.rides[i + 1] if i + 1 < len(plan.rides) else ()),
+        }
+        rides.append(
+            tuple(
+                sorted(
+                    line.route_id
+                    for line in lines
+                    if line.stops == chosen.stops and line.route_id not in neighbours
+                )
             )
-            if check(proposal, facts) is not None:
-                continue
-            score = min(reach[r] for r in first) + min(onward[r] for r in second)
-            scored.setdefault(proposal.signature(), (score + TRANSFER_PENALTY_STOPS, proposal))
-    ranked = sorted(scored.values(), key=lambda item: (item[0], item[1].transfer_station))
-    return [proposal for _, proposal in ranked[:limit]]
+        )
+    return _Plan(plan.stations, tuple(rides), plan.minutes)
+
+
+def _proposal(facts: TransferFacts, plan: _Plan) -> TransferProposal:
+    stations = [*plan.stations, facts.segment.alight_station]
+    parts = [
+        f"the {_names(facts, ride, start, end)} to {facts.name(end)}"
+        for ride, start, end in zip(
+            plan.rides, [facts.segment.board_station, *plan.stations], stations, strict=True
+        )
+    ]
+    reason = "Ride " + ", then ".join(parts) + "."
+    return TransferProposal(
+        first_routes=list(plan.rides[0]),
+        transfer_station=plan.stations[0],
+        second_routes=list(plan.rides[1]),
+        then=[
+            LaterTransfer(station=station, routes=list(ride))
+            for station, ride in zip(plan.stations[1:], plan.rides[2:], strict=True)
+        ],
+        reason=reason[:200],
+    )
 
 
 def check(proposal: TransferProposal, facts: TransferFacts) -> tuple[RejectionCode, str] | None:
     """Why a proposal cannot be right for these facts, or None if it may be."""
-    option = facts.option(proposal.transfer_station)
-    if option is None:
-        return "unknown_id", f"{proposal.transfer_station} is not a candidate transfer station"
-    reach = {line.route_id for line in option.to_transfer}
-    onward = {line.route_id for line in option.to_destination}
-    if missing := set(proposal.first_routes) - reach:
-        return "not_served", f"{sorted(missing)} do not run to {option.name}"
-    if missing := set(proposal.second_routes) - onward:
-        return "not_served", f"{sorted(missing)} do not run from {option.name} to the destination"
-    if set(proposal.first_routes) & set(proposal.second_routes):
-        return "not_served", "the same line on both sides is not a transfer"
+    order = {station: i for i, station in enumerate(facts.stations)}
+    for station in proposal.stations:
+        if station not in facts.interchanges:
+            return "unknown_id", f"{station} is not a candidate transfer station"
+    if len(proposal.then) > MAX_LATER_TRANSFERS:
+        return "not_served", "too many transfers"
+    positions = [order[s] for s in proposal.stations]
+    if positions != sorted(set(positions)):
+        return "not_served", "the transfer stations are not in riding order"
+
+    stops = [facts.segment.board_station, *proposal.stations, facts.segment.alight_station]
+    rides = proposal.rides
+    for routes, (start, end) in zip(rides, pairwise(stops), strict=True):
+        serving = {line.route_id for line in facts.lines(start, end)}
+        if missing := set(routes) - serving:
+            return "not_served", (
+                f"{sorted(missing)} do not run from {facts.name(start)} to {facts.name(end)}"
+            )
+    for before, after in pairwise(rides):
+        if set(before) & set(after):
+            return "not_served", "the same line on both sides is not a transfer"
+
     segment = facts.segment
-    if proposal.transfer_station in segment.transfer_stations and set(segment.route_ids) <= (
-        set(proposal.first_routes) | set(proposal.second_routes)
+    if (
+        tuple(proposal.stations) == segment.transfer_stations
+        and len(rides) == len(segment.route_ids)
+        and all(route in ride for route, ride in zip(segment.route_ids, rides, strict=True))
     ):
         return "same_as_baseline", "the baseline route already makes this transfer"
     return None
 
 
-def _names(facts: TransferFacts, routes: set[str], station: str, first: bool) -> str:
-    option = facts.option(station)
-    lines = (option.to_transfer if first else option.to_destination) if option else ()
-    names = sorted({line.route for line in lines if line.route_id in routes})
-    return "/".join(names) or "/".join(sorted(routes))
+def _names(facts: TransferFacts, routes: tuple[str, ...], start: str, end: str) -> str:
+    names = sorted({line.route for line in facts.lines(start, end) if line.route_id in routes})
+    return "/".join(names) or "/".join(routes)

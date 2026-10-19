@@ -51,8 +51,8 @@ export function RouteCard({ route, selected, onSelect, savesSeconds, fastest = f
         <span className={styles.via}>
           {changes.length === 0
             ? "No transfer"
-            : changes.length === 1
-              ? `Change at ${changes[0]}`
+            : changes.length <= 2
+              ? `Change at ${changes.join(", then ")}`
               : `${changes.length} transfers`}
           {route.walk_meters >= 400 && ` · ${distance(route.walk_meters)} walk`}
         </span>

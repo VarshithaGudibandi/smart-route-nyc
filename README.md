@@ -9,7 +9,7 @@ Runs locally in Docker on open transit data. The AI features work with an API ke
 ## What you get
 
 - **Routing on real data.** Journeys come from OpenTripPlanner 2 over the official MTA and PATH timetables and the OpenStreetMap street network.
-- **AI that builds on the routes.** The model turns "I use a wheelchair and hate changing trains" into search settings, proposes faster transfers (say, switching to the express for part of the trip), and summarizes routes in plain language.
+- **AI that builds on the routes.** The model turns "I use a wheelchair and hate changing trains" into search settings, plans faster transfers (say, onto the express and back to the local), and summarizes routes in plain language.
 - **Checked before it is shown.** The model's transfer ideas are timed by OpenTripPlanner and kept only if they arrive earlier; its explanations are kept only if every sentence matches the route data.
 - **Clear accessibility.** Each station and walk is marked *meets*, *violates* or *unknown*, with the data's source and age. Routes that cannot be confirmed are listed under "Needs review" with each barrier named.
 - **Private.** No accounts, no stored locations or route history; feedback is anonymous.
@@ -45,7 +45,7 @@ A search, end to end:
 | Feature | What the model does | How it is checked | Without an API key |
 |---|---|---|---|
 | Typed needs | Turns a rider's words into search settings for them to confirm | Strict schema; text can add a requirement but never remove one the rider set | Keyword rules (also used if a model call fails) |
-| Faster transfers | Proposes transfers from the timetable facts of the trip | IDs must exist, lines must run there, and OpenTripPlanner must confirm an earlier arrival | Rule-based proposals only |
+| Faster transfers | Plans changes along the trip's line from timetable facts, such as onto the express and back to the local | IDs must exist, every ride must run there, and OpenTripPlanner must confirm an earlier arrival | Rule-based plans only |
 | Route summaries | Summarizes the route in 2 to 5 sentences | Every number, name and accessibility claim must appear in the cited facts | The key facts, as sentences |
 
 Every call has a timeout, one retry, a circuit breaker and a daily call limit (`LLM_DAILY_CALL_LIMIT`). The code is in [`backend/app/ai/`](backend/app/ai): Claude goes through Anthropic's SDK, and every other provider through the OpenAI-compatible chat API they all offer.

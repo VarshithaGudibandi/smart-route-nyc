@@ -510,6 +510,16 @@ export interface components {
              */
             updated_at: string;
         };
+        /**
+         * LaterTransfer
+         * @description Ride on to ``station`` and change there to one of ``routes``.
+         */
+        LaterTransfer: {
+            /** Routes */
+            routes: string[];
+            /** Station */
+            station: string;
+        };
         /** Leg */
         Leg: {
             /** Agency */
@@ -771,6 +781,8 @@ export interface components {
             reason: string;
             /** Second Routes */
             second_routes: string[];
+            /** Then */
+            then?: components["schemas"]["LaterTransfer"][];
             /** Transfer Station */
             transfer_station: string;
         };

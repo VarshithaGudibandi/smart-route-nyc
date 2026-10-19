@@ -20,7 +20,7 @@ from app.services.suggestions.context import TransferFacts
 
 logger = structlog.get_logger(__name__)
 
-MAX_OUTPUT_TOKENS = 500
+MAX_OUTPUT_TOKENS = 800
 
 
 class InvalidProposalsError(Exception):
@@ -51,14 +51,12 @@ def facts_document(facts: TransferFacts) -> dict[str, Any]:
             "transfer_station_ids": list(segment.transfer_stations),
         },
         "direct_lines": lines(facts.direct),
-        "candidates": [
-            {
-                "station_id": option.station_id,
-                "name": option.name,
-                "to_transfer": lines(option.to_transfer),
-                "to_destination": lines(option.to_destination),
-            }
-            for option in facts.options
+        # In riding order: boarding station, interchanges, alighting station.
+        "stations": [{"station_id": s, "name": facts.name(s)} for s in facts.stations],
+        "interchange_ids": list(facts.interchanges),
+        "rides": [
+            {"from": origin, "to": destination, "lines": lines(options)}
+            for (origin, destination), options in facts.rides.items()
         ],
     }
 

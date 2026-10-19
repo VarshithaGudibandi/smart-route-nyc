@@ -46,6 +46,7 @@ test("route detail shows every step, explains the route and takes a rating", asy
   const detail = page.getByRole("article");
   await expect(detail.getByRole("heading", { level: 2, name: "8:34 – 9:18" })).toBeVisible();
   await expect(detail.getByText("Change at 59 St")).toBeVisible();
+  await expect(detail.getByText(/Ride the R to 59 St, then the N to 34 St-Herald Sq\./)).toBeVisible();
   await expect(detail.getByText("Every station and walk checked")).toBeVisible();
   if (isMobile) await expect(page.getByRole("heading", { level: 1 })).toBeHidden();
 

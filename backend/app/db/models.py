@@ -221,6 +221,8 @@ class SuggestionOutcome(Base):
     first_routes: Mapped[str] = mapped_column(String(128))
     transfer_station: Mapped[str] = mapped_column(String(64))
     second_routes: Mapped[str] = mapped_column(String(128))
+    # Further changes, "station>route,route;station>route", or None.
+    later_transfers: Mapped[str | None] = mapped_column(String(256))
     # "verified" or the rejection code.
     outcome: Mapped[str] = mapped_column(String(32))
     saves_seconds: Mapped[int | None] = mapped_column()

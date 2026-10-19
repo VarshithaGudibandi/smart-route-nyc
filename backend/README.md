@@ -94,12 +94,14 @@ A route `violates` if any finding does, `meets` only if all do, and is `unknown`
 
 ## Transfer suggestions
 
-OpenTripPlanner ranks itineraries by a cost that penalizes transfers, so it often prefers a one-seat ride over a faster trip with a change. After each search a background investigation looks for those:
+OpenTripPlanner ranks itineraries by a cost that penalizes transfers, so it often prefers a one-seat ride over a faster trip with changes. After each search a background investigation looks for those:
 
-1. **Facts.** For the fastest route's subway segment, every station ahead is checked for lines the rider could change to, with stop counts, headways and current MTA alerts.
-2. **Proposals.** A rules generator proposes express/local and line-to-line changes. With an API key, the model (`app/ai/suggestions.py`) proposes from the same facts as well.
-3. **Checks.** IDs must come from the facts, the lines must run between the stations, and no line may be suspended.
-4. **Verification.** One OTP query restricted to the proposed lines and forced through the transfer station, under the rider's settings. It must ride those lines, arrive at least a minute earlier and meet any accessibility requirement.
+1. **Facts.** For the fastest route's subway segment, a map of the corridor ahead: every interchange (a station more than one line serves on the way), and for each pair of stations the lines between them, with stop counts and headways from the trips running in that hour. A line that runs local at night shows local stop counts then.
+2. **Plans.** A plan rides from the boarding station to the alighting station, changing at up to three interchanges: express then local, local then express, or local, express and back to the local (the 1 to the 2/3 at Chambers St, back to the 1 at 96 St). With an API key the model (`app/ai/suggestions.py`) plans from the map; a rules planner walks every path with up to two changes and ranks them by estimated minutes.
+3. **Checks.** IDs must come from the facts, every ride must run between its stations, and no line may be suspended.
+4. **Verification.** One OTP query restricted to the plan's lines and forced through each transfer station in order, under the rider's settings. It must ride exactly those lines, arrive at least a minute earlier and meet any accessibility requirement.
+
+With **Fewer transfers** selected, no investigation runs. Timing follows MTA's published minimum transfer times (3 minutes at most stations), so a change only shows up when it still wins after them.
 
 The search response includes `{"investigation": {"id": "...", "poll_after_ms": 1500}}`; poll `GET /api/v1/routes/investigations/{id}`, cancel with `DELETE`. Identical searches share one investigation (Redis `SET NX`); at most 2 run and 16 wait per instance, each with a 20 s timeout. Each proposal's outcome is kept in `suggestion_outcomes` for 180 days, with lines and stations only.
 
