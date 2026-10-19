@@ -5,17 +5,17 @@
 
 Accessibility-aware journey planning for New York City subway, bus and PATH.
 
-Riders say what they need, such as step-free access, a wheelchair, less walking or fewer transfers, and SmartRouteNYC finds routes that respect it. A hard requirement is treated as a requirement, not a preference: every station and walk on a route is checked against live elevator data, and anything that cannot be confirmed is shown as such, never as accessible.
+Riders say what they need, such as step-free access, a wheelchair, less walking or fewer transfers. [OpenTripPlanner](https://www.opentripplanner.org/) computes the routes, and [Claude](https://www.anthropic.com/claude) builds on them: it reads needs written in plain words, looks for faster transfers the routing engine skipped, and explains each route. Every station and walk is checked against live elevator data, and whatever Claude proposes is verified against the timetable and route data before it is shown.
 
-Everything runs locally in Docker from free, open data. No accounts, API keys or paid services.
+Runs locally in Docker on open transit data. The AI features use your own Anthropic API key; without one, they fall back to deterministic rules and everything else works the same.
 
 ## What you get
 
-- **Real routing.** Every journey comes from [OpenTripPlanner 2](https://www.opentripplanner.org/) over the official MTA and PATH timetables and the OpenStreetMap street network.
-- **Honest accessibility.** Each station and walk is marked *meets*, *violates* or *unknown*, with the data's source and age. Routes that cannot be confirmed are listed separately under "Needs review", with every barrier named.
-- **Faster transfers, verified.** After each search, a background job looks for changes OpenTripPlanner skipped, such as switching to the express, and shows one only after the routing engine confirms it arrives earlier.
-- **Explanations that cannot invent facts.** Route explanations are built from computed facts; model wording is accepted only if every sentence is grounded in them.
-- **Private by design.** No accounts, no stored locations or route history; feedback is anonymous.
+- **Routing on real data.** Journeys come from OpenTripPlanner 2 over the official MTA and PATH timetables and the OpenStreetMap street network.
+- **AI that builds on the routes.** Claude turns "I use a wheelchair and hate changing trains" into search settings, proposes faster transfers (say, switching to the express for part of the trip), and explains routes in plain language.
+- **Checked before it is shown.** Claude's transfer ideas are timed by OpenTripPlanner and kept only if they arrive earlier; its explanations are kept only if every sentence matches the route data.
+- **Clear accessibility.** Each station and walk is marked *meets*, *violates* or *unknown*, with the data's source and age. Routes that cannot be confirmed are listed under "Needs review" with each barrier named.
+- **Private.** No accounts, no stored locations or route history; feedback is anonymous.
 - **Accessible web app.** Keyboard and screen-reader support, status shown by shape and words as well as colour, and automated accessibility checks on every screen.
 
 ## How it works
@@ -28,6 +28,7 @@ flowchart LR
   API <--> R[(Redis)]
   API --> PG[(PostgreSQL)]
   API --> G[Photon geocoder]
+  API --> C[Claude API]
   W[Ingestion worker] --> PG
   F[MTA · PATH · OpenStreetMap] --> W
   F -->|graph build| OTP
@@ -38,8 +39,19 @@ A search, end to end:
 1. The web app sends origin, destination, time and the rider's needs to `POST /api/v1/routes/search`.
 2. The API asks OpenTripPlanner for itineraries, caching results in Redis and sharing one computation between identical concurrent searches.
 3. Every station and walk is assessed against the latest elevator status and OpenStreetMap; routes that miss a requirement move to "Needs review".
-4. Routes return immediately. A background investigation then tests faster transfers and the web app polls for verified ones.
-5. The worker refreshes elevator outages and service alerts every two minutes and tracks how fresh each source is.
+4. Routes return immediately. In the background, Claude and a set of rules propose faster transfers; OpenTripPlanner times each one, and the web app shows those that arrive earlier.
+5. On request, Claude explains a route from facts the API computes (legs, transfers, elevator status, alerts), and each sentence is checked against them.
+6. The worker refreshes elevator outages and service alerts every two minutes.
+
+### Where AI is used
+
+| Feature | What Claude does | How it is checked | Without an API key |
+|---|---|---|---|
+| Typed needs | Turns a rider's words into search settings for them to confirm | Strict schema; text can add a requirement but never remove one the rider set | Keyword rules |
+| Faster transfers | Proposes transfers from the timetable facts of the trip | IDs must exist, lines must run there, and OpenTripPlanner must confirm an earlier arrival | Rule-based proposals only |
+| Route explanations | Words an explanation of the route | Every number, name and accessibility claim must appear in the cited facts | The facts themselves, as sentences |
+
+Calls go to `claude-opus-5-5` at low effort, with a timeout, one retry, a circuit breaker and a daily call limit (`LLM_DAILY_CALL_LIMIT`). The code is in [`backend/app/ai/`](backend/app/ai).
 
 ## Stack
 
@@ -61,16 +73,30 @@ cd smart-route-nyc
 
 Then open **http://localhost:3000**.
 
+**To turn on the AI features**, put your [Anthropic API key](https://console.anthropic.com/) in the `.env` file that the first run creates, then run `./start.sh` again:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
 The first run takes 10 to 15 minutes: it downloads the current timetables and street map (about 220 MB), builds the routing graph, starts every service and waits for live elevator data. Later starts take about a minute.
 
 | Command | What it does |
 |---|---|
 | `./start.sh` | Start, or set everything up on the first run |
 | `./start.sh --with-dashboards` | Also start Prometheus and Grafana (http://localhost:3001) |
-| `./start.sh --refresh` | Rebuild the graph from the latest timetables; the old graph keeps serving until the new one passes its checks |
 | `./start.sh --stop` | Stop everything; data and the graph are kept |
 
-The graph covers up to 60 days of service, less if a published timetable ends sooner; http://localhost:8000/api/v1/data/freshness shows when. Interactive API docs are at http://localhost:8000/api/docs. All ports are bound to `127.0.0.1`.
+Interactive API docs are at http://localhost:8000/api/docs. The graph covers the timetables published when it was built; to use newer ones, delete `data/otp/graph` and run `./start.sh` again.
+
+### See what it is doing
+
+| What | Where |
+|---|---|
+| Each request, its timing and cache result, and every Claude call with its latency and token counts | `docker compose logs -f backend` |
+| Elevator, alert and feed updates | `docker compose logs -f worker` |
+| What the background transfer search found, and how many ideas were rejected for each reason | `GET /api/v1/routes/investigations/{id}` (the id comes with each search response); every idea's outcome is also stored in the `suggestion_outcomes` table |
+| Charts of traffic, latency, cache, OpenTripPlanner and data age | `./start.sh --with-dashboards`, then http://localhost:3001 |
 
 ### Troubleshooting
 
@@ -104,9 +130,9 @@ Behaviour, limits and the accessibility rules are documented in [`backend/README
 |---|---|
 | Typed preferences (30 labelled requests, keyword baseline) | 100% recall on wheelchair and step-free needs, no false positives, injection attempts handled |
 | Explanation grounding (23 scripted model replies) | All 18 unfaithful or malformed replies rejected; 2 known gaps documented |
-| Transfer suggestions (240 live searches) | Verified faster route for 6.6% of applicable searches, saving up to 13 minutes |
+| Transfer suggestions (240 live searches, rule-based proposals) | Verified faster route for 6.6% of applicable searches, saving up to 13 minutes |
 
-Cases, metrics and commands are in [`backend/README.md`](backend/README.md#evaluations). The first two run in CI.
+Each evaluation also runs against Claude with an API key set (`--provider anthropic`, `--live N`, `--generator model`), to compare it with the rules. Cases, metrics and commands are in [`backend/README.md`](backend/README.md#evaluations). The first two run in CI.
 
 ## Development
 
@@ -117,10 +143,10 @@ pip install pre-commit && pre-commit install   # lint, format and secret checks 
 
 (cd backend && uv sync && uv run pytest)       # API tests (integration tests use Docker)
 (cd frontend && npm ci && npm test)            # web app tests; npm run test:e2e for browser tests
-load/run.sh                                    # k6 load tests against the running stack
+ops/load/run.sh                                # k6 load tests against the running stack
 ```
 
-CI runs linting, type checks, all tests, evaluations, dependency audits and image scans on every push.
+CI runs linting, type checks, all tests, evaluations, dependency audits and image scans on every push. A separate workflow, started by hand, runs `./start.sh` on a fresh machine and load-tests it.
 
 ## Repository structure
 
@@ -128,8 +154,7 @@ CI runs linting, type checks, all tests, evaluations, dependency audits and imag
 backend/        FastAPI API, ingestion worker, evaluations
 frontend/       Next.js web app and browser tests
 otp/            OpenTripPlanner config and graph-build scripts
-load/           k6 load tests
-observability/  Prometheus and Grafana configuration
+ops/            k6 load tests, Prometheus and Grafana configuration
 start.sh        One-command local setup
 ```
 

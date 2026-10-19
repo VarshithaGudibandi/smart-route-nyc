@@ -12,7 +12,7 @@ import { Counter } from "k6/metrics";
 
 const BASE = __ENV.API_URL || "http://localhost:8000";
 const SCENARIO = __ENV.SCENARIO || "mixed";
-const TRIPS = open("../backend/evals/suggestion_trips.jsonl")
+const TRIPS = open("../../backend/evals/suggestion_trips.jsonl")
   .split("\n")
   .filter((line) => line.trim())
   .map((line) => JSON.parse(line));

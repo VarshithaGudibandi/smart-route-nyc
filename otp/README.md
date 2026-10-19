@@ -46,22 +46,9 @@ python otp/scripts/smoke_test.py
 
 `fetch_inputs.py` retries transient failures with exponential backoff and jitter. It writes files atomically and records each source's SHA-256 checksum, size and service dates in `manifest.json`. It warns when a feed's service is about to end, and when a feed carries no stop-level accessibility data.
 
-## Refreshing timetables
+## Updating timetables
 
-Published timetables cover only a few months, so the graph must be rebuilt regularly. [`scripts/refresh_graph.sh`](scripts/refresh_graph.sh) does this without taking routing offline:
-
-1. Fetch and validate fresh inputs into `data/otp/graph-next`. The live graph keeps serving.
-2. Build the new graph there.
-3. Swap directories (the previous graph is kept as `graph-previous`) and restart OTP.
-4. Wait for OTP to answer, then run the smoke tests. If either fails, the previous graph is restored automatically.
-
-Run it on a schedule, for example nightly:
-
-```cron
-30 3 * * * cd /srv/smart-route-nyc && OTP_BUILD_HEAP=10g otp/scripts/refresh_graph.sh >> /var/log/smartroute-refresh.log 2>&1
-```
-
-The ingestion worker's `gtfs_static` job reports each feed's end of service at `/api/v1/data/freshness`, so a refresh that stops running shows up there before routing starts missing trips.
+Published timetables cover a few months. To build from newer ones, run `./start.sh --stop`, delete `data/otp/graph`, and run `./start.sh` again. `/api/v1/data/freshness` shows when each feed's service ends.
 
 ## Derived station accessibility
 
@@ -71,7 +58,7 @@ MTA's subway GTFS leaves `wheelchair_boarding` empty, so OTP's wheelchair routin
 - `2` (not accessible) for every other subway station
 - platforms inherit their parent station's value
 
-The router configuration then penalises inaccessible stops heavily for wheelchair requests, so routing steers toward accessible stations. Only the static inventory is used here; live outages are applied when each route is assessed. The source and counts are recorded under `derived` in `manifest.json`. PATH publishes no equivalent data, so PATH stops stay unknown. If the inventory cannot be fetched, the whole fetch fails and a refresh keeps the current graph.
+The router configuration then penalises inaccessible stops heavily for wheelchair requests, so routing steers toward accessible stations. Only the static inventory is used here; live outages are applied when each route is assessed. The source and counts are recorded under `derived` in `manifest.json`. PATH publishes no equivalent data, so PATH stops stay unknown. If the inventory cannot be fetched, the whole fetch fails rather than building a graph without it.
 
 Measured effect (October 2026 data: 163 of 496 subway stations have an ADA elevator), comparing wheelchair-required searches for six cross-borough trips before and after the derivation:
 
@@ -121,7 +108,7 @@ Measured on a 4-core, 16 GB machine with all eight feeds and the street extract 
 
 ## Data notes
 
-- **Short feed validity.** The subway feed covers about five months and PATH about four, and both are republished frequently. Inputs must be refreshed and the graph rebuilt on a schedule.
+- **Short feed validity.** The subway feed covers about five months and PATH about four, and both are republished frequently.
 - **No accessibility in GTFS.** None of the MTA or PATH feeds set `wheelchair_boarding`. For the subway it is derived from MTA's elevator inventory (see above); live status comes from MTA's outage feed. Every active elevator in the equipment feed carries the GTFS stop ID it serves, so outages map directly onto stations in the graph.
 - **Upcoming vs. current outages.** MTA's current-outage feed also lists scheduled future outages, flagged with `isupcomingoutage`. Those must be filtered out, or working elevators are reported as broken.
 - **PATH stations.** The PATH feed does not group platforms under parent stations, so each station appears as several unrelated stops. Address-based planning is unaffected; stop-based queries need a station mapping.

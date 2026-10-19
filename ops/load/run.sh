@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Run the k6 load tests against the local stack started by ./start.sh.
 #
-# Usage: load/run.sh [mixed|same_search|otp_outage ...]   (default: all three)
+# Usage: ops/load/run.sh [mixed|same_search|otp_outage ...]   (default: all three)
 #
 # k6 runs in Docker on the Compose network. The rate limits are raised while
 # the tests run, because all traffic comes from one address, and restored
 # afterwards. otp_outage stops OpenTripPlanner and starts it again at the end.
-# Results are written to load/results/<scenario>.json.
+# Results are written to ops/load/results/<scenario>.json.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 K6_IMAGE="grafana/k6:1.8.2@sha256:bd6ae8607c0a05d0dc0dc3f5753c464b0929baf083ef0f20b7eed845a3d9e6b4"
-LOAD_COMPOSE=(docker compose -f docker-compose.yml -f load/compose.load.yml)
+LOAD_COMPOSE=(docker compose -f docker-compose.yml -f ops/load/compose.load.yml)
 scenarios=("$@")
 if ((${#scenarios[@]} == 0)); then scenarios=(mixed same_search otp_outage); fi
 
@@ -37,7 +37,7 @@ restore() {
 trap restore EXIT
 
 missed=0
-mkdir -p load/results
+mkdir -p ops/load/results
 "${LOAD_COMPOSE[@]}" up -d backend >/dev/null
 wait_ready
 
@@ -48,7 +48,7 @@ for scenario in "${scenarios[@]}"; do
   docker run --rm \
     --network smartroute_default \
     --user "$(id -u):$(id -g)" \
-    -v "$ROOT:/repo:ro" -v "$ROOT/load/results:/results" -w /repo/load \
+    -v "$ROOT:/repo:ro" -v "$ROOT/ops/load/results:/results" -w /repo/ops/load \
     -e SCENARIO="$scenario" -e API_URL=http://backend:8000 -e SUMMARY_DIR=/results \
     -e K6_NO_USAGE_REPORT=true \
     "$K6_IMAGE" run --quiet smartroute.js || status=$?

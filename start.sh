@@ -3,7 +3,6 @@
 #
 #   ./start.sh                    start (the first run downloads data and builds the routing graph)
 #   ./start.sh --with-dashboards  also start Prometheus and Grafana
-#   ./start.sh --refresh          rebuild the routing graph from the latest timetables
 #   ./start.sh --stop             stop everything (data is kept)
 #
 # Written for bash 3.2, so it runs unchanged on macOS.
@@ -33,15 +32,13 @@ fail() {
   exit 1
 }
 
-usage() { sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; }
 
 dashboards=false
-refresh=false
 stop=false
 for arg in "$@"; do
   case "$arg" in
     --with-dashboards) dashboards=true ;;
-    --refresh) refresh=true ;;
     --stop) stop=true ;;
     -h | --help) usage; exit 0 ;;
     *) usage >&2; exit 2 ;;
@@ -110,6 +107,8 @@ ensure_env() {
   cat > .env <<EOF
 # Created by start.sh. Settings for the local Docker stack; never commit this file.
 KEY_HASHING_SECRET=$secret
+# Optional: Claude for typed preferences, explanations and transfer ideas.
+ANTHROPIC_API_KEY=
 EOF
   note "Created .env with a random key-hashing secret"
 }
@@ -141,13 +140,6 @@ build_graph() {
   step "Building the routing graph (about 10 minutes, once)"
   note "${dim}OpenTripPlanner is combining the timetables with the street network.${reset}"
   otp/scripts/build_graph.sh "$GRAPH_DIR"
-}
-
-refresh_graph() {
-  step "Rebuilding the routing graph from the latest timetables"
-  note "The current graph keeps serving until the new one passes its checks."
-  PYTHON="$ROOT/otp/scripts/docker_python.sh" SMOKE_OTP_URL="http://otp:8080" \
-    otp/scripts/refresh_graph.sh
 }
 
 wait_for() {
@@ -199,15 +191,6 @@ step "Checking this machine"
 check_memory
 choose_heaps
 
-if $refresh; then
-  [[ -f "$GRAPH_DIR/graph.obj" ]] || fail "There is no graph to refresh yet." "Run ./start.sh first."
-  build_images
-  compose up -d
-  refresh_graph
-  wait_for_stack
-  exit 0
-fi
-
 check_ports
 ensure_env
 
@@ -229,4 +212,10 @@ echo "    API docs:   http://localhost:8000/api/docs"
 if $dashboards; then
   echo "    Dashboards: http://localhost:3001 (Grafana; metrics from Prometheus at http://localhost:9090)"
 fi
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]] || grep -qE '^ANTHROPIC_API_KEY=.+' .env; then
+  echo "    AI:         Claude"
+else
+  echo "    AI:         off; add ANTHROPIC_API_KEY to .env and run ./start.sh again to use Claude"
+fi
+echo "    Logs:       docker compose logs -f backend worker"
 echo "    Stop with:  ./start.sh --stop"

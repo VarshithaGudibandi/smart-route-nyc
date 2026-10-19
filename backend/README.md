@@ -36,6 +36,19 @@ evals/             offline evaluations with labelled cases
 tests/             unit and integration tests (fixtures recorded from live sources)
 ```
 
+## Claude
+
+`app/ai/anthropic_provider.py` calls Claude through the Anthropic SDK. Set `ANTHROPIC_API_KEY` to enable it; `LLM_PROVIDER=auto` (the default) uses Claude when a key is set and the rule-based baselines otherwise.
+
+| Setting | Default | |
+|---|---|---|
+| `LLM_MODEL` | `claude-opus-5-5` | |
+| `LLM_EFFORT` | `low` | Short, structured tasks; raise it to trade latency for more careful answers |
+| `LLM_TIMEOUT_S` | `20` | Per call; one retry for rate limits, server errors and network failures |
+| `LLM_DAILY_CALL_LIMIT` | `2000` | Shared across instances through Redis |
+
+Requests declined by the safety classifiers are rerun on the API's fallback model. A reply that is refused, cut off or fails validation is discarded and the rule-based result is used. Each call is logged with its task, latency and token counts, never the prompt.
+
 ## Route search
 
 `POST /api/v1/routes/search` returns up to five itineraries with every leg, its timing and its geometry.
@@ -53,12 +66,12 @@ curl -s localhost:8000/api/v1/routes/search -H 'Content-Type: application/json' 
 | Caching | Redis, keyed by rounded coordinates (about 11 m), a 5-minute departure bucket, every preference and the routing graph version. `X-Cache` reports `HIT`, `MISS` or `SHARED` |
 | Coalescing | Identical concurrent searches share one routing computation, within and across instances |
 | Rate limiting | 20 searches per minute per client, shared across instances; `429` with `Retry-After` |
-| Failures | `503 routing_unavailable` or `504 routing_timeout`. No itinerary is ever invented, and errors are never cached |
+| Failures | `503 routing_unavailable` or `504 routing_timeout`; errors are not cached |
 | Privacy | Cache and rate-limit keys are HMACs; no coordinates or client addresses are stored readably |
 
 ## Accessibility assessment
 
-Every route is assessed on every response, including cached ones, so a verdict is never stale. Each station and walking leg gets a finding:
+Every route is assessed on every response, including cached ones, so verdicts use the latest elevator status. Each station and walking leg gets a finding:
 
 | Place | `meets` | `violates` | `unknown` |
 |---|---|---|---|
@@ -66,7 +79,7 @@ Every route is assessed on every response, including cached ones, so a verdict i
 | Walking leg | No stairs found in OpenStreetMap | Stairs mapped, or an entrance tagged not wheelchair accessible | |
 | PATH station, bus stop | | | Always: no equipment data is published |
 
-A route `violates` if any finding does, `meets` only if all do, and is `unknown` otherwise. Wheelchair users need an ADA-accessible elevator; step-free travel can use any working one. When a requirement is set, only complying routes are returned in `routes`; everything else goes to `review_only_routes` with each barrier and unconfirmed step listed. Walking findings say "no stairs found", never "step-free guaranteed".
+A route `violates` if any finding does, `meets` only if all do, and is `unknown` otherwise. Wheelchair users need an ADA-accessible elevator; step-free travel can use any working one. When a requirement is set, only complying routes are returned in `routes`; everything else goes to `review_only_routes` with each barrier and unconfirmed step listed. Walking findings rely on OpenStreetMap and say "no stairs found" rather than guaranteeing a step-free walk.
 
 ## Typed preferences
 
@@ -75,14 +88,14 @@ A route `violates` if any finding does, `meets` only if all do, and is `unknown`
 - The model only proposes; code decides. Replies must match a strict schema or are discarded (`502`).
 - Text can add requirements but never remove one the rider selected; such attempts are reported as conflicts.
 - The rider's text is sent as delimited data. Calls have a timeout, one retry, a circuit breaker and a daily budget shared through Redis.
-- Until a model provider is configured, `LLM_PROVIDER=baseline` uses keyword rules, reported as `provider: "baseline"`.
+- Without an API key, keyword rules answer instead, reported as `provider: "baseline"`.
 
 ## Transfer suggestions
 
 OpenTripPlanner ranks itineraries by a cost that penalizes transfers, so it often prefers a one-seat ride over a faster trip with a change. After each search a background investigation looks for those:
 
 1. **Facts.** For the fastest route's subway segment, every station ahead is checked for lines the rider could change to, with stop counts, headways and current MTA alerts.
-2. **Proposals.** A rules generator proposes express/local and line-to-line changes. A model generator (`app/ai/suggestions.py`) uses the same facts once a provider is configured.
+2. **Proposals.** A rules generator proposes express/local and line-to-line changes. With an API key, Claude (`app/ai/suggestions.py`) proposes from the same facts as well.
 3. **Checks.** IDs must come from the facts, the lines must run between the stations, and no line may be suspended.
 4. **Verification.** One OTP query restricted to the proposed lines and forced through the transfer station, under the rider's settings. It must ride those lines, arrive at least a minute earlier and meet any accessibility requirement.
 
@@ -124,19 +137,27 @@ Runs are recorded in `feed_sync_runs`; unchanged payloads are skipped by checksu
 
 The first two run in CI and fail it on regressions in critical recall, false positives, injection safety or grounding.
 
+To measure Claude on the same cases (needs `ANTHROPIC_API_KEY`; each run makes real API calls):
+
+```bash
+uv run python -m evals.preferences --provider anthropic
+uv run python -m evals.explanations --live 10        # score 10 of Claude's explanations
+uv run python -m evals.suggestions --generator model # Claude proposes alongside the rules
+```
+
 ## Observability
 
 The API and worker serve Prometheus metrics on port 9100 inside the Compose network only. Labels use route templates, never locations or IDs. `./start.sh --with-dashboards` adds Prometheus and a provisioned Grafana dashboard at http://localhost:3001: traffic, latency and errors by route, cache results, OpenTripPlanner latency and circuit-breaker refusals, investigations, and time since each feed was last fetched. Logs are structured JSON with a request ID, returned in `X-Request-ID`.
 
 ## Load tests
 
-[k6](https://k6.io) scenarios in [`../load/smartroute.js`](../load/smartroute.js), run in Docker against the local stack with `load/run.sh`:
+[k6](https://k6.io) scenarios in [`../ops/load/smartroute.js`](../ops/load/smartroute.js), run in Docker against the local stack with `ops/load/run.sh`:
 
 | Scenario | Checks |
 |---|---|
 | `mixed` | Searches over 30 real trips, place lookups and investigation polls, 1 to 8 requests per second |
 | `same_search` | 50 identical concurrent searches: exactly one reaches OpenTripPlanner |
-| `otp_outage` | OpenTripPlanner stopped: `503 routing_unavailable` within a second, never a 500 |
+| `otp_outage` | OpenTripPlanner stopped: `503 routing_unavailable` within a second |
 
 ## Security
 

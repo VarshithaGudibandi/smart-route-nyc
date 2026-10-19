@@ -68,7 +68,7 @@ test("when nothing can be confirmed, routes are listed for review with each barr
   await expectAccessible(page);
 });
 
-test("a routing outage is reported, never filled with made-up routes", async ({ page }) => {
+test("a routing outage is reported clearly", async ({ page }) => {
   let failures = 1;
   await mockApi(page, {
     "POST /api/v1/routes/search": async (route, next) => {

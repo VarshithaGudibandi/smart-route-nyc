@@ -1,25 +1,11 @@
 name: Local setup and load tests
 
 # Runs ./start.sh on a fresh machine exactly as a new user would: downloads
-# the live timetables and street map, builds the routing graph, starts the
-# stack with dashboards, then checks real routing, the web app and the
-# metrics pipeline, and runs the k6 load tests. Weekly, because published
-# timetables change, and whenever the setup itself changes.
+# the timetables and street map, builds the routing graph, starts the stack
+# with dashboards, then checks real routing, the web app and the metrics
+# pipeline, and runs the k6 load tests. Started by hand from the Actions tab.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 6 * * 1"
-  push:
-    branches: [main]
-    paths:
-      - start.sh
-      - docker-compose.yml
-      - backend/Dockerfile
-      - frontend/Dockerfile
-      - "otp/**"
-      - "observability/**"
-      - "load/**"
-      - .github/workflows/local-setup.yml
 
 permissions:
   contents: read
@@ -114,9 +100,9 @@ jobs:
 
       - name: Load tests
         run: |
-          while sleep 5; do docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}'; done > load/results-stats.log &
+          while sleep 5; do docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}'; done > ops/load/results-stats.log &
           trap 'kill $!' EXIT
-          load/run.sh
+          ops/load/run.sh
 
       - name: Summary
         if: always()
@@ -128,7 +114,7 @@ jobs:
             echo "Runner: $(nproc) CPUs, $(free -g | awk '/Mem:/ {print $2}') GB RAM"
             echo
             echo "## Load tests"
-            for f in load/results/*.json; do
+            for f in ops/load/results/*.json; do
               [ -f "$f" ] || continue
               python3 - "$f" <<'EOF'
           import json, sys
@@ -145,12 +131,9 @@ jobs:
             echo
             echo "Peak memory per container during the load tests:"
             echo '```'
-            sort -k1,1 -k2,2h load/results-stats.log 2>/dev/null | awk '{peak[$1]=$2} END {for (c in peak) print c, peak[c]}' | sort
+            sort -k1,1 -k2,2h ops/load/results-stats.log 2>/dev/null | awk '{peak[$1]=$2} END {for (c in peak) print c, peak[c]}' | sort
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Rebuild the graph with ./start.sh --refresh
-        run: ./start.sh --refresh
 
       - name: Logs
         if: failure()
@@ -161,6 +144,6 @@ jobs:
         with:
           name: load-test-results
           path: |
-            load/results
-            load/results-stats.log
+            ops/load/results
+            ops/load/results-stats.log
           if-no-files-found: ignore
