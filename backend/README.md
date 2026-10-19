@@ -137,7 +137,7 @@ Runs are recorded in `feed_sync_runs`; unchanged payloads are skipped by checksu
 |---|---|---|---|
 | Typed preferences, keyword baseline | 30 labelled requests, including injection attempts | 93% fully correct, 100% recall on wheelchair and step-free needs, 0 false positives | `uv run python -m evals.preferences` |
 | Explanation grounding | 23 scripted model replies | All faithful replies accepted; all unfaithful and malformed ones rejected; 2 known gaps documented | `uv run python -m evals.explanations` |
-| Transfer suggestions | 30 trips × 4 times × with and without step-free, live graph | A verified faster route for 6.6% of applicable searches, saving 1 to 13 min (median 4.3) | `uv run python -m evals.suggestions` (needs the running stack) |
+| Transfer suggestions | 30 trips × 4 times, without step-free, live graph | A verified faster route for 3.3% of searches, saving up to 5.5 min (median 4.2), the same with up to one or two changes: MTA's 3-minute minimum transfers outweigh most express savings | `uv run python -m evals.suggestions` (needs the running stack) |
 
 The first two run in CI and fail it on regressions in critical recall, false positives, injection safety or grounding.
 
