@@ -45,7 +45,9 @@ class Settings(BaseSettings):
 
     search_itineraries: int = Field(default=5, ge=1, le=10)
     route_cache_ttl_s: int = Field(default=600, gt=0)
-    route_cache_near_term_ttl_s: int = Field(default=60, gt=0)
+    # Departures within the hour. The graph carries no realtime updates, so a
+    # result holds for its whole 5-minute departure bucket.
+    route_cache_near_term_ttl_s: int = Field(default=300, gt=0)
     route_cache_empty_ttl_s: int = Field(default=30, gt=0)
     single_flight_lock_ttl_ms: int = Field(default=10_000, gt=0)
     single_flight_wait_s: float = Field(default=3.0, gt=0)

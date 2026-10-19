@@ -65,7 +65,7 @@ curl -s localhost:8000/api/v1/routes/search -H 'Content-Type: application/json' 
 
 | Behavior | Detail |
 |---|---|
-| Caching | Redis, keyed by rounded coordinates (about 11 m), a 5-minute departure bucket, every preference and the routing graph version. `X-Cache` reports `HIT`, `MISS` or `SHARED` |
+| Caching | Redis, keyed by rounded coordinates (about 11 m), a 5-minute departure bucket, every preference and the routing graph version; kept for the bucket (10 minutes for departures over an hour away). `X-Cache` reports `HIT`, `MISS` or `SHARED` |
 | Coalescing | Identical concurrent searches share one routing computation, within and across instances |
 | Rate limiting | 20 searches per minute per client, shared across instances; `429` with `Retry-After` |
 | Failures | `503 routing_unavailable` or `504 routing_timeout`; errors are not cached |
