@@ -102,6 +102,13 @@ export function isoToNewYorkLocal(iso: string): string {
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }
 
+const PROVIDER_NAMES: Record<string, string> = { anthropic: "Claude" };
+
+/** The model's name as riders know it, rather than the API's provider key. */
+export function providerName(provider: string | null | undefined): string {
+  return PROVIDER_NAMES[provider ?? ""] ?? provider ?? "a language model";
+}
+
 /** Replace OTP's names for coordinate endpoints inside a longer text. */
 export function friendlyText(text: string): string {
   return text.replace(/\bOrigin\b/g, "your starting point").replace(/\bDestination\b/g, "your destination");

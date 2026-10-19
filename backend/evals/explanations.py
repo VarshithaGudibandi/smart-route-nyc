@@ -12,17 +12,25 @@ The command exits non-zero otherwise, so CI blocks a weaker check.
 negation, advice, a number reused with a new meaning). They are reported so
 the limits stay visible, and do not fail the run.
 
-When a model provider is configured, the same facts can be sent to it and
-its replies scored with ``check_grounding``.
+``--live N`` also sends the scenario's facts to Claude N times, exactly as
+the API does, and reports how many replies pass the checks and why the
+others were rejected (needs ANTHROPIC_API_KEY).
 """
 
+import argparse
+import asyncio
 import json
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
 from app.ai.explanations import InvalidExplanationError, check_grounding, parse_explanation
+from app.ai.prompts import EXPLANATIONS_SYSTEM, explanations_user_message
+from app.ai.provider import LlmUnavailableError
+from app.services.explanations.service import MAX_OUTPUT_TOKENS
 from evals.explanation_scenario import scenario_facts
+from evals.model import claude_llm
 
 CASES_FILE = Path(__file__).with_name("explanation_cases.jsonl")
 
@@ -54,7 +62,41 @@ def run_case(case: dict[str, str | None]) -> Outcome:
     return Outcome(str(case["id"]), str(case["category"]), accepted, problems, ok)
 
 
+async def live(runs: int) -> None:
+    """Score Claude's own wording of the scenario's facts."""
+    llm = claude_llm()
+    facts = scenario_facts()
+    document = json.dumps([f.model_dump() for f in facts], separators=(",", ":"))
+    accepted = 0
+    reasons: Counter[str] = Counter()
+    for _ in range(runs):
+        try:
+            reply = await llm.complete_json(
+                "explanations",
+                EXPLANATIONS_SYSTEM,
+                explanations_user_message(document),
+                MAX_OUTPUT_TOKENS,
+            )
+            problems = [p.message for p in check_grounding(parse_explanation(reply.text), facts)]
+        except InvalidExplanationError as exc:
+            problems = ["schema: " + p.message for p in exc.problems]
+        except LlmUnavailableError as exc:
+            problems = [f"unavailable: {exc.code}"]
+        if problems:
+            reasons.update(p.split(":")[0] for p in problems)
+        else:
+            accepted += 1
+    print(f"\nClaude ({llm.provider.name}), {runs} replies: {accepted} passed the checks")
+    for reason, count in reasons.most_common():
+        print(f"  rejected for {reason}: {count}")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument("--live", type=int, metavar="N", help="also score N replies from Claude")
+    args = parser.parse_args()
     cases = [json.loads(line) for line in CASES_FILE.read_text().splitlines() if line.strip()]
     outcomes = [run_case(case) for case in cases]
     by_category: dict[str, list[Outcome]] = {}
@@ -82,6 +124,8 @@ def main() -> int:
     for o in by_category.get("known_gap", []):
         if o.accepted:
             print(f"  gap: {o.id} passes the checks")
+    if args.live:
+        asyncio.run(live(args.live))
     return 1 if failures else 0
 
 

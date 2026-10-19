@@ -68,13 +68,19 @@ class Settings(BaseSettings):
     suggestions_enabled: bool = True
     investigation_max_concurrent: int = Field(default=2, ge=1)
     investigation_max_pending: int = Field(default=16, ge=1)
-    investigation_timeout_s: float = Field(default=20.0, gt=0)
+    # Includes a model call when a language model is configured.
+    investigation_timeout_s: float = Field(default=40.0, gt=0)
     investigation_ttl_s: int = Field(default=900, ge=60)
     investigation_poll_after_ms: int = Field(default=1500, ge=100)
 
-    # Language model. "baseline" is a keyword-rule stand-in, not a model.
-    llm_provider: Literal["disabled", "baseline"] = "disabled"
-    llm_timeout_s: float = Field(default=8.0, gt=0)
+    # Language model. "anthropic" is Claude; "baseline" is keyword rules, not a
+    # model; "auto" picks Claude when an API key is set and baseline otherwise.
+    llm_provider: Literal["auto", "anthropic", "baseline", "disabled"] = "auto"
+    anthropic_api_key: SecretStr | None = None
+    llm_model: str = "claude-opus-5-5"
+    # These are short, structured tasks; low effort keeps them quick.
+    llm_effort: Literal["low", "medium", "high"] = "low"
+    llm_timeout_s: float = Field(default=20.0, gt=0)
     llm_daily_call_limit: int = Field(default=2000, ge=1)
     llm_breaker_failure_threshold: int = Field(default=5, ge=1)
     llm_breaker_reset_s: float = Field(default=60.0, gt=0)
@@ -112,6 +118,12 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
+    @field_validator("anthropic_api_key", mode="before")
+    @classmethod
+    def empty_key_is_no_key(cls, value: object) -> object:
+        """Compose passes an unset variable as an empty string."""
+        return None if value == "" else value
+
     @model_validator(mode="after")
     def check_production_settings(self) -> Self:
         """Refuse to start in production with settings only fit for a laptop."""
@@ -127,6 +139,18 @@ class Settings(BaseSettings):
                 raise ValueError(f"ALLOWED_ORIGINS must list https origins in production: {origin}")
         if "smartroute:smartroute@" in str(self.database_url):
             raise ValueError("DATABASE_URL uses the local development password")
+        return self
+
+    @property
+    def resolved_llm_provider(self) -> Literal["anthropic", "baseline", "disabled"]:
+        if self.llm_provider == "auto":
+            return "anthropic" if self.anthropic_api_key else "baseline"
+        return self.llm_provider
+
+    @model_validator(mode="after")
+    def require_key_for_claude(self) -> Self:
+        if self.llm_provider == "anthropic" and not self.anthropic_api_key:
+            raise ValueError("LLM_PROVIDER=anthropic needs ANTHROPIC_API_KEY")
         return self
 
 

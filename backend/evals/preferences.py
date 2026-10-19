@@ -26,6 +26,7 @@ from app.ai.provider import LlmProvider
 from app.core.logging import configure_logging
 from app.core.resilience import CircuitBreaker
 from app.schemas.preferences import InterpretResponse, PreferenceState
+from evals.model import claude_provider
 
 CASES_FILE = Path(__file__).with_name("preference_cases.jsonl")
 CRITICAL_FIELDS = ("wheelchair_required", "step_free_required")
@@ -167,6 +168,8 @@ def summarize(provider: str, cases: list[dict[str, Any]], results: list[CaseResu
 def build_provider(name: str) -> LlmProvider:
     if name == "baseline":
         return KeywordBaselineProvider()
+    if name == "anthropic":
+        return claude_provider()
     raise SystemExit(f"unknown provider: {name}")
 
 
@@ -194,7 +197,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument("--provider", default="baseline")
+    parser.add_argument("--provider", choices=["baseline", "anthropic"], default="baseline")
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     args = parser.parse_args()
     configure_logging("WARNING")

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ApiError, api, describeError, unwrap } from "@/lib/api";
+import { providerName } from "@/lib/format";
 import type { Explanation as ExplanationData } from "@/lib/types";
 
 import styles from "./Explanation.module.css";
@@ -62,7 +63,7 @@ export function Explanation({ searchId, routeId }: { searchId: string; routeId: 
       {data.notice && <p className={styles.note}>{data.notice}</p>}
       <p className={styles.note}>
         {data.source === "model"
-          ? `Worded by ${data.provider}, and checked sentence by sentence against the route data.`
+          ? `Worded by ${providerName(data.provider)}, and checked sentence by sentence against the route data.`
           : "Built directly from the route data."}
       </p>
     </section>

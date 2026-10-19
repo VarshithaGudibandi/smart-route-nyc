@@ -26,6 +26,7 @@ from datetime import time as clock
 from pathlib import Path
 from typing import Any
 
+from app.ai.suggestions import ModelProposalGenerator
 from app.cache.redis import ResilientRedis
 from app.core.config import get_settings
 from app.core.graph_version import GraphVersion
@@ -44,6 +45,7 @@ from app.services.route_search import RouteSearchService
 from app.services.suggestions.service import SuggestionService
 from app.services.transit.alerts import AlertsProvider
 from app.services.transit.knowledge import TransitKnowledge
+from evals.model import claude_llm
 
 TRIPS_FILE = Path(__file__).with_name("suggestion_trips.jsonl")
 
@@ -103,7 +105,7 @@ def request(trip: dict[str, Any], depart_at: datetime, step_free: bool) -> Route
     )
 
 
-async def evaluate(trips: list[dict[str, Any]]) -> Report:
+async def evaluate(trips: list[dict[str, Any]], generator: str) -> Report:
     settings = get_settings()
     redis = ResilientRedis.from_url(
         str(settings.redis_url), timeout_ms=500, failure_threshold=5, reset_timeout_s=10
@@ -113,8 +115,13 @@ async def evaluate(trips: list[dict[str, Any]]) -> Report:
     graph = GraphVersion(settings.otp_graph_version_file)
     accessibility = SnapshotProvider(engine, redis)
     search = RouteSearchService(otp, redis, graph, accessibility, settings)
+    model = ModelProposalGenerator(claude_llm()) if generator == "model" else None
     suggestions = SuggestionService(
-        otp, TransitKnowledge(otp, redis, graph), AlertsProvider(engine, redis), accessibility
+        otp,
+        TransitKnowledge(otp, redis, graph),
+        AlertsProvider(engine, redis),
+        accessibility,
+        model,
     )
 
     runs: list[Run] = []
@@ -217,10 +224,16 @@ def main() -> int:
     )
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     parser.add_argument("--limit", type=int, help="only the first N trips")
+    parser.add_argument(
+        "--generator",
+        choices=["rules", "model"],
+        default="rules",
+        help="model: Claude proposes as well as the rules (needs ANTHROPIC_API_KEY)",
+    )
     args = parser.parse_args()
     configure_logging("WARNING")
     trips = [json.loads(line) for line in TRIPS_FILE.read_text().splitlines() if line.strip()]
-    report = asyncio.run(evaluate(trips[: args.limit] if args.limit else trips))
+    report = asyncio.run(evaluate(trips[: args.limit] if args.limit else trips, args.generator))
     if args.json:
         print(json.dumps(asdict(report), indent=2, default=str))
     else:

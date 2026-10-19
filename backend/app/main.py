@@ -8,10 +8,12 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.anthropic_provider import AnthropicProvider
 from app.ai.baseline import KeywordBaselineProvider
 from app.ai.guard import DailyCallBudget, GuardedLlm
 from app.ai.preferences import PreferenceInterpreter
 from app.ai.provider import DisabledProvider, LlmProvider
+from app.ai.suggestions import ModelProposalGenerator
 from app.api.deps import Resources
 from app.api.v1.router import api_router
 from app.cache.redis import ResilientRedis
@@ -48,7 +50,12 @@ logger = structlog.get_logger(__name__)
 
 
 def build_provider(settings: Settings) -> LlmProvider:
-    if settings.llm_provider == "baseline":
+    provider = settings.resolved_llm_provider
+    if provider == "anthropic" and settings.anthropic_api_key:
+        return AnthropicProvider.create(
+            settings.anthropic_api_key.get_secret_value(), settings.llm_model, settings.llm_effort
+        )
+    if provider == "baseline":
         return KeywordBaselineProvider()
     return DisabledProvider()
 
@@ -85,15 +92,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         graph_version = GraphVersion(settings.otp_graph_version_file)
         accessibility = SnapshotProvider(db_engine, redis)
         alerts = AlertsProvider(db_engine, redis)
+        # Only a real model writes explanations and proposes transfers; the
+        # keyword baseline handles typed preferences alone.
+        model_llm = llm if settings.resolved_llm_provider == "anthropic" else None
         investigations = None
         if settings.suggestions_enabled:
-            # No language model generates proposals yet: only "baseline" or
-            # "disabled" providers exist, and neither is a model.
             suggestions = SuggestionService(
                 otp,
                 TransitKnowledge(otp, redis, graph_version),
                 alerts,
                 accessibility,
+                ModelProposalGenerator(model_llm) if model_llm else None,
             )
             investigations = InvestigationRunner(
                 suggestions.investigate,
@@ -141,9 +150,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 search_results,
                 accessibility,
                 alerts,
-                # No language model provider exists yet ("baseline" is keyword
-                # rules for preferences), so explanations are the facts.
-                None,
+                model_llm,
                 redis,
                 secret,
                 settings.explanation_cache_ttl_s,

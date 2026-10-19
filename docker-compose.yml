@@ -10,7 +10,11 @@ x-backend-env: &backend-env
   OTP_GRAPH_VERSION_FILE: /otp-data/graph/graph-version
   GTFS_MANIFEST_FILE: /otp-data/graph/manifest.json
   KEY_HASHING_SECRET: ${KEY_HASHING_SECRET:-development-only-secret}
-  LLM_PROVIDER: ${LLM_PROVIDER:-baseline}
+  # Claude powers typed preferences, explanations and transfer ideas when a
+  # key is set; without one the app runs on deterministic rules.
+  LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
   # Prometheus metrics, reachable only on the Compose network.
   METRICS_PORT: "9100"
 

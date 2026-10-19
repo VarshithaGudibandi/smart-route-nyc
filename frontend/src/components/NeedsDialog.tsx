@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ApiError, api, unwrap } from "@/lib/api";
+import { providerName } from "@/lib/format";
 import { needsFromPreferences, preferencesFromNeeds, type Needs } from "@/lib/trip";
 import type { InterpretResponse } from "@/lib/types";
 
@@ -142,7 +143,7 @@ export function NeedsDialog({ open, needs, onClose, onApply }: Props) {
               <p className={styles.note}>Can’t plan for: {result.unsupported_requests.join(", ")}.</p>
             )}
             <p className={styles.source}>
-              {byRules ? "Read with simple keyword rules; no AI model is connected." : `Read by ${result.source.provider}.`}
+              {byRules ? "Read with simple keyword rules; no AI model is connected." : `Read by ${providerName(result.source.provider)}.`}
             </p>
             <div className={styles.actions}>
               <button
