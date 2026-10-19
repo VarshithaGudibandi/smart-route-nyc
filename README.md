@@ -118,7 +118,7 @@ Behaviour, limits and the accessibility rules are documented in [`backend/README
 |---|---|
 | Typed preferences (30 labelled requests, keyword baseline) | 100% recall on wheelchair and step-free needs, no false positives, injection attempts handled |
 | Explanation grounding (23 scripted model replies) | All 18 unfaithful or malformed replies rejected; 2 known gaps documented |
-| Transfer suggestions (120 live searches, rule-based plans, no step-free) | Verified faster route for 3.3% of searches, saving up to 5.5 minutes; plans with two changes added none under MTA's 3-minute transfer times |
+| Transfer suggestions (120 live searches, rule-based plans, no step-free) | Verified faster route for 6.7% of searches, saving up to 9 minutes; for 11 more, the routing engine's own fastest route already uses a 1-minute same-platform change |
 
 Each evaluation also runs against the configured model (`--provider model`, `--live N`, `--generator model`), to compare it with the rules. Cases, metrics and commands are in [`backend/README.md`](backend/README.md#evaluations). The first two run in CI.
 
